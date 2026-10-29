@@ -129,7 +129,12 @@
             "minimum": { "type": "number" },
             "maximum": { "type": "number" },
             "consecutive": { "type": "integer", "minimum": 1, "default": 1 },
-            "recoverAfter": { "type": "integer", "minimum": 1 }
+            "recoverAfter": { "type": "integer", "minimum": 1 },
+            "where": {
+              "type": "object", "minProperties": 1,
+              "propertyNames": { "pattern": "^jsonPayload\\.[A-Za-z0-9_.]+$" },
+              "additionalProperties": { "type": ["string", "number", "boolean"] }
+            }
           }
         }
       }
