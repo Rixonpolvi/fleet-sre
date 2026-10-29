@@ -1,0 +1,13 @@
+[importlinter]
+root_package = fleetsre
+include_external_packages = True
+
+[importlinter:contract:1]
+name = SRE isolation
+type = forbidden
+source_modules =
+    fleetsre.sre
+forbidden_modules =
+    google
+    fleetsre.adapters
+    fleetsre.mock

@@ -1,0 +1,13 @@
+repos:
+  - repo: local
+    hooks:
+      - id: scan-secrets
+        name: scan secrets
+        entry: python scripts/scan_secrets.py
+        language: system
+        types: [file]
+      - id: check-denylist
+        name: check denylist
+        entry: python scripts/check_denylist.py
+        language: system
+        types: [file]
