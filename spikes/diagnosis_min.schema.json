@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Minimal spike diagnosis (D2)",
+  "description": "Minimal submission shape for the D2 feasibility spike. Category enum from spec.md §6.5.",
+  "type": "object",
+  "properties": {
+    "deployment": {
+      "type": "string",
+      "description": "Deployment under investigation, e.g. alert-ingestion/bravo."
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "connector_stalled",
+        "job_stalled",
+        "credential_failure",
+        "schema_drift",
+        "job_hollow_success",
+        "job_failing",
+        "unknown"
+      ]
+    },
+    "hypothesis": {
+      "type": "string",
+      "description": "ID of the concluded hypothesis from set_hypotheses."
+    },
+    "evidence": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "Recorded evidence IDs (E1, E2, ...) the conclusion rests on."
+    },
+    "action": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["propose", "none", "escalate"] },
+        "method": { "type": "string" },
+        "resource": { "type": "string" },
+        "updateMask": { "type": "array", "items": { "type": "string" } },
+        "patch": { "type": "object" },
+        "escalationSummary": { "type": "string" }
+      },
+      "required": ["type"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["deployment", "category", "hypothesis", "evidence", "action"],
+  "additionalProperties": false
+}

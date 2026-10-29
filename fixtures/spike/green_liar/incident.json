@@ -1,0 +1,17 @@
+{
+  "id": "inc-green-liar-spike-001",
+  "deployment": "alert-ingestion/bravo",
+  "tripwire": "connector-errors",
+  "trippedAt": "2026-10-29T15:07:22.000Z",
+  "evidence": [
+    "gl-000505",
+    "gl-000515",
+    "gl-000526",
+    "gl-000534",
+    "gl-000542",
+    "gl-000550",
+    "gl-000558",
+    "gl-000566"
+  ],
+  "now": "2026-10-29T15:15:00Z"
+}

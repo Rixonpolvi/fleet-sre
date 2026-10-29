@@ -1,0 +1,3358 @@
+{
+  "connectorInstances": [
+    {
+      "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel",
+      "agent": "",
+      "environment": "projects/fleet-sre-demo/locations/us/instances/mock-soar/environments/alpha",
+      "displayName": "Alpha Corp Sentinel Incidents",
+      "description": "Mock Sentinel incidents connector (synthetic fixture)",
+      "intervalSeconds": 60,
+      "documentationLink": "",
+      "allowList": [],
+      "productFieldName": "device_product",
+      "eventFieldName": "event_name",
+      "timeoutSeconds": 30,
+      "connectorDefinitionName": "mock-sentinel-incidents",
+      "integrationVersion": "1.0",
+      "version": "1",
+      "loggingEnabledUntilUnixMs": "0",
+      "statistics": {
+        "pastDayAlertsCount": 2880,
+        "avgAlertsPerDay": 2880
+      },
+      "parameters": [
+        {
+          "value": "00000000-0000-4000-a000-0000000000a1",
+          "displayName": "Tenant ID",
+          "description": "Sentinel tenant ID",
+          "mandatory": true,
+          "advanced": false,
+          "type": "STRING"
+        },
+        {
+          "value": "00000000-0000-4000-b000-0000000000a1",
+          "displayName": "Client ID",
+          "description": "Sentinel app client ID",
+          "mandatory": true,
+          "advanced": false,
+          "type": "STRING"
+        },
+        {
+          "value": "********",
+          "displayName": "Client Secret",
+          "description": "Sentinel app secret",
+          "mandatory": true,
+          "advanced": false,
+          "type": "PASSWORD"
+        },
+        {
+          "value": "law-alpha",
+          "displayName": "Workspace Name",
+          "description": "Sentinel workspace",
+          "mandatory": true,
+          "advanced": false,
+          "type": "STRING"
+        },
+        {
+          "value": "50",
+          "displayName": "Max Incidents Per Cycle",
+          "description": "Poll cap",
+          "mandatory": false,
+          "advanced": true,
+          "type": "INT"
+        },
+        {
+          "value": "",
+          "displayName": "Unknown Severity Priority",
+          "description": "Fallback priority",
+          "mandatory": false,
+          "advanced": true,
+          "type": "INT"
+        }
+      ],
+      "connectorId": "mock-sentinel-incidents",
+      "identifier": "alpha-sentinel",
+      "id": "alpha-sentinel",
+      "updateAvailable": false,
+      "custom": true,
+      "enabled": true,
+      "remote": false,
+      "status": "LIVE",
+      "integration": "MockSentinel"
+    },
+    {
+      "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel",
+      "agent": "",
+      "environment": "projects/fleet-sre-demo/locations/us/instances/mock-soar/environments/bravo",
+      "displayName": "Bravo Health Sentinel Incidents",
+      "description": "Mock Sentinel incidents connector (synthetic fixture)",
+      "intervalSeconds": 60,
+      "documentationLink": "",
+      "allowList": [],
+      "productFieldName": "device_product",
+      "eventFieldName": "event_name",
+      "timeoutSeconds": 30,
+      "connectorDefinitionName": "mock-sentinel-incidents",
+      "integrationVersion": "1.0",
+      "version": "1",
+      "loggingEnabledUntilUnixMs": "0",
+      "statistics": {
+        "pastDayAlertsCount": 720,
+        "avgAlertsPerDay": 720
+      },
+      "parameters": [
+        {
+          "value": "00000000-0000-4000-a000-0000000000b2",
+          "displayName": "Tenant ID",
+          "description": "Sentinel tenant ID",
+          "mandatory": true,
+          "advanced": false,
+          "type": "STRING"
+        },
+        {
+          "value": "00000000-0000-4000-b000-0000000000b2",
+          "displayName": "Client ID",
+          "description": "Sentinel app client ID",
+          "mandatory": true,
+          "advanced": false,
+          "type": "STRING"
+        },
+        {
+          "value": "********",
+          "displayName": "Client Secret",
+          "description": "Sentinel app secret",
+          "mandatory": true,
+          "advanced": false,
+          "type": "PASSWORD"
+        },
+        {
+          "value": "law-bravo",
+          "displayName": "Workspace Name",
+          "description": "Sentinel workspace",
+          "mandatory": true,
+          "advanced": false,
+          "type": "STRING"
+        },
+        {
+          "value": "50",
+          "displayName": "Max Incidents Per Cycle",
+          "description": "Poll cap",
+          "mandatory": false,
+          "advanced": true,
+          "type": "INT"
+        },
+        {
+          "value": "",
+          "displayName": "Unknown Severity Priority",
+          "description": "Fallback priority",
+          "mandatory": false,
+          "advanced": true,
+          "type": "INT"
+        }
+      ],
+      "connectorId": "mock-sentinel-incidents",
+      "identifier": "bravo-sentinel",
+      "id": "bravo-sentinel",
+      "updateAvailable": false,
+      "custom": true,
+      "enabled": true,
+      "remote": false,
+      "status": "LIVE",
+      "integration": "MockSentinel"
+    },
+    {
+      "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel",
+      "agent": "",
+      "environment": "projects/fleet-sre-demo/locations/us/instances/mock-soar/environments/charlie",
+      "displayName": "Charlie Retail Sentinel Incidents",
+      "description": "Mock Sentinel incidents connector (synthetic fixture)",
+      "intervalSeconds": 60,
+      "documentationLink": "",
+      "allowList": [],
+      "productFieldName": "device_product",
+      "eventFieldName": "event_name",
+      "timeoutSeconds": 30,
+      "connectorDefinitionName": "mock-sentinel-incidents",
+      "integrationVersion": "1.0",
+      "version": "1",
+      "loggingEnabledUntilUnixMs": "0",
+      "statistics": {
+        "pastDayAlertsCount": 48,
+        "avgAlertsPerDay": 48
+      },
+      "parameters": [
+        {
+          "value": "00000000-0000-4000-a000-0000000000c3",
+          "displayName": "Tenant ID",
+          "description": "Sentinel tenant ID",
+          "mandatory": true,
+          "advanced": false,
+          "type": "STRING"
+        },
+        {
+          "value": "00000000-0000-4000-b000-0000000000c3",
+          "displayName": "Client ID",
+          "description": "Sentinel app client ID",
+          "mandatory": true,
+          "advanced": false,
+          "type": "STRING"
+        },
+        {
+          "value": "********",
+          "displayName": "Client Secret",
+          "description": "Sentinel app secret",
+          "mandatory": true,
+          "advanced": false,
+          "type": "PASSWORD"
+        },
+        {
+          "value": "law-charlie",
+          "displayName": "Workspace Name",
+          "description": "Sentinel workspace",
+          "mandatory": true,
+          "advanced": false,
+          "type": "STRING"
+        },
+        {
+          "value": "50",
+          "displayName": "Max Incidents Per Cycle",
+          "description": "Poll cap",
+          "mandatory": false,
+          "advanced": true,
+          "type": "INT"
+        },
+        {
+          "value": "",
+          "displayName": "Unknown Severity Priority",
+          "description": "Fallback priority",
+          "mandatory": false,
+          "advanced": true,
+          "type": "INT"
+        }
+      ],
+      "connectorId": "mock-sentinel-incidents",
+      "identifier": "charlie-sentinel",
+      "id": "charlie-sentinel",
+      "updateAvailable": false,
+      "custom": true,
+      "enabled": true,
+      "remote": false,
+      "status": "LIVE",
+      "integration": "MockSentinel"
+    }
+  ],
+  "integrationInstances": [
+    {
+      "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/integrationInstances/alpha",
+      "environment": "projects/fleet-sre-demo/locations/us/instances/mock-soar/environments/alpha",
+      "displayName": "Alpha Corp MockSentinel",
+      "parameters": [
+        {
+          "id": "tenant_id",
+          "displayName": "Tenant ID",
+          "type": "STRING",
+          "description": "Sentinel tenant ID",
+          "propertyName": "tenant_id",
+          "mandatory": true,
+          "value": "00000000-0000-4000-a000-0000000000a1"
+        },
+        {
+          "id": "client_id",
+          "displayName": "Client ID",
+          "type": "STRING",
+          "description": "Sentinel app client ID",
+          "propertyName": "client_id",
+          "mandatory": true,
+          "value": "00000000-0000-4000-b000-0000000000a1"
+        },
+        {
+          "id": "client_secret",
+          "displayName": "Client Secret",
+          "type": "PASSWORD",
+          "description": "Sentinel app secret",
+          "propertyName": "client_secret",
+          "mandatory": true,
+          "value": "********"
+        },
+        {
+          "id": "workspace",
+          "displayName": "Workspace Name",
+          "type": "STRING",
+          "description": "Sentinel workspace",
+          "propertyName": "workspace",
+          "mandatory": true,
+          "value": "law-alpha"
+        }
+      ],
+      "integrationIdentifier": "MockSentinel",
+      "identifier": "alpha",
+      "description": "MockSentinel integration (synthetic fixture)",
+      "configured": true,
+      "remote": false,
+      "agent": "",
+      "systemDefault": false
+    },
+    {
+      "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/integrationInstances/bravo",
+      "environment": "projects/fleet-sre-demo/locations/us/instances/mock-soar/environments/bravo",
+      "displayName": "Bravo Health MockSentinel",
+      "parameters": [
+        {
+          "id": "tenant_id",
+          "displayName": "Tenant ID",
+          "type": "STRING",
+          "description": "Sentinel tenant ID",
+          "propertyName": "tenant_id",
+          "mandatory": true,
+          "value": "00000000-0000-4000-a000-0000000000b2"
+        },
+        {
+          "id": "client_id",
+          "displayName": "Client ID",
+          "type": "STRING",
+          "description": "Sentinel app client ID",
+          "propertyName": "client_id",
+          "mandatory": true,
+          "value": "00000000-0000-4000-b000-0000000000b2"
+        },
+        {
+          "id": "client_secret",
+          "displayName": "Client Secret",
+          "type": "PASSWORD",
+          "description": "Sentinel app secret",
+          "propertyName": "client_secret",
+          "mandatory": true,
+          "value": "********"
+        },
+        {
+          "id": "workspace",
+          "displayName": "Workspace Name",
+          "type": "STRING",
+          "description": "Sentinel workspace",
+          "propertyName": "workspace",
+          "mandatory": true,
+          "value": "law-bravo"
+        }
+      ],
+      "integrationIdentifier": "MockSentinel",
+      "identifier": "bravo",
+      "description": "MockSentinel integration (synthetic fixture)",
+      "configured": true,
+      "remote": false,
+      "agent": "",
+      "systemDefault": false
+    },
+    {
+      "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/integrationInstances/charlie",
+      "environment": "projects/fleet-sre-demo/locations/us/instances/mock-soar/environments/charlie",
+      "displayName": "Charlie Retail MockSentinel",
+      "parameters": [
+        {
+          "id": "tenant_id",
+          "displayName": "Tenant ID",
+          "type": "STRING",
+          "description": "Sentinel tenant ID",
+          "propertyName": "tenant_id",
+          "mandatory": true,
+          "value": "00000000-0000-4000-a000-0000000000c3"
+        },
+        {
+          "id": "client_id",
+          "displayName": "Client ID",
+          "type": "STRING",
+          "description": "Sentinel app client ID",
+          "propertyName": "client_id",
+          "mandatory": true,
+          "value": "00000000-0000-4000-b000-0000000000c3"
+        },
+        {
+          "id": "client_secret",
+          "displayName": "Client Secret",
+          "type": "PASSWORD",
+          "description": "Sentinel app secret",
+          "propertyName": "client_secret",
+          "mandatory": true,
+          "value": "********"
+        },
+        {
+          "id": "workspace",
+          "displayName": "Workspace Name",
+          "type": "STRING",
+          "description": "Sentinel workspace",
+          "propertyName": "workspace",
+          "mandatory": true,
+          "value": "law-charlie"
+        }
+      ],
+      "integrationIdentifier": "MockSentinel",
+      "identifier": "charlie",
+      "description": "MockSentinel integration (synthetic fixture)",
+      "configured": true,
+      "remote": false,
+      "agent": "",
+      "systemDefault": false
+    }
+  ],
+  "connectorLogs": {
+    "alpha-sentinel": [
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0120",
+        "time": "1793289541000",
+        "message": "Run alpha-run-0120 completed: 0 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0119",
+        "time": "1793289481000",
+        "message": "Run alpha-run-0119 completed: 4 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0118",
+        "time": "1793289421000",
+        "message": "Run alpha-run-0118 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0117",
+        "time": "1793289361000",
+        "message": "Run alpha-run-0117 completed: 3 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0116",
+        "time": "1793289301000",
+        "message": "Run alpha-run-0116 completed: 0 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0115",
+        "time": "1793289241000",
+        "message": "Run alpha-run-0115 completed: 3 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0114",
+        "time": "1793289181000",
+        "message": "Run alpha-run-0114 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0113",
+        "time": "1793289121000",
+        "message": "Run alpha-run-0113 completed: 3 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0112",
+        "time": "1793289061000",
+        "message": "Run alpha-run-0112 completed: 5 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0111",
+        "time": "1793289001000",
+        "message": "Run alpha-run-0111 completed: 3 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0110",
+        "time": "1793288941000",
+        "message": "Run alpha-run-0110 completed: 4 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0109",
+        "time": "1793288881000",
+        "message": "Run alpha-run-0109 completed: 1 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0108",
+        "time": "1793288821000",
+        "message": "Run alpha-run-0108 completed: 1 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0107",
+        "time": "1793288761000",
+        "message": "Run alpha-run-0107 completed: 1 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0106",
+        "time": "1793288701000",
+        "message": "Run alpha-run-0106 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0105",
+        "time": "1793288641000",
+        "message": "Run alpha-run-0105 completed: 4 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0104",
+        "time": "1793288581000",
+        "message": "Run alpha-run-0104 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0103",
+        "time": "1793288521000",
+        "message": "Run alpha-run-0103 completed: 1 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0102",
+        "time": "1793288461000",
+        "message": "Run alpha-run-0102 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0101",
+        "time": "1793288401000",
+        "message": "Run alpha-run-0101 completed: 5 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0100",
+        "time": "1793288341000",
+        "message": "Run alpha-run-0100 completed: 4 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0099",
+        "time": "1793288281000",
+        "message": "Run alpha-run-0099 completed: 1 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0098",
+        "time": "1793288221000",
+        "message": "Run alpha-run-0098 completed: 4 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0097",
+        "time": "1793288161000",
+        "message": "Run alpha-run-0097 completed: 1 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0096",
+        "time": "1793288101000",
+        "message": "Run alpha-run-0096 completed: 4 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0095",
+        "time": "1793288041000",
+        "message": "Run alpha-run-0095 completed: 5 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0094",
+        "time": "1793287981000",
+        "message": "Run alpha-run-0094 completed: 3 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0093",
+        "time": "1793287921000",
+        "message": "Run alpha-run-0093 completed: 3 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0092",
+        "time": "1793287861000",
+        "message": "Run alpha-run-0092 completed: 1 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0091",
+        "time": "1793287801000",
+        "message": "Run alpha-run-0091 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0090",
+        "time": "1793287741000",
+        "message": "Run alpha-run-0090 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0089",
+        "time": "1793287681000",
+        "message": "Run alpha-run-0089 completed: 1 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0088",
+        "time": "1793287621000",
+        "message": "Run alpha-run-0088 completed: 1 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0087",
+        "time": "1793287561000",
+        "message": "Run alpha-run-0087 completed: 3 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0086",
+        "time": "1793287501000",
+        "message": "Run alpha-run-0086 completed: 3 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0085",
+        "time": "1793287441000",
+        "message": "Run alpha-run-0085 completed: 4 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0084",
+        "time": "1793287381000",
+        "message": "Run alpha-run-0084 completed: 1 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0083",
+        "time": "1793287321000",
+        "message": "Run alpha-run-0083 completed: 0 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0082",
+        "time": "1793287261000",
+        "message": "Run alpha-run-0082 completed: 3 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0081",
+        "time": "1793287201000",
+        "message": "Run alpha-run-0081 completed: 0 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0080",
+        "time": "1793287141000",
+        "message": "Run alpha-run-0080 completed: 1 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0079",
+        "time": "1793287081000",
+        "message": "Run alpha-run-0079 completed: 0 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0078",
+        "time": "1793287021000",
+        "message": "Run alpha-run-0078 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0077",
+        "time": "1793286961000",
+        "message": "Run alpha-run-0077 completed: 3 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0076",
+        "time": "1793286901000",
+        "message": "Run alpha-run-0076 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0075",
+        "time": "1793286841000",
+        "message": "Run alpha-run-0075 completed: 1 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0074",
+        "time": "1793286781000",
+        "message": "Run alpha-run-0074 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0073",
+        "time": "1793286721000",
+        "message": "Run alpha-run-0073 completed: 1 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0072",
+        "time": "1793286661000",
+        "message": "Run alpha-run-0072 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0071",
+        "time": "1793286601000",
+        "message": "Run alpha-run-0071 completed: 0 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0070",
+        "time": "1793286541000",
+        "message": "Run alpha-run-0070 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0069",
+        "time": "1793286481000",
+        "message": "Run alpha-run-0069 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0068",
+        "time": "1793286421000",
+        "message": "Run alpha-run-0068 completed: 0 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0067",
+        "time": "1793286361000",
+        "message": "Run alpha-run-0067 completed: 1 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0066",
+        "time": "1793286301000",
+        "message": "Run alpha-run-0066 completed: 1 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0065",
+        "time": "1793286241000",
+        "message": "Run alpha-run-0065 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0064",
+        "time": "1793286181000",
+        "message": "Run alpha-run-0064 completed: 0 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0063",
+        "time": "1793286121000",
+        "message": "Run alpha-run-0063 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0062",
+        "time": "1793286061000",
+        "message": "Run alpha-run-0062 completed: 4 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0061",
+        "time": "1793286001000",
+        "message": "Run alpha-run-0061 completed: 3 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0060",
+        "time": "1793285941000",
+        "message": "Run alpha-run-0060 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0059",
+        "time": "1793285881000",
+        "message": "Run alpha-run-0059 completed: 1 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0058",
+        "time": "1793285821000",
+        "message": "Run alpha-run-0058 completed: 3 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0057",
+        "time": "1793285761000",
+        "message": "Run alpha-run-0057 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0056",
+        "time": "1793285701000",
+        "message": "Run alpha-run-0056 completed: 6 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0055",
+        "time": "1793285641000",
+        "message": "Run alpha-run-0055 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0054",
+        "time": "1793285581000",
+        "message": "Run alpha-run-0054 completed: 3 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0053",
+        "time": "1793285521000",
+        "message": "Run alpha-run-0053 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0052",
+        "time": "1793285461000",
+        "message": "Run alpha-run-0052 completed: 3 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0051",
+        "time": "1793285401000",
+        "message": "Run alpha-run-0051 completed: 3 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0050",
+        "time": "1793285341000",
+        "message": "Run alpha-run-0050 completed: 0 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0049",
+        "time": "1793285281000",
+        "message": "Run alpha-run-0049 completed: 0 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0048",
+        "time": "1793285221000",
+        "message": "Run alpha-run-0048 completed: 0 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0047",
+        "time": "1793285161000",
+        "message": "Run alpha-run-0047 completed: 3 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0046",
+        "time": "1793285101000",
+        "message": "Run alpha-run-0046 completed: 1 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0045",
+        "time": "1793285041000",
+        "message": "Run alpha-run-0045 completed: 1 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0044",
+        "time": "1793284981000",
+        "message": "Run alpha-run-0044 completed: 3 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0043",
+        "time": "1793284921000",
+        "message": "Run alpha-run-0043 completed: 0 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0042",
+        "time": "1793284861000",
+        "message": "Run alpha-run-0042 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0041",
+        "time": "1793284801000",
+        "message": "Run alpha-run-0041 completed: 3 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0040",
+        "time": "1793284741000",
+        "message": "Run alpha-run-0040 completed: 0 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0039",
+        "time": "1793284681000",
+        "message": "Run alpha-run-0039 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0038",
+        "time": "1793284621000",
+        "message": "Run alpha-run-0038 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0037",
+        "time": "1793284561000",
+        "message": "Run alpha-run-0037 completed: 0 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0036",
+        "time": "1793284501000",
+        "message": "Run alpha-run-0036 completed: 7 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0035",
+        "time": "1793284441000",
+        "message": "Run alpha-run-0035 completed: 4 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0034",
+        "time": "1793284381000",
+        "message": "Run alpha-run-0034 completed: 0 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0033",
+        "time": "1793284321000",
+        "message": "Run alpha-run-0033 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0032",
+        "time": "1793284261000",
+        "message": "Run alpha-run-0032 completed: 0 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0031",
+        "time": "1793284201000",
+        "message": "Run alpha-run-0031 completed: 0 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0030",
+        "time": "1793284141000",
+        "message": "Run alpha-run-0030 completed: 5 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0029",
+        "time": "1793284081000",
+        "message": "Run alpha-run-0029 completed: 3 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0028",
+        "time": "1793284021000",
+        "message": "Run alpha-run-0028 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0027",
+        "time": "1793283961000",
+        "message": "Run alpha-run-0027 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0026",
+        "time": "1793283901000",
+        "message": "Run alpha-run-0026 completed: 0 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0025",
+        "time": "1793283841000",
+        "message": "Run alpha-run-0025 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0024",
+        "time": "1793283781000",
+        "message": "Run alpha-run-0024 completed: 5 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0023",
+        "time": "1793283721000",
+        "message": "Run alpha-run-0023 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0022",
+        "time": "1793283661000",
+        "message": "Run alpha-run-0022 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0021",
+        "time": "1793283601000",
+        "message": "Run alpha-run-0021 completed: 1 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0020",
+        "time": "1793283541000",
+        "message": "Run alpha-run-0020 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0019",
+        "time": "1793283481000",
+        "message": "Run alpha-run-0019 completed: 0 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0018",
+        "time": "1793283421000",
+        "message": "Run alpha-run-0018 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0017",
+        "time": "1793283361000",
+        "message": "Run alpha-run-0017 completed: 6 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0016",
+        "time": "1793283301000",
+        "message": "Run alpha-run-0016 completed: 3 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0015",
+        "time": "1793283241000",
+        "message": "Run alpha-run-0015 completed: 1 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0014",
+        "time": "1793283181000",
+        "message": "Run alpha-run-0014 completed: 0 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0013",
+        "time": "1793283121000",
+        "message": "Run alpha-run-0013 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0012",
+        "time": "1793283061000",
+        "message": "Run alpha-run-0012 completed: 0 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0011",
+        "time": "1793283001000",
+        "message": "Run alpha-run-0011 completed: 0 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0010",
+        "time": "1793282941000",
+        "message": "Run alpha-run-0010 completed: 4 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0009",
+        "time": "1793282881000",
+        "message": "Run alpha-run-0009 completed: 1 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0008",
+        "time": "1793282821000",
+        "message": "Run alpha-run-0008 completed: 2 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0007",
+        "time": "1793282761000",
+        "message": "Run alpha-run-0007 completed: 3 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0006",
+        "time": "1793282701000",
+        "message": "Run alpha-run-0006 completed: 3 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0005",
+        "time": "1793282641000",
+        "message": "Run alpha-run-0005 completed: 3 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0004",
+        "time": "1793282581000",
+        "message": "Run alpha-run-0004 completed: 0 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0003",
+        "time": "1793282521000",
+        "message": "Run alpha-run-0003 completed: 0 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0002",
+        "time": "1793282461000",
+        "message": "Run alpha-run-0002 completed: 1 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel/logs/alpha-log-0001",
+        "time": "1793282401000",
+        "message": "Run alpha-run-0001 completed: 1 alerts fetched",
+        "connectorInstanceId": "alpha-sentinel",
+        "logLevel": "INFO"
+      }
+    ],
+    "bravo-sentinel": [
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0120",
+        "time": "1793289562000",
+        "message": "Run bravo-run-0120 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0120-warn",
+        "time": "1793289561000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0119",
+        "time": "1793289502000",
+        "message": "Run bravo-run-0119 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0119-warn",
+        "time": "1793289501000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0118",
+        "time": "1793289442000",
+        "message": "Run bravo-run-0118 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0118-warn",
+        "time": "1793289441000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0117",
+        "time": "1793289382000",
+        "message": "Run bravo-run-0117 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0117-warn",
+        "time": "1793289381000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0116",
+        "time": "1793289322000",
+        "message": "Run bravo-run-0116 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0116-warn",
+        "time": "1793289321000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0115",
+        "time": "1793289262000",
+        "message": "Run bravo-run-0115 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0115-warn",
+        "time": "1793289261000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0114",
+        "time": "1793289202000",
+        "message": "Run bravo-run-0114 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0114-warn",
+        "time": "1793289201000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0113",
+        "time": "1793289142000",
+        "message": "Run bravo-run-0113 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0113-warn",
+        "time": "1793289141000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0112",
+        "time": "1793289082000",
+        "message": "Run bravo-run-0112 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0112-warn",
+        "time": "1793289081000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0111",
+        "time": "1793289022000",
+        "message": "Run bravo-run-0111 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0111-warn",
+        "time": "1793289021000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0110",
+        "time": "1793288962000",
+        "message": "Run bravo-run-0110 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0110-warn",
+        "time": "1793288961000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0109",
+        "time": "1793288902000",
+        "message": "Run bravo-run-0109 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0109-warn",
+        "time": "1793288901000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0108",
+        "time": "1793288842000",
+        "message": "Run bravo-run-0108 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0108-warn",
+        "time": "1793288841000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0107",
+        "time": "1793288782000",
+        "message": "Run bravo-run-0107 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0107-warn",
+        "time": "1793288781000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0106",
+        "time": "1793288722000",
+        "message": "Run bravo-run-0106 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0106-warn",
+        "time": "1793288721000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0105",
+        "time": "1793288662000",
+        "message": "Run bravo-run-0105 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0105-warn",
+        "time": "1793288661000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0104",
+        "time": "1793288602000",
+        "message": "Run bravo-run-0104 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0104-warn",
+        "time": "1793288601000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0103",
+        "time": "1793288542000",
+        "message": "Run bravo-run-0103 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0103-warn",
+        "time": "1793288541000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0102",
+        "time": "1793288482000",
+        "message": "Run bravo-run-0102 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0102-warn",
+        "time": "1793288481000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0101",
+        "time": "1793288422000",
+        "message": "Run bravo-run-0101 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0101-warn",
+        "time": "1793288421000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0100",
+        "time": "1793288362000",
+        "message": "Run bravo-run-0100 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0100-warn",
+        "time": "1793288361000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0099",
+        "time": "1793288302000",
+        "message": "Run bravo-run-0099 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0099-warn",
+        "time": "1793288301000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0098",
+        "time": "1793288242000",
+        "message": "Run bravo-run-0098 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0098-warn",
+        "time": "1793288241000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0097",
+        "time": "1793288182000",
+        "message": "Run bravo-run-0097 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0097-warn",
+        "time": "1793288181000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0096",
+        "time": "1793288122000",
+        "message": "Run bravo-run-0096 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0096-warn",
+        "time": "1793288121000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0095",
+        "time": "1793288062000",
+        "message": "Run bravo-run-0095 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0095-warn",
+        "time": "1793288061000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0094",
+        "time": "1793288002000",
+        "message": "Run bravo-run-0094 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0094-warn",
+        "time": "1793288001000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0093",
+        "time": "1793287942000",
+        "message": "Run bravo-run-0093 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0093-warn",
+        "time": "1793287941000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0092",
+        "time": "1793287882000",
+        "message": "Run bravo-run-0092 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0092-warn",
+        "time": "1793287881000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0091",
+        "time": "1793287822000",
+        "message": "Run bravo-run-0091 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0091-warn",
+        "time": "1793287821000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0090",
+        "time": "1793287762000",
+        "message": "Run bravo-run-0090 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0090-warn",
+        "time": "1793287761000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0089",
+        "time": "1793287702000",
+        "message": "Run bravo-run-0089 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0089-warn",
+        "time": "1793287701000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0088",
+        "time": "1793287642000",
+        "message": "Run bravo-run-0088 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0088-warn",
+        "time": "1793287641000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0087",
+        "time": "1793287582000",
+        "message": "Run bravo-run-0087 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0087-warn",
+        "time": "1793287581000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0086",
+        "time": "1793287522000",
+        "message": "Run bravo-run-0086 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0086-warn",
+        "time": "1793287521000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0085",
+        "time": "1793287462000",
+        "message": "Run bravo-run-0085 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0085-warn",
+        "time": "1793287461000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0084",
+        "time": "1793287402000",
+        "message": "Run bravo-run-0084 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0084-warn",
+        "time": "1793287401000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0083",
+        "time": "1793287342000",
+        "message": "Run bravo-run-0083 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0083-warn",
+        "time": "1793287341000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0082",
+        "time": "1793287282000",
+        "message": "Run bravo-run-0082 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0082-warn",
+        "time": "1793287281000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0081",
+        "time": "1793287222000",
+        "message": "Run bravo-run-0081 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0081-warn",
+        "time": "1793287221000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0080",
+        "time": "1793287162000",
+        "message": "Run bravo-run-0080 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0080-warn",
+        "time": "1793287161000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0079",
+        "time": "1793287102000",
+        "message": "Run bravo-run-0079 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0079-warn",
+        "time": "1793287101000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0078",
+        "time": "1793287042000",
+        "message": "Run bravo-run-0078 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0078-warn",
+        "time": "1793287041000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0077",
+        "time": "1793286982000",
+        "message": "Run bravo-run-0077 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0077-warn",
+        "time": "1793286981000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0076",
+        "time": "1793286922000",
+        "message": "Run bravo-run-0076 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0076-warn",
+        "time": "1793286921000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0075",
+        "time": "1793286862000",
+        "message": "Run bravo-run-0075 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0075-warn",
+        "time": "1793286861000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0074",
+        "time": "1793286802000",
+        "message": "Run bravo-run-0074 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0074-warn",
+        "time": "1793286801000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0073",
+        "time": "1793286742000",
+        "message": "Run bravo-run-0073 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0073-warn",
+        "time": "1793286741000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0072",
+        "time": "1793286682000",
+        "message": "Run bravo-run-0072 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0072-warn",
+        "time": "1793286681000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0071",
+        "time": "1793286622000",
+        "message": "Run bravo-run-0071 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0071-warn",
+        "time": "1793286621000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0070",
+        "time": "1793286562000",
+        "message": "Run bravo-run-0070 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0070-warn",
+        "time": "1793286561000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0069",
+        "time": "1793286502000",
+        "message": "Run bravo-run-0069 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0069-warn",
+        "time": "1793286501000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0068",
+        "time": "1793286442000",
+        "message": "Run bravo-run-0068 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0068-warn",
+        "time": "1793286441000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0067",
+        "time": "1793286382000",
+        "message": "Run bravo-run-0067 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0067-warn",
+        "time": "1793286381000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0066",
+        "time": "1793286322000",
+        "message": "Run bravo-run-0066 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0066-warn",
+        "time": "1793286321000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0065",
+        "time": "1793286262000",
+        "message": "Run bravo-run-0065 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0065-warn",
+        "time": "1793286261000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0064",
+        "time": "1793286202000",
+        "message": "Run bravo-run-0064 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0064-warn",
+        "time": "1793286201000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0063",
+        "time": "1793286142000",
+        "message": "Run bravo-run-0063 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0063-warn",
+        "time": "1793286141000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0062",
+        "time": "1793286082000",
+        "message": "Run bravo-run-0062 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0062-warn",
+        "time": "1793286081000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0061",
+        "time": "1793286022000",
+        "message": "Run bravo-run-0061 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0061-warn",
+        "time": "1793286021000",
+        "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "WARNING"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0060",
+        "time": "1793285961000",
+        "message": "Run bravo-run-0060 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0059",
+        "time": "1793285901000",
+        "message": "Run bravo-run-0059 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0058",
+        "time": "1793285841000",
+        "message": "Run bravo-run-0058 completed: 1 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0057",
+        "time": "1793285781000",
+        "message": "Run bravo-run-0057 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0056",
+        "time": "1793285721000",
+        "message": "Run bravo-run-0056 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0055",
+        "time": "1793285661000",
+        "message": "Run bravo-run-0055 completed: 1 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0054",
+        "time": "1793285601000",
+        "message": "Run bravo-run-0054 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0053",
+        "time": "1793285541000",
+        "message": "Run bravo-run-0053 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0052",
+        "time": "1793285481000",
+        "message": "Run bravo-run-0052 completed: 1 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0051",
+        "time": "1793285421000",
+        "message": "Run bravo-run-0051 completed: 1 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0050",
+        "time": "1793285361000",
+        "message": "Run bravo-run-0050 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0049",
+        "time": "1793285301000",
+        "message": "Run bravo-run-0049 completed: 1 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0048",
+        "time": "1793285241000",
+        "message": "Run bravo-run-0048 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0047",
+        "time": "1793285181000",
+        "message": "Run bravo-run-0047 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0046",
+        "time": "1793285121000",
+        "message": "Run bravo-run-0046 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0045",
+        "time": "1793285061000",
+        "message": "Run bravo-run-0045 completed: 1 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0044",
+        "time": "1793285001000",
+        "message": "Run bravo-run-0044 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0043",
+        "time": "1793284941000",
+        "message": "Run bravo-run-0043 completed: 1 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0042",
+        "time": "1793284881000",
+        "message": "Run bravo-run-0042 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0041",
+        "time": "1793284821000",
+        "message": "Run bravo-run-0041 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0040",
+        "time": "1793284761000",
+        "message": "Run bravo-run-0040 completed: 1 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0039",
+        "time": "1793284701000",
+        "message": "Run bravo-run-0039 completed: 1 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0038",
+        "time": "1793284641000",
+        "message": "Run bravo-run-0038 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0037",
+        "time": "1793284581000",
+        "message": "Run bravo-run-0037 completed: 1 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0036",
+        "time": "1793284521000",
+        "message": "Run bravo-run-0036 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0035",
+        "time": "1793284461000",
+        "message": "Run bravo-run-0035 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0034",
+        "time": "1793284401000",
+        "message": "Run bravo-run-0034 completed: 1 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0033",
+        "time": "1793284341000",
+        "message": "Run bravo-run-0033 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0032",
+        "time": "1793284281000",
+        "message": "Run bravo-run-0032 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0031",
+        "time": "1793284221000",
+        "message": "Run bravo-run-0031 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0030",
+        "time": "1793284161000",
+        "message": "Run bravo-run-0030 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0029",
+        "time": "1793284101000",
+        "message": "Run bravo-run-0029 completed: 1 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0028",
+        "time": "1793284041000",
+        "message": "Run bravo-run-0028 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0027",
+        "time": "1793283981000",
+        "message": "Run bravo-run-0027 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0026",
+        "time": "1793283921000",
+        "message": "Run bravo-run-0026 completed: 1 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0025",
+        "time": "1793283861000",
+        "message": "Run bravo-run-0025 completed: 1 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0024",
+        "time": "1793283801000",
+        "message": "Run bravo-run-0024 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0023",
+        "time": "1793283741000",
+        "message": "Run bravo-run-0023 completed: 1 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0022",
+        "time": "1793283681000",
+        "message": "Run bravo-run-0022 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0021",
+        "time": "1793283621000",
+        "message": "Run bravo-run-0021 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0020",
+        "time": "1793283561000",
+        "message": "Run bravo-run-0020 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0019",
+        "time": "1793283501000",
+        "message": "Run bravo-run-0019 completed: 1 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0018",
+        "time": "1793283441000",
+        "message": "Run bravo-run-0018 completed: 1 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0017",
+        "time": "1793283381000",
+        "message": "Run bravo-run-0017 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0016",
+        "time": "1793283321000",
+        "message": "Run bravo-run-0016 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0015",
+        "time": "1793283261000",
+        "message": "Run bravo-run-0015 completed: 2 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0014",
+        "time": "1793283201000",
+        "message": "Run bravo-run-0014 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0013",
+        "time": "1793283141000",
+        "message": "Run bravo-run-0013 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0012",
+        "time": "1793283081000",
+        "message": "Run bravo-run-0012 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0011",
+        "time": "1793283021000",
+        "message": "Run bravo-run-0011 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0010",
+        "time": "1793282961000",
+        "message": "Run bravo-run-0010 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0009",
+        "time": "1793282901000",
+        "message": "Run bravo-run-0009 completed: 2 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0008",
+        "time": "1793282841000",
+        "message": "Run bravo-run-0008 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0007",
+        "time": "1793282781000",
+        "message": "Run bravo-run-0007 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0006",
+        "time": "1793282721000",
+        "message": "Run bravo-run-0006 completed: 1 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0005",
+        "time": "1793282661000",
+        "message": "Run bravo-run-0005 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0004",
+        "time": "1793282601000",
+        "message": "Run bravo-run-0004 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0003",
+        "time": "1793282541000",
+        "message": "Run bravo-run-0003 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0002",
+        "time": "1793282481000",
+        "message": "Run bravo-run-0002 completed: 1 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel/logs/bravo-log-0001",
+        "time": "1793282421000",
+        "message": "Run bravo-run-0001 completed: 0 alerts fetched",
+        "connectorInstanceId": "bravo-sentinel",
+        "logLevel": "INFO"
+      }
+    ],
+    "charlie-sentinel": [
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0120",
+        "time": "1793289581000",
+        "message": "Run charlie-run-0120 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0119",
+        "time": "1793289521000",
+        "message": "Run charlie-run-0119 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0118",
+        "time": "1793289461000",
+        "message": "Run charlie-run-0118 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0117",
+        "time": "1793289401000",
+        "message": "Run charlie-run-0117 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0116",
+        "time": "1793289341000",
+        "message": "Run charlie-run-0116 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0115",
+        "time": "1793289281000",
+        "message": "Run charlie-run-0115 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0114",
+        "time": "1793289221000",
+        "message": "Run charlie-run-0114 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0113",
+        "time": "1793289161000",
+        "message": "Run charlie-run-0113 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0112",
+        "time": "1793289101000",
+        "message": "Run charlie-run-0112 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0111",
+        "time": "1793289041000",
+        "message": "Run charlie-run-0111 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0110",
+        "time": "1793288981000",
+        "message": "Run charlie-run-0110 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0109",
+        "time": "1793288921000",
+        "message": "Run charlie-run-0109 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0108",
+        "time": "1793288861000",
+        "message": "Run charlie-run-0108 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0107",
+        "time": "1793288801000",
+        "message": "Run charlie-run-0107 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0106",
+        "time": "1793288741000",
+        "message": "Run charlie-run-0106 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0105",
+        "time": "1793288681000",
+        "message": "Run charlie-run-0105 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0104",
+        "time": "1793288621000",
+        "message": "Run charlie-run-0104 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0103",
+        "time": "1793288561000",
+        "message": "Run charlie-run-0103 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0102",
+        "time": "1793288501000",
+        "message": "Run charlie-run-0102 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0101",
+        "time": "1793288441000",
+        "message": "Run charlie-run-0101 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0100",
+        "time": "1793288381000",
+        "message": "Run charlie-run-0100 completed: 1 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0099",
+        "time": "1793288321000",
+        "message": "Run charlie-run-0099 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0098",
+        "time": "1793288261000",
+        "message": "Run charlie-run-0098 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0097",
+        "time": "1793288201000",
+        "message": "Run charlie-run-0097 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0096",
+        "time": "1793288141000",
+        "message": "Run charlie-run-0096 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0095",
+        "time": "1793288081000",
+        "message": "Run charlie-run-0095 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0094",
+        "time": "1793288021000",
+        "message": "Run charlie-run-0094 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0093",
+        "time": "1793287961000",
+        "message": "Run charlie-run-0093 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0092",
+        "time": "1793287901000",
+        "message": "Run charlie-run-0092 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0091",
+        "time": "1793287841000",
+        "message": "Run charlie-run-0091 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0090",
+        "time": "1793287781000",
+        "message": "Run charlie-run-0090 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0089",
+        "time": "1793287721000",
+        "message": "Run charlie-run-0089 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0088",
+        "time": "1793287661000",
+        "message": "Run charlie-run-0088 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0087",
+        "time": "1793287601000",
+        "message": "Run charlie-run-0087 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0086",
+        "time": "1793287541000",
+        "message": "Run charlie-run-0086 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0085",
+        "time": "1793287481000",
+        "message": "Run charlie-run-0085 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0084",
+        "time": "1793287421000",
+        "message": "Run charlie-run-0084 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0083",
+        "time": "1793287361000",
+        "message": "Run charlie-run-0083 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0082",
+        "time": "1793287301000",
+        "message": "Run charlie-run-0082 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0081",
+        "time": "1793287241000",
+        "message": "Run charlie-run-0081 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0080",
+        "time": "1793287181000",
+        "message": "Run charlie-run-0080 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0079",
+        "time": "1793287121000",
+        "message": "Run charlie-run-0079 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0078",
+        "time": "1793287061000",
+        "message": "Run charlie-run-0078 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0077",
+        "time": "1793287001000",
+        "message": "Run charlie-run-0077 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0076",
+        "time": "1793286941000",
+        "message": "Run charlie-run-0076 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0075",
+        "time": "1793286881000",
+        "message": "Run charlie-run-0075 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0074",
+        "time": "1793286821000",
+        "message": "Run charlie-run-0074 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0073",
+        "time": "1793286761000",
+        "message": "Run charlie-run-0073 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0072",
+        "time": "1793286701000",
+        "message": "Run charlie-run-0072 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0071",
+        "time": "1793286641000",
+        "message": "Run charlie-run-0071 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0070",
+        "time": "1793286581000",
+        "message": "Run charlie-run-0070 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0069",
+        "time": "1793286521000",
+        "message": "Run charlie-run-0069 completed: 1 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0068",
+        "time": "1793286461000",
+        "message": "Run charlie-run-0068 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0067",
+        "time": "1793286401000",
+        "message": "Run charlie-run-0067 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0066",
+        "time": "1793286341000",
+        "message": "Run charlie-run-0066 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0065",
+        "time": "1793286281000",
+        "message": "Run charlie-run-0065 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0064",
+        "time": "1793286221000",
+        "message": "Run charlie-run-0064 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0063",
+        "time": "1793286161000",
+        "message": "Run charlie-run-0063 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0062",
+        "time": "1793286101000",
+        "message": "Run charlie-run-0062 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0061",
+        "time": "1793286041000",
+        "message": "Run charlie-run-0061 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0060",
+        "time": "1793285981000",
+        "message": "Run charlie-run-0060 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0059",
+        "time": "1793285921000",
+        "message": "Run charlie-run-0059 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0058",
+        "time": "1793285861000",
+        "message": "Run charlie-run-0058 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0057",
+        "time": "1793285801000",
+        "message": "Run charlie-run-0057 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0056",
+        "time": "1793285741000",
+        "message": "Run charlie-run-0056 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0055",
+        "time": "1793285681000",
+        "message": "Run charlie-run-0055 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0054",
+        "time": "1793285621000",
+        "message": "Run charlie-run-0054 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0053",
+        "time": "1793285561000",
+        "message": "Run charlie-run-0053 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0052",
+        "time": "1793285501000",
+        "message": "Run charlie-run-0052 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0051",
+        "time": "1793285441000",
+        "message": "Run charlie-run-0051 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0050",
+        "time": "1793285381000",
+        "message": "Run charlie-run-0050 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0049",
+        "time": "1793285321000",
+        "message": "Run charlie-run-0049 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0048",
+        "time": "1793285261000",
+        "message": "Run charlie-run-0048 completed: 1 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0047",
+        "time": "1793285201000",
+        "message": "Run charlie-run-0047 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0046",
+        "time": "1793285141000",
+        "message": "Run charlie-run-0046 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0045",
+        "time": "1793285081000",
+        "message": "Run charlie-run-0045 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0044",
+        "time": "1793285021000",
+        "message": "Run charlie-run-0044 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0043",
+        "time": "1793284961000",
+        "message": "Run charlie-run-0043 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0042",
+        "time": "1793284901000",
+        "message": "Run charlie-run-0042 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0041",
+        "time": "1793284841000",
+        "message": "Run charlie-run-0041 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0040",
+        "time": "1793284781000",
+        "message": "Run charlie-run-0040 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0039",
+        "time": "1793284721000",
+        "message": "Run charlie-run-0039 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0038",
+        "time": "1793284661000",
+        "message": "Run charlie-run-0038 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0037",
+        "time": "1793284601000",
+        "message": "Run charlie-run-0037 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0036",
+        "time": "1793284541000",
+        "message": "Run charlie-run-0036 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0035",
+        "time": "1793284481000",
+        "message": "Run charlie-run-0035 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0034",
+        "time": "1793284421000",
+        "message": "Run charlie-run-0034 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0033",
+        "time": "1793284361000",
+        "message": "Run charlie-run-0033 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0032",
+        "time": "1793284301000",
+        "message": "Run charlie-run-0032 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0031",
+        "time": "1793284241000",
+        "message": "Run charlie-run-0031 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0030",
+        "time": "1793284181000",
+        "message": "Run charlie-run-0030 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0029",
+        "time": "1793284121000",
+        "message": "Run charlie-run-0029 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0028",
+        "time": "1793284061000",
+        "message": "Run charlie-run-0028 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0027",
+        "time": "1793284001000",
+        "message": "Run charlie-run-0027 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0026",
+        "time": "1793283941000",
+        "message": "Run charlie-run-0026 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0025",
+        "time": "1793283881000",
+        "message": "Run charlie-run-0025 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0024",
+        "time": "1793283821000",
+        "message": "Run charlie-run-0024 completed: 1 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0023",
+        "time": "1793283761000",
+        "message": "Run charlie-run-0023 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0022",
+        "time": "1793283701000",
+        "message": "Run charlie-run-0022 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0021",
+        "time": "1793283641000",
+        "message": "Run charlie-run-0021 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0020",
+        "time": "1793283581000",
+        "message": "Run charlie-run-0020 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0019",
+        "time": "1793283521000",
+        "message": "Run charlie-run-0019 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0018",
+        "time": "1793283461000",
+        "message": "Run charlie-run-0018 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0017",
+        "time": "1793283401000",
+        "message": "Run charlie-run-0017 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0016",
+        "time": "1793283341000",
+        "message": "Run charlie-run-0016 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0015",
+        "time": "1793283281000",
+        "message": "Run charlie-run-0015 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0014",
+        "time": "1793283221000",
+        "message": "Run charlie-run-0014 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0013",
+        "time": "1793283161000",
+        "message": "Run charlie-run-0013 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0012",
+        "time": "1793283101000",
+        "message": "Run charlie-run-0012 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0011",
+        "time": "1793283041000",
+        "message": "Run charlie-run-0011 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0010",
+        "time": "1793282981000",
+        "message": "Run charlie-run-0010 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0009",
+        "time": "1793282921000",
+        "message": "Run charlie-run-0009 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0008",
+        "time": "1793282861000",
+        "message": "Run charlie-run-0008 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0007",
+        "time": "1793282801000",
+        "message": "Run charlie-run-0007 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0006",
+        "time": "1793282741000",
+        "message": "Run charlie-run-0006 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0005",
+        "time": "1793282681000",
+        "message": "Run charlie-run-0005 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0004",
+        "time": "1793282621000",
+        "message": "Run charlie-run-0004 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0003",
+        "time": "1793282561000",
+        "message": "Run charlie-run-0003 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0002",
+        "time": "1793282501000",
+        "message": "Run charlie-run-0002 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      },
+      {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/charlie-sentinel/logs/charlie-log-0001",
+        "time": "1793282441000",
+        "message": "Run charlie-run-0001 completed: 0 alerts fetched",
+        "connectorInstanceId": "charlie-sentinel",
+        "logLevel": "INFO"
+      }
+    ]
+  },
+  "executeTest": {
+    "alpha": {
+      "success": true,
+      "message": "Token endpoint reachable; credentials valid."
+    },
+    "bravo": {
+      "success": false,
+      "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized"
+    },
+    "charlie": {
+      "success": true,
+      "message": "Token endpoint reachable; credentials valid."
+    }
+  }
+}
