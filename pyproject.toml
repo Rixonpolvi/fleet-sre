@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fleetsre"
+version = "0.0.0"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+  "pytest",
+  "ruff",
+  "mypy",
+  "import-linter",
+  "jsonschema",
+  "pyyaml",
+  "pydantic",
+  "fastapi",
+  "httpx",
+]
+
+[tool.pytest.ini_options]
+markers = [
+  "live: tests that call the Meta Model API (cost money)",
+  "gcp: tests that need the GCP project",
+]
+
+[tool.setuptools.packages.find]
+include = ["fleetsre*"]
