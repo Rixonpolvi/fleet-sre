@@ -1,0 +1,25 @@
+{
+  "_comment": "Runs 4-11 warn (+185..+605). 8th warning run at +605 trips (8 of last 10). Window drops to 7 at run 14 (+785).",
+  "service": "alert-ingestion",
+  "deployments": [
+    "alert-ingestion/bravo"
+  ],
+  "t0": "2026-10-29T14:00:00Z",
+  "durationSeconds": 800,
+  "tickSeconds": 15,
+  "canariesPlanted": [],
+  "events": [
+    {
+      "kind": "trip",
+      "deployment": "alert-ingestion/bravo",
+      "tripwire": "connector-errors",
+      "atOffsetSeconds": 605
+    },
+    {
+      "kind": "recovery",
+      "deployment": "alert-ingestion/bravo",
+      "tripwire": "connector-errors",
+      "atOffsetSeconds": 785
+    }
+  ]
+}

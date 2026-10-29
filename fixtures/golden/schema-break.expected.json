@@ -1,0 +1,25 @@
+{
+  "_comment": "String priority at +130 trips (consecutive 1). 20 valid alerts (+150..+530) recover (recoverAfter 20).",
+  "service": "alert-ingestion",
+  "deployments": [
+    "alert-ingestion/alpha"
+  ],
+  "t0": "2026-10-29T14:00:00Z",
+  "durationSeconds": 600,
+  "tickSeconds": 15,
+  "canariesPlanted": [],
+  "events": [
+    {
+      "kind": "trip",
+      "deployment": "alert-ingestion/alpha",
+      "tripwire": "priority-shape",
+      "atOffsetSeconds": 130
+    },
+    {
+      "kind": "recovery",
+      "deployment": "alert-ingestion/alpha",
+      "tripwire": "priority-shape",
+      "atOffsetSeconds": 530
+    }
+  ]
+}

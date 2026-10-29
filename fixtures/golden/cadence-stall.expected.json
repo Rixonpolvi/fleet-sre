@@ -1,0 +1,25 @@
+{
+  "_comment": "Last heartbeat +425; 3 x 60 s silent -> due +605. Next heartbeat +905 recovers.",
+  "service": "alert-ingestion",
+  "deployments": [
+    "alert-ingestion/alpha"
+  ],
+  "t0": "2026-10-29T14:00:00Z",
+  "durationSeconds": 1000,
+  "tickSeconds": 15,
+  "canariesPlanted": [],
+  "events": [
+    {
+      "kind": "trip",
+      "deployment": "alert-ingestion/alpha",
+      "tripwire": "dead-connector",
+      "atOffsetSeconds": 605
+    },
+    {
+      "kind": "recovery",
+      "deployment": "alert-ingestion/alpha",
+      "tripwire": "dead-connector",
+      "atOffsetSeconds": 905
+    }
+  ]
+}
