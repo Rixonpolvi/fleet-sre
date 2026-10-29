@@ -1,0 +1,98 @@
+[
+  [
+    {
+      "type": "function_call",
+      "call_id": "call_001",
+      "name": "set_hypotheses",
+      "arguments": "{\"items\": [{\"id\": \"H1\", \"statement\": \"Bravo connector credential expired; upstream returns 401.\", \"wouldConfirm\": \"bravo WARNING entries plus executeTest success false\", \"alternative\": false}, {\"id\": \"H2\", \"statement\": \"Fleet-wide upstream outage affecting every tenant.\", \"wouldConfirm\": \"siblings show the same connector errors as bravo\", \"alternative\": true}, {\"id\": \"H3\", \"statement\": \"Bravo connector stalled and stopped running.\", \"wouldConfirm\": \"missing connector.run.completed entries on bravo\", \"alternative\": false}], \"rationale\": \"State credential, fleet-wide and stall hypotheses first.\"}"
+    }
+  ],
+  [
+    {
+      "type": "function_call",
+      "call_id": "call_002",
+      "name": "update_plan",
+      "arguments": "{\"plan\": [{\"hypothesis\": \"H1\", \"next\": \"query bravo logs\"}, {\"hypothesis\": \"H2\", \"next\": \"compare siblings\"}, {\"hypothesis\": \"H3\", \"next\": \"check run cadence\"}], \"rationale\": \"Plan one check per hypothesis.\"}"
+    }
+  ],
+  [
+    {
+      "type": "function_call",
+      "call_id": "call_003",
+      "name": "query_logs",
+      "arguments": "{\"deployment\": \"alert-ingestion/bravo\", \"window\": \"2026-10-29T15:00:00Z/2026-10-29T16:00:00Z\", \"filter\": \"severity >= WARNING\", \"rationale\": \"Read bravo connector errors around the trip.\"}"
+    }
+  ],
+  [
+    {
+      "type": "function_call",
+      "call_id": "call_004",
+      "name": "record_evidence",
+      "arguments": "{\"hypothesis\": \"H1\", \"stance\": \"supports\", \"source\": {\"insertId\": \"gl-000625\"}, \"why\": \"bravo run logged the 401 warning\", \"rationale\": \"Pin the 401 warning to the credential hypothesis.\"}"
+    }
+  ],
+  [
+    {
+      "type": "function_call",
+      "call_id": "call_005",
+      "name": "compare_siblings",
+      "arguments": "{\"service\": \"alert-ingestion\", \"component\": \"connector\", \"window\": \"2026-10-29T15:00:00Z/2026-10-29T16:00:00Z\", \"rationale\": \"Check whether siblings fail too.\"}"
+    }
+  ],
+  [
+    {
+      "type": "function_call",
+      "call_id": "call_006",
+      "name": "record_evidence",
+      "arguments": "{\"hypothesis\": \"H2\", \"stance\": \"refutes\", \"source\": {\"callId\": \"call_005\", \"field\": \"deployments.alert-ingestion/alpha.warningRuns\", \"value\": 0}, \"why\": \"alpha has zero warning runs, so not fleet-wide\", \"rationale\": \"Alpha is clean, against the fleet-wide hypothesis.\"}"
+    }
+  ],
+  [
+    {
+      "type": "function_call",
+      "call_id": "call_007",
+      "name": "record_evidence",
+      "arguments": "{\"hypothesis\": \"H2\", \"stance\": \"refutes\", \"source\": {\"callId\": \"call_005\", \"field\": \"deployments.alert-ingestion/charlie.warningRuns\", \"value\": 0}, \"why\": \"charlie has zero warning runs, so not fleet-wide\", \"rationale\": \"Charlie is clean, against the fleet-wide hypothesis.\"}"
+    }
+  ],
+  [
+    {
+      "type": "function_call",
+      "call_id": "call_008",
+      "name": "test_integration_instance",
+      "arguments": "{\"name\": \"projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/integrationInstances/bravo\", \"rationale\": \"Test bravo connectivity directly.\"}"
+    }
+  ],
+  [
+    {
+      "type": "function_call",
+      "call_id": "call_009",
+      "name": "record_evidence",
+      "arguments": "{\"hypothesis\": \"H1\", \"stance\": \"supports\", \"source\": {\"callId\": \"call_008\", \"field\": \"success\", \"value\": false}, \"why\": \"executeTest success false on bravo\", \"rationale\": \"Failed connectivity test supports credential failure.\"}"
+    }
+  ],
+  [
+    {
+      "type": "function_call",
+      "call_id": "call_010",
+      "name": "query_logs",
+      "arguments": "{\"deployment\": \"alert-ingestion/bravo\", \"window\": \"2026-10-29T15:00:00Z/2026-10-29T16:00:00Z\", \"filter\": \"event = connector.run.completed\", \"rationale\": \"Check whether bravo runs still complete.\"}"
+    }
+  ],
+  [
+    {
+      "type": "function_call",
+      "call_id": "call_011",
+      "name": "record_evidence",
+      "arguments": "{\"hypothesis\": \"H3\", \"stance\": \"refutes\", \"source\": {\"insertId\": \"gl-000626\"}, \"why\": \"bravo runs still complete on schedule\", \"rationale\": \"Completed runs refute the stall hypothesis.\"}"
+    }
+  ],
+  [
+    {
+      "type": "function_call",
+      "call_id": "call_012",
+      "name": "submit_diagnosis",
+      "arguments": "{\"diagnosis\": {\"deployment\": \"alert-ingestion/bravo\", \"category\": \"credential_failure\", \"hypothesis\": \"H1\", \"evidence\": [\"E1\", \"E4\"], \"action\": {\"type\": \"escalate\", \"escalationSummary\": \"Bravo cannot auth to Sentinel (401); rotation outside allowlist.\"}}, \"rationale\": \"Credential failure; escalate for rotation.\"}"
+    }
+  ]
+]
