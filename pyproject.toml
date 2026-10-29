@@ -10,6 +10,7 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = [
+  "pre-commit",
   "pytest",
   "ruff",
   "mypy",

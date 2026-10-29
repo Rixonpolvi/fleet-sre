@@ -12,14 +12,12 @@ PROTECTED_DIRS = (
     "prompts/",
     "tests/acceptance/",
     "docs/",
+    ".agents/",
 )
-PROTECTED_FILES = ("AGENTS.md",)
 
 
 def is_protected(path: str) -> bool:
     normalized = path.strip()
-    if normalized in PROTECTED_FILES:
-        return True
     for prefix in PROTECTED_DIRS:
         if normalized.startswith(prefix):
             return True
