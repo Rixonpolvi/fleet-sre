@@ -10,11 +10,12 @@ mock SecOps that follows Google's published Chronicle API and SOAR log format. S
 - Anything not in Google's docs is invented: mark it with a `# invented:` comment.
 - fleetsre.sre must not import google.*, fleetsre.adapters or fleetsre.mock. It reaches the world
   only through fleetsre.sre.tools.ToolSet.
+- Checks run inside the tools (docs/spec.md §6.3, §6.5). Never add a code path that lets the model
+  skip a gate, and never hard-code which tool the model calls when.
 - Use SimClock in tests. No sleeps.
 
-# Protected paths
-Read-only on impl/* branches:
-contracts/ fixtures/ specs/ prompts/ tests/acceptance/ docs/ AGENTS.md
+# Protected paths (read-only on impl/* branches)
+contracts/ fixtures/ specs/ prompts/ tests/acceptance/ docs/ .agents/
 
 # Architecture
 Ports and adapters (docs/spec.md §4.2). Local adapters first; GCP adapters in D7 only.
