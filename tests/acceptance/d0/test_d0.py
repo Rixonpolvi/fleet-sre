@@ -88,7 +88,8 @@ def test_d0_t3_protected_guard(tmp_path):
         "prompts/x.txt",
         "tests/acceptance/x.txt",
         "docs/x.txt",
-        "AGENTS.md",
+        ".agents/AGENTS.md",
+        ".agents/other.txt",
     ]
     for index, rel in enumerate(protected):
         repo = tmp_path / f"case{index}"
@@ -110,7 +111,14 @@ def test_d0_t3_protected_guard(tmp_path):
             f"expected exit 1 for protected path {rel}, got {proc.returncode}:"
             f"\n{proc.stdout}\n{proc.stderr}"
         )
-    for index, rel in enumerate(["fleetsre/new_module.py", "fleetsre/docs_helper.py"]):
+    for index, rel in enumerate(
+        [
+            "fleetsre/new_module.py",
+            "fleetsre/docs_helper.py",
+            "AGENTS.md",
+            ".agents-old/x.txt",
+        ]
+    ):
         repo = tmp_path / f"case_clean{index}"
         base = _init_repo(repo)
         target = repo / rel
@@ -364,9 +372,12 @@ def test_d0_t8_markers():
 
 
 def test_d0_t9_agents_structure():
-    """D0-T9: AGENTS.md contains the six required headings."""
-    agents = ROOT / "AGENTS.md"
-    assert agents.exists(), "AGENTS.md missing"
+    """D0-T9: .agents/AGENTS.md exists, no root AGENTS.md, six headings by prefix."""
+    assert not (ROOT / "AGENTS.md").exists(), (
+        "AGENTS.md must not exist at the repo root"
+    )
+    agents = ROOT / ".agents" / "AGENTS.md"
+    assert agents.exists(), ".agents/AGENTS.md missing"
     text = agents.read_text()
     for heading in [
         "Project",
@@ -376,5 +387,5 @@ def test_d0_t9_agents_structure():
         "Commands",
         "Deliverable protocol",
     ]:
-        pattern = re.compile(r"^#+\s+" + re.escape(heading) + r"\s*$", re.MULTILINE)
-        assert pattern.search(text), f"AGENTS.md missing heading: {heading}"
+        pattern = re.compile(r"^#+\s+" + re.escape(heading), re.MULTILINE)
+        assert pattern.search(text), f".agents/AGENTS.md missing heading: {heading}"
