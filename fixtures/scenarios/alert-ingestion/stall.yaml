@@ -1,0 +1,22 @@
+# Timing: faults land at :30 offsets so they never tie with a run or a canary plant.
+# withinSeconds counts from the fault "at" for trips and from "clearAt" for recoveries.
+# F1: last run ~1800, dead-connector due at +180 s (3 x 60). The canary is not ingested
+# either: next plant 2400, deadline 2580 (~750 s after the fault).
+id: stall
+service: alert-ingestion
+seed: 102
+durationSeconds: 7200
+holdout: false
+deployments: [alpha, bravo, charlie]
+faults:
+  - { at: 1830, type: connector_stall, environment: alpha }
+expected:
+  trips:
+    - { deployment: alpha, tripwire: dead-connector, withinSeconds: 300 }
+    - { deployment: alpha, tripwire: canary, withinSeconds: 900 }
+  recoveries: []
+  mustNotTrip:
+    - { deployment: alpha, tripwire: priority-shape }
+    - { deployment: alpha, tripwire: connector-errors }
+    - { deployment: bravo, tripwire: "*" }
+    - { deployment: charlie, tripwire: "*" }

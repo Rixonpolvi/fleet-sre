@@ -1,0 +1,24 @@
+# Timing: faults land at :30 offsets so they never tie with a run or a canary plant.
+# withinSeconds counts from the fault "at" for trips and from "clearAt" for recoveries.
+# F1 then cleared. Recovery: next heartbeat within 2 intervals of the clear; the canary recovers
+# on the next plant (4200) plus one run (~630 s after the clear).
+id: recovery
+service: alert-ingestion
+seed: 107
+durationSeconds: 7200
+holdout: true
+deployments: [alpha, bravo, charlie]
+faults:
+  - { at: 1830, type: connector_stall, environment: alpha, clearAt: 3630 }
+expected:
+  trips:
+    - { deployment: alpha, tripwire: dead-connector, withinSeconds: 300 }
+    - { deployment: alpha, tripwire: canary, withinSeconds: 900 }
+  recoveries:
+    - { deployment: alpha, tripwire: dead-connector, withinSeconds: 180 }
+    - { deployment: alpha, tripwire: canary, withinSeconds: 720 }
+  mustNotTrip:
+    - { deployment: alpha, tripwire: priority-shape }
+    - { deployment: alpha, tripwire: connector-errors }
+    - { deployment: bravo, tripwire: "*" }
+    - { deployment: charlie, tripwire: "*" }

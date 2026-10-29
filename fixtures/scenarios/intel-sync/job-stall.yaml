@@ -1,0 +1,19 @@
+# Timing: faults land at :30 offsets so they never tie with a run or a canary plant.
+# withinSeconds counts from the fault "at" for trips and from "clearAt" for recoveries.
+# F7: last run 1800; dead-job due at +900 s (3 x 300), ~870 s after the fault.
+id: job-stall
+service: intel-sync
+seed: 202
+durationSeconds: 10800
+holdout: false
+deployments: [alpha, bravo]
+faults:
+  - { at: 1830, type: job_stall, environment: alpha }
+expected:
+  trips:
+    - { deployment: alpha, tripwire: dead-job, withinSeconds: 1200 }
+  recoveries: []
+  mustNotTrip:
+    - { deployment: alpha, tripwire: hollow-run }
+    - { deployment: alpha, tripwire: job-errors }
+    - { deployment: bravo, tripwire: "*" }

@@ -1,0 +1,16 @@
+# Timing: faults land at :30 offsets so they never tie with a run or a canary plant.
+# withinSeconds counts from the fault "at" for trips and from "clearAt" for recoveries.
+id: clean
+service: alert-ingestion
+seed: 101
+durationSeconds: 21600
+holdout: false
+deployments: [alpha, bravo, charlie]
+faults: []
+expected:
+  trips: []
+  recoveries: []
+  mustNotTrip:
+    - { deployment: alpha, tripwire: "*" }
+    - { deployment: bravo, tripwire: "*" }
+    - { deployment: charlie, tripwire: "*" }

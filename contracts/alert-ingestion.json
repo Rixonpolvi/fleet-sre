@@ -21,7 +21,7 @@
       "spec": { "everyMinutes": 10, "deadlineSeconds": 180 } },
     { "id": "priority-shape", "component": "ingestion", "type": "schema",
       "description": "An ingested alert's priority is not one of Google's documented integer values.",
-      "spec": { "event": "alert.ingested", "field": "jsonPayload.alert.priority", "type": "integer", "enum": [-1, 40, 60, 80, 100], "required": true, "consecutive": 1, "recoverAfter": 10 } },
+      "spec": { "event": "alert.ingested", "field": "jsonPayload.alert.priority", "type": "integer", "enum": [-1, 40, 60, 80, 100], "required": true, "consecutive": 1, "recoverAfter": 20 } },
     { "id": "connector-errors", "component": "connector", "type": "errorSignature",
       "description": "Too many connector runs logged WARNING or worse. Catches swallowed failures (Green Liar) while status stays LIVE.",
       "spec": { "minSeverity": "WARNING", "windowRuns": 10, "threshold": 8 } }

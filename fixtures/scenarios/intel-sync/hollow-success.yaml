@@ -1,0 +1,19 @@
+# Timing: faults land at :30 offsets so they never tie with a run or a canary plant.
+# withinSeconds counts from the fault "at" for trips and from "clearAt" for recoveries.
+# F4: Lookback Hours -> 0. Hollow SUCCESS runs at 2100, 2400, 2700; the third (~870 s) trips.
+id: hollow-success
+service: intel-sync
+seed: 203
+durationSeconds: 10800
+holdout: false
+deployments: [alpha, bravo]
+faults:
+  - { at: 1830, type: job_hollow_success, environment: bravo }
+expected:
+  trips:
+    - { deployment: bravo, tripwire: hollow-run, withinSeconds: 1200 }
+  recoveries: []
+  mustNotTrip:
+    - { deployment: bravo, tripwire: dead-job }
+    - { deployment: bravo, tripwire: job-errors }
+    - { deployment: alpha, tripwire: "*" }

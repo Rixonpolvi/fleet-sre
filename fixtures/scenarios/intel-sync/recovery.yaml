@@ -1,0 +1,20 @@
+# Timing: faults land at :30 offsets so they never tie with a run or a canary plant.
+# withinSeconds counts from the fault "at" for trips and from "clearAt" for recoveries.
+# F7 then cleared. The next run lands within 2 intervals (600 s) of the clear.
+id: recovery
+service: intel-sync
+seed: 205
+durationSeconds: 10800
+holdout: true
+deployments: [alpha, bravo]
+faults:
+  - { at: 1830, type: job_stall, environment: bravo, clearAt: 5430 }
+expected:
+  trips:
+    - { deployment: bravo, tripwire: dead-job, withinSeconds: 1200 }
+  recoveries:
+    - { deployment: bravo, tripwire: dead-job, withinSeconds: 720 }
+  mustNotTrip:
+    - { deployment: bravo, tripwire: hollow-run }
+    - { deployment: bravo, tripwire: job-errors }
+    - { deployment: alpha, tripwire: "*" }

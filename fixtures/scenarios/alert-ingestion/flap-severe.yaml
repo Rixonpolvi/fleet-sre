@@ -1,0 +1,22 @@
+# Timing: faults land at :30 offsets so they never tie with a run or a canary plant.
+# withinSeconds counts from the fault "at" for trips and from "clearAt" for recoveries.
+# F6 at 70% ERROR runs. Simulated latency to 8 of 10: p95 ~37 runs, p99 ~55 runs (60 s each).
+# ERROR runs still fetch and ingest, so the canary stays green.
+id: flap-severe
+service: alert-ingestion
+seed: 106
+durationSeconds: 7200
+holdout: false
+deployments: [alpha, bravo, charlie]
+faults:
+  - { at: 630, type: connector_flap, environment: alpha, params: { rate: 0.7 } }
+expected:
+  trips:
+    - { deployment: alpha, tripwire: connector-errors, withinSeconds: 3600 }
+  recoveries: []
+  mustNotTrip:
+    - { deployment: alpha, tripwire: dead-connector }
+    - { deployment: alpha, tripwire: canary }
+    - { deployment: alpha, tripwire: priority-shape }
+    - { deployment: bravo, tripwire: "*" }
+    - { deployment: charlie, tripwire: "*" }
