@@ -1,0 +1,20 @@
+# Timing: faults land at :30 offsets so they never tie with a run or a canary plant.
+# withinSeconds counts from the fault "at" for trips and from "clearAt" for recoveries.
+# F5: runs at 2100 and 2400 end ERROR; the second (~570 s) trips job-errors (2 of 3).
+# Errored runs still write job.run.completed (status ERROR), so dead-job and hollow-run stay green.
+id: job-error
+service: intel-sync
+seed: 204
+durationSeconds: 10800
+holdout: false
+deployments: [alpha, bravo]
+faults:
+  - { at: 1830, type: job_error, environment: alpha }
+expected:
+  trips:
+    - { deployment: alpha, tripwire: job-errors, withinSeconds: 900 }
+  recoveries: []
+  mustNotTrip:
+    - { deployment: alpha, tripwire: dead-job }
+    - { deployment: alpha, tripwire: hollow-run }
+    - { deployment: bravo, tripwire: "*" }

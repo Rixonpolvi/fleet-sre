@@ -62,7 +62,7 @@ One worker per connector instance. Every `intervalSeconds` (while `enabled` and 
    - `environment` ← the instance's environment
    - `events` ← one event dict per incident with `device_product`
 4. Hand alerts to ingestion.
-5. Emit logs (see §5) and append `ConnectorLog` records.
+5. Emit logs (see §5) and append `ConnectorLog` records. Every run ends with `connector.run.completed`, including a run that failed; a failed run writes `connector.run.warning` or `connector.run.error` first (invented). So `dead-connector` measures whether the connector ran, and `connector-errors` whether it ran cleanly.
 
 **Swallowed failure (Green Liar).** On a 401 from upstream, the worker catches the exception, writes a `WARNING` log and a `WARNING` ConnectorLog ("Failed to authenticate to Sentinel workspace: 401 Unauthorized"), returns zero alerts and still emits `connector.run.completed`. Status stays `LIVE`.
 
@@ -92,7 +92,7 @@ Ingestion does **not** validate `priority`; a string passes straight through (re
 
 ### 3.4 Job runtime (intel-sync)
 
-One worker per job instance. Every `intervalSeconds`: fetch indicators from a fake TI feed (`/_upstream/{env}/indicators?lookbackHours=N`), "sync" them, write a `python` log entry `job.run.completed` with `jsonPayload.indicatorsSynced` and `jsonPayload.status`, and append a `JobInstanceLog` (`status` `SUCCESS`/`ERROR`, `message`, `startTime`, `endTime`). Updates the job instance's `lastRunTime`, `lastRunStatus`, `nextScheduledRunTime`.
+One worker per job instance. Every `intervalSeconds`: fetch indicators from a fake TI feed (`/_upstream/{env}/indicators?lookbackHours=N`), "sync" them, write a `python` log entry `job.run.completed` with `jsonPayload.indicatorsSynced` and `jsonPayload.status`, and append a `JobInstanceLog` (`status` `SUCCESS`/`ERROR`, `message`, `startTime`, `endTime`). Updates the job instance's `lastRunTime`, `lastRunStatus`, `nextScheduledRunTime`. A failed run writes `job.run.error` and then still ends with `job.run.completed` (`status: ERROR`, `indicatorsSynced: 0`, severity ERROR), so `dead-job` measures whether the job ran and `hollow-run` checks only `SUCCESS` runs (invented).
 
 Job definition (invented): integration `MockThreatIntel` v`1.0`, job `Sync Indicators`. Parameters:
 
@@ -105,7 +105,7 @@ Job definition (invented): integration `MockThreatIntel` v`1.0`, job `Sync Indic
 
 ### 3.5 Canary planter
 
-`POST /_upstream/{env}/incidents:plant` creates an incident whose title starts with `[CANARY]` and whose `providerIncidentId` is `canary-<uuid>`. Ingestion sets `jsonPayload.alert.canary = true` for it. The platform's synthetic tripwire calls this endpoint; in production it would target only the `canary` environment (spec §5).
+`POST /_upstream/{env}/incidents:plant` creates an incident whose title starts with `[CANARY]` and whose `providerIncidentId` is `canary-<uuid>`. Ingestion sets `jsonPayload.alert.canary = true` for it. A canary counts as seen when an `alert.ingested` entry has `alert.canary: true` and `alert.ticket_id` equal to the planted `providerIncidentId`. Canaries are planted with severity `Informational`, so F3 never affects them. The platform's synthetic tripwire calls this endpoint; in production it would target only the `canary` environment (spec §5).
 
 ## 4. Mock Chronicle API (control plane)
 
@@ -217,6 +217,8 @@ Environment is not a documented log label. The platform maps `connector_instance
 
 Local sink: append-only JSONL, one `LogEntry` per line, `insertId` unique per entry (seeded).
 
+`resource.labels.project_id` and the project in `logName` are read from `$PROJECT` at runtime, because Cloud Logging requires the real project ID (`docs/decisions/logging-resource.md`). `fleet-sre-demo` appears only in fake Chronicle resource names and in test fixtures.
+
 ## 6. Fault catalog
 
 Each fault has a defined cause, what the native API shows, what should trip, and the **right answer**: the action a correct SRE takes. The right answers make the evaluations gradeable.
@@ -225,10 +227,10 @@ Each fault has a defined cause, what the native API shows, what should trip, and
 | --- | --- | --- | --- | --- | --- |
 | F1 | `connector_stall` | Worker for one instance stops running. No logs, no ConnectorLogs | `status: LIVE`, `enabled: true` | `dead-connector` (cadence) | `connectorInstances.restart`. The mock clears a stall on any `enabled` false→true transition |
 | F2 | `credential_expiry` | Upstream token endpoint returns 401 for one env. Connector swallows it: WARNING logs and ConnectorLogs every run, zero alerts, runs on schedule | `status: LIVE`; `executeTest` → `success: false` | `connector-errors` (errorSignature), `canary` (synthetic) | `escalate`, category `credential_failure`. Siblings healthy → tenant-specific. Fix (rotate secret) is outside the allowlist |
-| F3 | `severity_drift` | Upstream starts emitting an unmapped severity (`"Critical"`); with `Unknown Severity Priority` empty, `priority` becomes a string | `status: LIVE`, volume normal | `priority-shape` (schema) | `connectorInstances.patch` `parameters`: set `Unknown Severity Priority` to `100` (or `80`) |
+| F3 | `severity_drift` | A fraction `rate` (fault `params`, e.g. 0.5) of new upstream incidents arrive with an unmapped severity (`"Critical"`); with `Unknown Severity Priority` empty, their `priority` becomes a string | `status: LIVE`, volume normal | `priority-shape` (schema) | `connectorInstances.patch` `parameters`: set `Unknown Severity Priority` to `100` (or `80`) |
 | F4 | `job_hollow_success` | Job parameter `Lookback Hours` set to `0` (simulates a bad config change, visible in `tripwire_history` as a recent change); runs succeed with 0 indicators | `lastRunStatus: SUCCESS` | intel-sync `hollow-run` (schema on `indicatorsSynced > 0` over N runs) | `jobInstances.patch` `parameters`: `Lookback Hours` → `24` |
 | F5 | `job_error` | Fake TI feed returns 500; job runs end `ERROR` | `lastRunStatus: ERROR` | intel-sync `job-errors` (errorSignature) | `escalate`, category `job_failing` (upstream outage) |
-| F6 | `connector_flap` | Instance emits ERROR on a fraction of runs (`rate` in the fault body, e.g. 0.2 or 0.6) | `status: LIVE` | `connector-errors` only if threshold met | Harness-only scenarios for false-positive and threshold tuning |
+| F6 | `connector_flap` | Instance emits ERROR on a fraction `rate` of runs (fault `params`, e.g. 0.2 or 0.7). ERROR runs still fetch and ingest normally | `status: LIVE` | `connector-errors` only if threshold met | Harness-only scenarios for false-positive and threshold tuning |
 | F7 | `job_stall` | Job worker stops running; `nextScheduledRunTime` goes stale | `lastRunStatus` unchanged, `enabled: true` | intel-sync `dead-job` (cadence) | `jobInstances.restart`, category `job_stalled`. The mock clears a job stall on any `enabled` false→true transition |
 
 Clearing: `DELETE /_chaos/faults/{id}` restores normal behaviour within 2 intervals. F2 has no allowlisted fix; in the demo, the admin UI "mark rotated" button clears it.
@@ -239,10 +241,10 @@ Enabled only when `FLEETSRE_CHAOS=1`; otherwise every `/_chaos` route returns 40
 
 | Method | Path | Body | Effect |
 | --- | --- | --- | --- |
-| `POST` | `/_chaos/faults` | `{"type": "credential_expiry", "environment": "bravo", "target": "<resource name, optional>"}` | Activates a fault; returns `{"id": "..."}` |
+| `POST` | `/_chaos/faults` | `{"type": "severity_drift", "environment": "alpha", "target": "<resource name, optional>", "params": {"rate": 0.5}}` | Activates a fault; returns `{"id": "..."}` |
 | `GET` | `/_chaos/faults` | | Active faults |
 | `DELETE` | `/_chaos/faults/{id}` | | Clears a fault |
-| `POST` | `/_chaos/schedule` | list of `{at, type, environment, clearAt?}` | Scenario schedule (harness and the live auto-chaos loop) |
+| `POST` | `/_chaos/schedule` | list of `{at, type, environment, params?, clearAt?}` | Scenario schedule (harness and the live auto-chaos loop) |
 
 ## 8. Determinism and time
 

@@ -1,0 +1,79 @@
+{
+  "_mutation": "hollow-run loses its status=SUCCESS filter; job-error's failed runs trip it",
+  "service": "intel-sync",
+  "version": "1.0.0",
+  "description": "A SOAR job instance that syncs threat-intel indicators from a feed on a schedule.",
+  "parameters": {
+    "intervalSeconds": {
+      "type": "integer",
+      "required": true,
+      "description": "Job run interval (Chronicle minimum is 60)."
+    }
+  },
+  "components": [
+    {
+      "id": "job",
+      "kind": "jobInstance",
+      "logs": {
+        "container_name": "python",
+        "match": [
+          "integration_name",
+          "job_name"
+        ],
+        "deploymentBy": "jsonPayload.environment"
+      }
+    }
+  ],
+  "tripwires": [
+    {
+      "id": "dead-job",
+      "component": "job",
+      "type": "cadence",
+      "description": "The job stopped running. lastRunStatus keeps showing the last result, so the native API looks fine.",
+      "spec": {
+        "event": "job.run.completed",
+        "intervalSeconds": "${intervalSeconds}",
+        "maxSilentIntervals": 3
+      }
+    },
+    {
+      "id": "hollow-run",
+      "component": "job",
+      "type": "schema",
+      "description": "Runs report SUCCESS but sync nothing, several times in a row.",
+      "spec": {
+        "event": "job.run.completed",
+        "field": "jsonPayload.indicatorsSynced",
+        "type": "integer",
+        "minimum": 1,
+        "required": true,
+        "consecutive": 3,
+        "recoverAfter": 2
+      }
+    },
+    {
+      "id": "job-errors",
+      "component": "job",
+      "type": "errorSignature",
+      "description": "Most recent job runs ended in ERROR.",
+      "spec": {
+        "minSeverity": "ERROR",
+        "windowRuns": 3,
+        "threshold": 2
+      }
+    }
+  ],
+  "changePoint": {
+    "durationSeconds": 1800,
+    "overrides": {
+      "dead-job": {
+        "maxSilentIntervals": 2
+      }
+    }
+  },
+  "provenance": {
+    "authoredBy": "human:rixon",
+    "scorecard": null,
+    "approvedBy": "rixon"
+  }
+}

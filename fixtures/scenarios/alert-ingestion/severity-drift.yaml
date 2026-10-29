@@ -1,0 +1,22 @@
+# Timing: faults land at :30 offsets so they never tie with a run or a canary plant.
+# withinSeconds counts from the fault "at" for trips and from "clearAt" for recoveries.
+# F3: half of new incidents arrive as "Critical" (unmapped). At 120 alerts/h the first string
+# priority lands within a few minutes. Volume and runs are normal.
+id: severity-drift
+service: alert-ingestion
+seed: 104
+durationSeconds: 7200
+holdout: false
+deployments: [alpha, bravo, charlie]
+faults:
+  - { at: 1830, type: severity_drift, environment: alpha, params: { rate: 0.5 } }
+expected:
+  trips:
+    - { deployment: alpha, tripwire: priority-shape, withinSeconds: 300 }
+  recoveries: []
+  mustNotTrip:
+    - { deployment: alpha, tripwire: dead-connector }
+    - { deployment: alpha, tripwire: canary }
+    - { deployment: alpha, tripwire: connector-errors }
+    - { deployment: bravo, tripwire: "*" }
+    - { deployment: charlie, tripwire: "*" }

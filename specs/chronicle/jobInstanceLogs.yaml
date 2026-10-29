@@ -1,0 +1,9 @@
+# Documented fields of the Chronicle jobInstances.logs resource (mocks.md §4.1). Human-owned.
+# The docs' name format says integrationJobInstanceLogs/{id}; the resource path is logs. The mock serves logs.
+resource: jobInstanceLogs
+source: https://docs.cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.integrations.jobs.jobInstances.logs
+name: projects/{project}/locations/{location}/instances/{instance}/integrations/{integration}/jobs/{job}/jobInstances/{jobInstance}/logs/{log}
+methods: [get, list]
+fields: [name, startTime, endTime, message, jobIdentifier, integration, jobInstanceId, status]
+enums:
+  status: [SUCCESS, ERROR]

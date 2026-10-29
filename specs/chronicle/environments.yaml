@@ -1,0 +1,7 @@
+# Documented fields of the Chronicle environments resource (mocks.md §4.1). Human-owned.
+resource: environments
+source: https://docs.cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.environments
+name: projects/{project}/locations/{location}/instances/{instance}/environments/{environment}
+methods: [get, list, create]
+fields: [name, displayName, description, contact, contactEmails, contactPhone, base64Image,
+  retentionDuration, dynamicParameters, system, aliasesJson, instanceUri, dataAccessScopesJson, weight, id]

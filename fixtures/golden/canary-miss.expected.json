@@ -1,0 +1,41 @@
+{
+  "_comment": "Canaries are matched by alert.ticket_id. canary-0002 (planted +330) is never seen: deadline 180 s -> +510. canary-0003 seen +665 recovers.",
+  "service": "alert-ingestion",
+  "deployments": [
+    "alert-ingestion/alpha"
+  ],
+  "t0": "2026-10-29T14:00:00Z",
+  "durationSeconds": 800,
+  "tickSeconds": 15,
+  "canariesPlanted": [
+    {
+      "deployment": "alert-ingestion/alpha",
+      "providerIncidentId": "canary-0001",
+      "atOffsetSeconds": 30
+    },
+    {
+      "deployment": "alert-ingestion/alpha",
+      "providerIncidentId": "canary-0002",
+      "atOffsetSeconds": 330
+    },
+    {
+      "deployment": "alert-ingestion/alpha",
+      "providerIncidentId": "canary-0003",
+      "atOffsetSeconds": 630
+    }
+  ],
+  "events": [
+    {
+      "kind": "trip",
+      "deployment": "alert-ingestion/alpha",
+      "tripwire": "canary",
+      "atOffsetSeconds": 510
+    },
+    {
+      "kind": "recovery",
+      "deployment": "alert-ingestion/alpha",
+      "tripwire": "canary",
+      "atOffsetSeconds": 665
+    }
+  ]
+}

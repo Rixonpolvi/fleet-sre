@@ -1,0 +1,15 @@
+# Timing: faults land at :30 offsets so they never tie with a run or a canary plant.
+# withinSeconds counts from the fault "at" for trips and from "clearAt" for recoveries.
+# Charlie at 2 alerts/h for 6 h. A "no alerts in 90 min" detector false-alarms here; ours must not.
+id: quiet-tenant
+service: alert-ingestion
+seed: 108
+durationSeconds: 21600
+holdout: false
+deployments: [charlie]
+faults: []
+expected:
+  trips: []
+  recoveries: []
+  mustNotTrip:
+    - { deployment: charlie, tripwire: "*" }

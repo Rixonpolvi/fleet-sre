@@ -1,0 +1,18 @@
+# Timing: faults land at :30 offsets so they never tie with a run or a canary plant.
+# withinSeconds counts from the fault "at" for trips and from "clearAt" for recoveries.
+# F6 at 20% ERROR runs for ~2 h. Simulated: trips connector-errors (8 of 10) in ~1% of seeds.
+id: flap-mild
+service: alert-ingestion
+seed: 105
+durationSeconds: 7200
+holdout: true
+deployments: [alpha, bravo, charlie]
+faults:
+  - { at: 630, type: connector_flap, environment: alpha, params: { rate: 0.2 } }
+expected:
+  trips: []
+  recoveries: []
+  mustNotTrip:
+    - { deployment: alpha, tripwire: "*" }
+    - { deployment: bravo, tripwire: "*" }
+    - { deployment: charlie, tripwire: "*" }

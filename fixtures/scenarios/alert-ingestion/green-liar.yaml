@@ -1,0 +1,22 @@
+# Timing: faults land at :30 offsets so they never tie with a run or a canary plant.
+# withinSeconds counts from the fault "at" for trips and from "clearAt" for recoveries.
+# F2: every run warns; 8th warning run ~2280 (~450 s). Canary planted 2400 misses its 2580 deadline.
+# Runs keep completing, so dead-connector must stay green.
+id: green-liar
+service: alert-ingestion
+seed: 103
+durationSeconds: 7200
+holdout: false
+deployments: [alpha, bravo, charlie]
+faults:
+  - { at: 1830, type: credential_expiry, environment: bravo }
+expected:
+  trips:
+    - { deployment: bravo, tripwire: connector-errors, withinSeconds: 600 }
+    - { deployment: bravo, tripwire: canary, withinSeconds: 900 }
+  recoveries: []
+  mustNotTrip:
+    - { deployment: bravo, tripwire: dead-connector }
+    - { deployment: bravo, tripwire: priority-shape }
+    - { deployment: alpha, tripwire: "*" }
+    - { deployment: charlie, tripwire: "*" }

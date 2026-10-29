@@ -1,0 +1,15 @@
+# Documented fields of the Chronicle connectorInstances resource (mocks.md §4.1). Human-owned.
+resource: connectorInstances
+source: https://docs.cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.integrations.connectors.connectorInstances
+name: projects/{project}/locations/{location}/instances/{instance}/integrations/{integration}/connectors/{connector}/connectorInstances/{connectorInstance}
+methods: [get, list, create, patch, runOnDemand, setLogsCollection]
+fields: [name, agent, environment, displayName, description, intervalSeconds, documentationLink, allowList,
+  productFieldName, eventFieldName, timeoutSeconds, connectorDefinitionName, integrationVersion, version,
+  loggingEnabledUntilUnixMs, statistics, parameters, connectorId, identifier, id, updateAvailable, custom,
+  enabled, remote, status, integration]
+nested:
+  statistics: [pastDayAlertsCount, avgAlertsPerDay]
+  parameters: [value, displayName, description, mandatory, advanced, type]
+enums:
+  status: [LIVE, NOT_LIVE]
+  paramType: [BOOLEAN, INT, STRING, PASSWORD, IP, IP_OR_HOST, URL, DOMAIN, EMAIL, VALUES_LIST, VALUES_AS_SEMI_COLON_SEPARATED_STRING, MULTI_VALUES_SELECTION, SCRIPT, FILTER_LIST, NUMERICAL_VALUES]
