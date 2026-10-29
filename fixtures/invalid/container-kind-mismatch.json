@@ -1,0 +1,111 @@
+{
+  "_expectError": "container_kind_mismatch",
+  "service": "alert-ingestion",
+  "version": "1.0.0",
+  "description": "Sentinel incidents polled by a SOAR connector instance and ingested as alerts by the ETL flow.",
+  "parameters": {
+    "expectedAlertsPerHour": {
+      "type": "number",
+      "required": true,
+      "description": "Organic upstream volume for this tenant. Informational: no tripwire uses it, because volume cannot tell quiet from broken."
+    },
+    "intervalSeconds": {
+      "type": "integer",
+      "required": true,
+      "description": "Connector run interval."
+    }
+  },
+  "components": [
+    {
+      "id": "connector",
+      "kind": "connectorInstance",
+      "logs": {
+        "container_name": "python",
+        "match": [
+          "connector_name",
+          "connector_instance"
+        ],
+        "deploymentBy": "labels.connector_instance"
+      }
+    },
+    {
+      "id": "ingestion",
+      "kind": "etlFlow",
+      "logs": {
+        "container_name": "python",
+        "match": [
+          "correlation_id"
+        ],
+        "deploymentBy": "jsonPayload.environment"
+      }
+    }
+  ],
+  "tripwires": [
+    {
+      "id": "dead-connector",
+      "component": "connector",
+      "type": "cadence",
+      "description": "The connector stopped running. Runs happen on schedule regardless of alert volume, so quiet tenants stay green.",
+      "spec": {
+        "event": "connector.run.completed",
+        "intervalSeconds": "${intervalSeconds}",
+        "maxSilentIntervals": 3
+      }
+    },
+    {
+      "id": "canary",
+      "component": "ingestion",
+      "type": "synthetic",
+      "description": "A planted canary incident did not come out of ingestion in time.",
+      "spec": {
+        "everyMinutes": 10,
+        "deadlineSeconds": 180
+      }
+    },
+    {
+      "id": "priority-shape",
+      "component": "ingestion",
+      "type": "schema",
+      "description": "An ingested alert's priority is not one of Google's documented integer values.",
+      "spec": {
+        "event": "alert.ingested",
+        "field": "jsonPayload.alert.priority",
+        "type": "integer",
+        "enum": [
+          -1,
+          40,
+          60,
+          80,
+          100
+        ],
+        "required": true,
+        "consecutive": 1,
+        "recoverAfter": 20
+      }
+    },
+    {
+      "id": "connector-errors",
+      "component": "connector",
+      "type": "errorSignature",
+      "description": "Too many connector runs logged WARNING or worse. Catches swallowed failures (Green Liar) while status stays LIVE.",
+      "spec": {
+        "minSeverity": "WARNING",
+        "windowRuns": 10,
+        "threshold": 8
+      }
+    }
+  ],
+  "changePoint": {
+    "durationSeconds": 1800,
+    "overrides": {
+      "dead-connector": {
+        "maxSilentIntervals": 2
+      }
+    }
+  },
+  "provenance": {
+    "authoredBy": "human:rixon",
+    "scorecard": null,
+    "approvedBy": "rixon"
+  }
+}
