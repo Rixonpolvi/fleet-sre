@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import Any
 
+import yaml
 from pydantic import BaseModel, ConfigDict
 
 
@@ -27,5 +28,7 @@ class FleetConfig(BaseModel):
 
 
 def load_fleet(path: str | Path) -> FleetConfig:
-    """Load and validate the fleet file. Session B implements."""
-    raise NotImplementedError
+    """Load and validate the fleet YAML file as it is."""
+    with open(path, encoding="utf-8") as fh:
+        data = yaml.safe_load(fh)
+    return FleetConfig.model_validate(data)

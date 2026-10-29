@@ -23,5 +23,10 @@ class LogEntry(BaseModel):
 
 
 def read_jsonl(path: str | Path) -> list[LogEntry]:
-    """Read a JSONL file as LogEntry list. Session B implements."""
-    raise NotImplementedError
+    """Read a JSONL file as a list of LogEntry, one per non-blank line."""
+    entries: list[LogEntry] = []
+    with open(path, encoding="utf-8") as fh:
+        for line in fh:
+            if line.strip():
+                entries.append(LogEntry.model_validate_json(line))
+    return entries
