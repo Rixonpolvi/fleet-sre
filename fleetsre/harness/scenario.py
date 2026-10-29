@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import Any
 
+import yaml
 from pydantic import BaseModel, ConfigDict
 
 
@@ -51,5 +52,7 @@ class Scenario(BaseModel):
 
 
 def load_scenario(path: str | Path) -> Scenario:
-    """Load and validate a scenario file. Session B implements."""
-    raise NotImplementedError
+    """Load and validate a scenario YAML file."""
+    with open(path, encoding="utf-8") as fh:
+        data = yaml.safe_load(fh)
+    return Scenario.model_validate(data)
