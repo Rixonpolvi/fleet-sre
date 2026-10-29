@@ -2,6 +2,10 @@
 
 As of 2026-10-28. Companion to [`spec.md`](spec.md) (source of truth) and [`mocks.md`](mocks.md).
 
+Revised 2026-10-28 (afternoon) to match the spec revision: `.agents/AGENTS.md`, held-out scenarios (D1), the spike in the gated loop shape (D2), the gated investigator (D5), NEEDS_INPUT, reject with notes and the executor journal (D6), and the turn timeline (D8).
+
+Revised 2026-10-29 during D1: contract rules, scenario values, `ContractError` codes and evaluator rules settled by the D1 fixtures (§D1, D3-T21, D3-T22, D4-T7, D4-T11, D4-T15).
+
 Nine deliverables, D0–D8. Each one is **two merges**: a tests PR, then an implementation PR. The acceptance tests below are the definition of done. The coding agent translates them into code; it does not decide them.
 
 ---
@@ -17,7 +21,7 @@ Nine deliverables, D0–D8. Each one is **two merges**: a tests PR, then an impl
 
 Why two sessions: the session that writes the code must not be able to weaken the tests. The protected-path guard (D0) enforces it mechanically; the fresh session keeps context small and the diff reviewable.
 
-Commit messages start with the ID (`D3-tests: …`, `D3-impl: …`). That history is your hackathon provenance.
+Commit messages start with the ID (`D3-tests: …`, `D3-impl: …`). That history is your hackathon provenance. After each session, export it with `muse export` to `provenance/DN-tests.json` or `provenance/DN-impl.json`, and commit it once `scan_secrets.py` and the denylist hook pass.
 
 ### 1.2 Conventions
 
@@ -25,7 +29,7 @@ Commit messages start with the ID (`D3-tests: …`, `D3-impl: …`). That histor
 - **Markers:** default tests run offline in `make check`. `@pytest.mark.live` calls the Meta Model API (costs money; run with `make test-live`). `@pytest.mark.gcp` needs the GCP project (run with `make test-gcp`). Live and GCP results are committed under `evals/` with a date.
 - **Clock:** all behavioural tests use `SimClock`. No `sleep` in tests.
 - **Seeds:** tests that use the mock world pass an explicit seed.
-- **Protected paths** (read-only in `impl/*` branches): `contracts/`, `fixtures/`, `specs/`, `prompts/`, `tests/acceptance/`, `docs/`, `AGENTS.md`.
+- **Protected paths** (read-only in `impl/*` branches): `contracts/`, `fixtures/`, `specs/`, `prompts/`, `tests/acceptance/`, `docs/`, `.agents/`.
 
 ### 1.3 Your review checklist (tests PR)
 
@@ -39,7 +43,7 @@ Commit messages start with the ID (`D3-tests: …`, `D3-impl: …`). That histor
 **Session A (tests)**
 ```
 Objective: Write the acceptance tests for DN exactly as specified in docs/deliverables.md §DN.
-Inputs: docs/spec.md, docs/mocks.md, docs/deliverables.md §1 and §DN, AGENTS.md.
+Inputs: docs/spec.md, docs/mocks.md, docs/deliverables.md §1 and §DN, .agents/AGENTS.md.
 Deliverables: tests/acceptance/dN/*.py (one function per test ID), interface stubs for the
   signatures in §DN that raise NotImplementedError, any fixtures §DN marks "Session A".
 Rules: no implementation logic. Do not edit docs/, contracts/, fixtures/ (except files §DN marks
@@ -52,9 +56,9 @@ Stop: print a table of test ID -> function name -> current failure reason, then 
 **Session B (implementation)**
 ```
 Objective: Implement DN so that tests/acceptance/dN passes, per docs/deliverables.md §DN.
-Inputs: docs/spec.md, docs/mocks.md, docs/deliverables.md §DN, AGENTS.md, tests/acceptance/.
-Rules: protected paths are read-only (AGENTS.md). Do not modify any acceptance test. You may add
-  tests under tests/unit/. Out of scope: everything in later deliverables.
+Inputs: docs/spec.md, docs/mocks.md, docs/deliverables.md §DN, .agents/AGENTS.md, tests/acceptance/.
+Rules: protected paths are read-only (.agents/AGENTS.md). Do not modify any acceptance test. You may
+  add tests under tests/unit/. Out of scope: everything in later deliverables.
 Acceptance: make check passes; pytest tests/acceptance/d0 ... dN all pass.
 Stop: print the acceptance results and a summary of files changed, then stop. Do not start DN+1.
 ```
@@ -63,28 +67,28 @@ Stop: print the acceptance results and a summary of files changed, then stop. Do
 
 ```
 fleet-sre/
-  AGENTS.md  README.md  Makefile  pyproject.toml  .importlinter
+  .agents/AGENTS.md  README.md  Makefile  pyproject.toml  .importlinter
   docs/                spec.md mocks.md deliverables.md decisions/
   prompts/             investigate.md author.md (human-written SRE prompts)
   contracts/           schema.json alert-ingestion.json intel-sync.json
   specs/chronicle/     *.yaml (field lists with source URLs)
-  fixtures/            fleet.yaml logs/samples/ golden/ scenarios/ invalid/ mutants/ spike/
+  fixtures/            fleet.yaml logs/samples/ golden/ scenarios/ invalid/ mutants/ spike/ scripted/ recorded/
   fleetsre/
     logmodel.py clock.py ports.py contracts.py registry.py
     mock/        world.py fleet.py sentinel.py connector.py ingestion.py jobs.py chronicle_api.py chaos.py auth.py
     evaluator/   tripwires.py engine.py canary.py
     harness/     scenario.py replay.py scorecard.py
-    sre/         schemas.py tools.py gateway.py investigator.py citations.py
-    control/     incidents.py approvals.py executor.py verify.py
+    sre/         schemas.py session.py gates.py tools.py gateway.py investigator.py
+    control/     incidents.py approvals.py executor.py journal.py verify.py
     authoring/   loop.py amend.py
     adapters/    jsonl.py sqlite_state.py cloud_logging.py pubsub_push.py firestore_state.py chronicle_http.py
     web/         app.py templates/
     live/        chaos_loop.py
   tests/acceptance/d0 … d8/   tests/unit/
-  evals/  spikes/  infra/  scripts/
+  evals/  spikes/  infra/  scripts/  provenance/
 ```
 
-Stack: Python 3.12, FastAPI, pydantic v2, httpx, pytest, ruff, mypy, import-linter, jsonschema, PyYAML. The model gateway uses the OpenAI-compatible client against the Meta Model API base URL.
+Stack: Python 3.12, FastAPI, pydantic v2, httpx, pytest, ruff, mypy, import-linter, jsonschema, PyYAML. The model gateway uses the OpenAI Python SDK's Responses API against the Meta Model API base URL (`spec.md` §8).
 
 ## 3. Schedule
 
@@ -107,23 +111,23 @@ Stack: Python 3.12, FastAPI, pydantic v2, httpx, pytest, ruff, mypy, import-lint
 
 **Goal.** A repo where `make check` works, protected paths are enforced in CI, and every acceptance test is traceable to this file.
 
-**Interfaces / files.** `Makefile` targets `check`, `lint`, `test`, `test-live`, `test-gcp`, `demo` (placeholder until D8). `scripts/check_protected.py --base <ref> --head <ref>`, `scripts/check_trace.py --doc docs/deliverables.md --tests tests/acceptance`, `scripts/scan_secrets.py <paths>`, `.pre-commit-config.yaml` with the denylist hook, `.github/workflows/ci.yml`, `AGENTS.md` (draft at the end of this section).
+**Interfaces / files.** `Makefile` targets `check`, `lint`, `test`, `test-live`, `test-gcp`, `demo` (placeholder until D8). `scripts/check_protected.py --base <ref> --head <ref>`, `scripts/check_trace.py --doc docs/deliverables.md --tests tests/acceptance`, `scripts/scan_secrets.py <paths>`, `.pre-commit-config.yaml` with the denylist hook, `.github/workflows/ci.yml`, `.agents/AGENTS.md` (draft at the end of this section). Muse Code loads standing rules from `.agents/AGENTS.md` at session start and treats `.agents/` as a guardrail path, so a write to it always stops for your review.
 
 | ID | Test | Pass condition |
 | --- | --- | --- |
 | D0-T1 | `make check` on a fresh clone | Exits 0; runs ruff, mypy, import-linter, trace check and offline pytest |
 | D0-T2 | Package imports | `import fleetsre` works; `fleetsre.__version__` is set; `pyproject.toml` requires Python ≥ 3.12 |
-| D0-T3 | Protected-path guard detects edits | In a temp git repo, `check_protected.py` exits 1 when the head changes any file under `contracts/`, `fixtures/`, `specs/`, `prompts/`, `tests/acceptance/`, `docs/` or `AGENTS.md`; exits 0 for changes elsewhere |
+| D0-T3 | Protected-path guard detects edits | In a temp git repo, `check_protected.py` exits 1 when the head changes any file under `contracts/`, `fixtures/`, `specs/`, `prompts/`, `tests/acceptance/`, `docs/` or `.agents/`; exits 0 for changes elsewhere |
 | D0-T4 | Guard wired into CI | `ci.yml` parses; it has a job that runs `check_protected.py` on pull requests from branches matching `impl/*` |
 | D0-T5 | Trace check | Against a temp doc and temp tests dir, `check_trace.py` exits 1 when an ID in a section that has a `tests/acceptance/dN/` directory lacks a `test_dN_tM_*` function, and 0 when all exist |
 | D0-T6 | Secret scan | `scan_secrets.py` flags a temp file containing a PEM private key, a GCP service-account key JSON, and an API-key-shaped string; exits 0 on the repo |
 | D0-T7 | Denylist hook | The pre-commit hook reads terms from `~/.config/fleetsre/denylist.txt` (outside the repo) and blocks a staged file containing a term; the repo contains no denylist file |
 | D0-T8 | Markers | pytest registers `live` and `gcp`; `make check` deselects them; `make test-live` and `make test-gcp` select only them |
-| D0-T9 | AGENTS.md structure | Contains the headings Project, Hard rules, Protected paths, Architecture, Commands, Deliverable protocol |
+| D0-T9 | AGENTS.md structure | `.agents/AGENTS.md` exists, there is no `AGENTS.md` at the repo root, and it contains the headings Project, Hard rules, Protected paths, Architecture, Commands, Deliverable protocol |
 
 **Out of scope:** any `fleetsre` logic.
 
-**AGENTS.md draft** (Session B may adjust wording, not rules):
+**`.agents/AGENTS.md` draft** (Session B may adjust wording, not rules):
 
 ```markdown
 # Project
@@ -138,10 +142,12 @@ mock SecOps that follows Google's published Chronicle API and SOAR log format. S
 - Anything not in Google's docs is invented: mark it with a `# invented:` comment.
 - fleetsre.sre must not import google.*, fleetsre.adapters or fleetsre.mock. It reaches the world
   only through fleetsre.sre.tools.ToolSet.
+- Checks run inside the tools (docs/spec.md §6.3, §6.5). Never add a code path that lets the model
+  skip a gate, and never hard-code which tool the model calls when.
 - Use SimClock in tests. No sleeps.
 
 # Protected paths (read-only on impl/* branches)
-contracts/ fixtures/ specs/ prompts/ tests/acceptance/ docs/ AGENTS.md
+contracts/ fixtures/ specs/ prompts/ tests/acceptance/ docs/ .agents/
 
 # Architecture
 Ports and adapters (docs/spec.md §4.2). Local adapters first; GCP adapters in D7 only.
@@ -176,7 +182,7 @@ class ContractError(Exception): code: str
 def load_contract(path) -> Contract     # schema + referential checks; raises ContractError(code)
 
 # fleetsre/harness/scenario.py
-class Scenario(BaseModel): id; service; seed; durationSeconds; deployments; faults; expected
+class Scenario(BaseModel): id; service; seed; durationSeconds; deployments; faults; expected; holdout: bool = False
 def load_scenario(path) -> Scenario
 
 # fleetsre/mock/fleet.py
@@ -184,13 +190,13 @@ def load_fleet(path) -> FleetConfig
 ```
 
 **Files you author** (protected once merged):
-- `contracts/alert-ingestion.json` (tripwires: `dead-connector`, `canary`, `priority-shape`, `connector-errors`) and `contracts/intel-sync.json` (tripwires: `dead-job`, `hollow-run`, `job-errors`). The schema tripwire supports `consecutive: K` (trip after K consecutive violating entries; default 1); `hollow-run` uses it.
+- `contracts/alert-ingestion.json` (tripwires: `dead-connector`, `canary`, `priority-shape`, `connector-errors`) and `contracts/intel-sync.json` (tripwires: `dead-job`, `hollow-run`, `job-errors`). Schema tripwires support `event`, `where`, `consecutive: K` (trip after K consecutive violating entries; default 1) and `recoverAfter` (valid entries in a row to recover; default `consecutive`); see `spec.md` §5.
 - `fixtures/fleet.yaml` per `mocks.md` §2.
 - `fixtures/logs/samples/*.jsonl`: a few entries per event type in `mocks.md` §5.
 - `fixtures/scenarios/<service>/*.yaml` (format below).
 - `fixtures/golden/*.jsonl` + `*.expected.json`: four tiny streams (≤ 40 lines each) with hand-checked expected events: `cadence-stall`, `schema-break`, `error-burst`, `canary-miss`.
 - `fixtures/invalid/*.json`: broken contracts, each with `"_expectError": "<code>"`.
-- `fixtures/mutants/*.json`: weakened copies of the real contracts, each with `"_mutation": "<what was weakened>"` (e.g. `maxSilentIntervals: 50`, schema tripwire removed, canary deadline ×10, errorSignature threshold 99).
+- `fixtures/mutants/*.json`: weakened copies of the real contracts, each with `"_mutation": "<what was weakened>"` (e.g. `maxSilentIntervals: 50`, schema tripwire removed, canary deadline ×10, errorSignature `minSeverity` raised to ERROR).
 - `docs/decisions/logging-resource.md`: result of the manual check below.
 
 **Manual check (15 minutes, today).** From your laptop, write one entry with a 10-line Python script using `google-cloud-logging`, passing `resource=Resource(type="k8s_container", labels={"project_id": ..., "location": ..., "cluster_name": "mock-soar", "namespace_name": "chronicle-soar", "pod_name": "python-0", "container_name": "python"})` and the connector entry labels. Then query it in Logs Explorer with `resource.labels.namespace_name="chronicle-soar"`. Record whether it landed with those resource labels. If it was rejected or rewritten, record the fallback (`generic_task` with the same entry `labels`).
@@ -201,12 +207,13 @@ id: green-liar
 service: alert-ingestion
 seed: 7
 durationSeconds: 7200
+holdout: false
 deployments: [alpha, bravo, charlie]
 faults:
-  - { at: 1800, type: credential_expiry, environment: bravo }
+  - { at: 1830, type: credential_expiry, environment: bravo }
 expected:
   trips:
-    - { deployment: bravo, tripwire: connector-errors, withinSeconds: 420 }
+    - { deployment: bravo, tripwire: connector-errors, withinSeconds: 600 }
     - { deployment: bravo, tripwire: canary, withinSeconds: 900 }
   recoveries: []
   mustNotTrip:
@@ -215,8 +222,21 @@ expected:
 ```
 
 **Required scenarios.**
-- `alert-ingestion`: `clean` (all three, 6 h), `stall` (F1 alpha), `green-liar` (F2 bravo), `severity-drift` (F3 alpha), `flap-mild` (F6 alpha, rate 0.2, must not trip), `flap-severe` (F6 alpha, rate 0.6, trips `connector-errors`), `recovery` (F1 alpha then cleared; expects trip then recovery), `quiet-tenant` (charlie only, 6 h, no trips).
-- `intel-sync`: `clean`, `job-stall` (F7), `hollow-success` (F4), `job-error` (F5), `recovery` (F7 then cleared).
+- `alert-ingestion`: `clean` (all three, 6 h), `stall` (F1 alpha), `green-liar` (F2 bravo), `severity-drift` (F3 alpha), `flap-mild` (F6 alpha, rate 0.2, must not trip; **holdout**), `flap-severe` (F6 alpha, rate 0.7, trips `connector-errors`), `recovery` (F1 alpha then cleared; expects trip then recovery; **holdout**), `quiet-tenant` (charlie only, 6 h, no trips).
+- `intel-sync`: `clean`, `job-stall` (F7), `hollow-success` (F4), `job-error` (F5), `recovery` (F7 then cleared; **holdout**).
+
+**`ContractError` codes.** `load_contract` checks the schema first, then the referential rules in this order, and raises the first failure. Top-level keys starting with `_` (`_expectError`, `_mutation`) are allowed by the schema and ignored by the loader.
+
+| Code | Raised when |
+| --- | --- |
+| `schema_invalid` | The contract fails `contracts/schema.json` |
+| `unknown_component` | A tripwire's `component` is not a component ID |
+| `duplicate_tripwire` | Two tripwires share an ID |
+| `dangling_parameter` | A `${param}` in a spec is not in `parameters` |
+| `unknown_override` | A `changePoint.overrides` key is not a tripwire ID |
+| `unknown_override_field` | An override field is not in that tripwire's `spec` |
+| `threshold_exceeds_window` | An errorSignature `threshold` is greater than its `windowRuns` |
+| `container_kind_mismatch` | A `connectorInstance` or `jobInstance` component is not on `python`, or an `etlFlow` is not on `etl` |
 
 | ID | Test | Pass condition |
 | --- | --- | --- |
@@ -234,6 +254,7 @@ expected:
 | D1-T12 | Mutants present | At least 4 files in `fixtures/mutants/`; each schema-valid; each has `_mutation` |
 | D1-T13 | Chronicle field specs | `specs/chronicle/{environments,integrationInstances,connectorInstances,connectorInstanceLogs,jobInstances,jobInstanceLogs}.yaml` exist, each with a `source:` URL on `docs.cloud.google.com/chronicle/docs/reference/rest/` and a `fields:` list equal to `mocks.md` §4.1 |
 | D1-T14 | Logging decision recorded | `docs/decisions/logging-resource.md` exists and states `result: accepted` or `result: fallback` with the resource type to use |
+| D1-T15 | Holdouts marked | Exactly the scenarios marked **holdout** above have `holdout: true`; every other scenario has `holdout: false`; each service has at least one holdout and at least one visible scenario with a fault |
 
 **Out of scope:** any mock or evaluator behaviour.
 
@@ -243,20 +264,21 @@ expected:
 
 **Target:** Wed Oct 28 · **Owner:** Muse writes the spike; you write the fixture (or have Muse generate it in Session A and inspect it line by line) · **Depends on:** D0, D1
 
-**Goal.** Find out today whether a Muse model, using the `spec.md` §6.1 tools over a fixture, diagnoses a credential Green Liar correctly. If it cannot, the plan changes now, not Saturday.
+**Goal.** Find out today whether a Muse model diagnoses a credential Green Liar correctly inside the gated loop of `spec.md` §6.1: one tool call per turn, hypotheses first, evidence checked when it is recorded, and a diagnosis submitted through a gated tool. If it cannot, the plan changes now, not Saturday. D5 inherits whatever shape passes here.
 
-**Files.** `fixtures/spike/green_liar/logs.jsonl` (three tenants, ~2 h; bravo shows WARNING runs with zero alerts, status LIVE), `fixtures/spike/green_liar/resources.json` (connector and integration instances; bravo's `executeTest` result `success: false`), `spikes/sre_spike.py`, `spikes/diagnosis_min.schema.json` (deployment, category, hypothesis, evidence insertIds, action), `spikes/RESULTS.md`.
+**Files.** `fixtures/spike/green_liar/logs.jsonl` (three tenants, ~2 h; bravo shows WARNING runs with zero alerts, status LIVE), `fixtures/spike/green_liar/resources.json` (connector and integration instances; bravo's `executeTest` result `success: false`), `spikes/sre_spike.py` (the loop on the Responses API, plus minimal gates: 2–4 hypotheses with one alternative, the `insertId` exists, cited evidence IDs were recorded), `spikes/diagnosis_min.schema.json` (deployment, category, hypothesis, evidence IDs, action), `spikes/RESULTS.md`.
 
-**Interface.** `python spikes/sre_spike.py --fixture <dir> --model {scripted|<model id>} [--runs N]`. Tools are stubs over the fixture files, with the same names as `spec.md` §6.1.
+**Interface.** `python spikes/sre_spike.py --fixture <dir> --model {scripted|<model id>} [--runs N] [--gates on|off]`. Tools are stubs over the fixture files, with the names in `spec.md` §6.2 and §6.3; every tool takes `rationale`.
 
 | ID | Test | Pass condition |
 | --- | --- | --- |
-| D2-T1 | Spike runs offline | With `--model scripted`, exits 0 and prints JSON valid against `diagnosis_min.schema.json` |
+| D2-T1 | Spike runs offline | With `--model scripted`, exits 0, prints a diagnosis valid against `diagnosis_min.schema.json`, and prints one trace line per turn (turn, rationale, tool, gate verdict) |
 | D2-T2 | Stub tools are faithful | Each stub tool returns data drawn only from the fixture files; `query_logs` returns entries with their `insertId`s |
-| D2-T3 (live) | Live diagnosis | With a Muse model, `--runs 3`: at least 2 of 3 runs name deployment `bravo`, category `credential_failure`, and cite at least one `insertId` that exists in the fixture |
-| D2-T4 (live) | Cost recorded | Each live run appends model, tokens in/out, tool calls, latency and estimated cost to `spikes/RESULTS.md` |
+| D2-T3 | Gates refuse in the loop | A scripted run that records a nonexistent `insertId`, then submits citing an unrecorded evidence ID, gets both refusals back as tool results, and the run continues to an accepted submission |
+| D2-T4 (live) | Live diagnosis | With a Muse model, `--runs 3`, gates on: at least 2 of 3 runs end with an accepted submission within 24 turns, one tool call per turn, naming deployment `bravo` and category `credential_failure` |
+| D2-T5 (live) | Cost and protocol recorded | Each live run appends model, tokens in/out (reasoning and cached separately), turns, read calls, refusals by gate, latency and estimated cost to `spikes/RESULTS.md` |
 
-**Decision rule.** If D2-T3 fails twice with prompt revisions, try the other model; if it still fails, simplify D5 (fewer tools, more pre-computed evidence in the incident) before building it.
+**Decision rule.** If D2-T4 fails twice with prompt revisions, try the other model. If it still fails, simplify in this order and re-run after each step: drop `update_plan`; drop `set_hypotheses` (hypothesis coverage becomes report-only); pre-compute evidence into the incident. Record which shape passed in `spikes/RESULTS.md`; D5 starts from it.
 
 ---
 
@@ -317,8 +339,8 @@ Tests use FastAPI's `TestClient` with `X-Fleetsre-Identity` and `dev_auth=True`.
 | D3-T18 | F2 credential expiry | Target environment: runs continue on schedule, each with a WARNING entry and a WARNING ConnectorLog, zero etl entries; `status` stays LIVE; other environments unaffected |
 | D3-T19 | F3 severity drift | Target environment: etl volume within ±30% of normal; some `priority` values are strings; patching `Unknown Severity Priority` to `100` makes new entries ints again |
 | D3-T20 | F4 hollow success | `Lookback Hours` becomes `0`; job runs report SUCCESS with `indicatorsSynced == 0`; patching it back to `24` restores non-zero syncs |
-| D3-T21 | F5 job error | Job runs end ERROR (`lastRunStatus`, job log `status`, python entry severity ERROR) |
-| D3-T22 | F6 flap | With `rate` r, the fraction of ERROR runs over 100 runs is r ± 0.1 |
+| D3-T21 | F5 job error | Job runs end ERROR (`lastRunStatus`, job log `status`, python entry severity ERROR); every run still ends with a `job.run.completed` entry with `status: ERROR` |
+| D3-T22 | F6 flap | With `rate` r, the fraction of ERROR runs over 100 runs is r ± 0.1; every run, ERROR or not, ends with `connector.run.completed` and still ingests its alerts |
 | D3-T23 | F7 job stall | No job runs; `nextScheduledRunTime` goes stale; an `enabled` false→true transition clears it |
 | D3-T24 | Clearing faults | `clear()` restores normal behaviour within 2 intervals for every fault type |
 | D3-T25 | Canary | `plant_canary(env)` produces an etl entry with `alert.canary == true` within 2 intervals; never appears while F2 is active on that environment |
@@ -375,15 +397,15 @@ Deployment IDs are `<service>/<environment>`.
 | D4-T4 | Schema detection | `schema_violation` returns a reason for a missing field, a wrong type and an out-of-enum value, and None for a valid entry; with `consecutive: K`, the evaluator trips only on the K-th consecutive violation |
 | D4-T5 | Error signature | Trips when WARNING-or-worse runs in the last `windowRuns` ≥ `threshold`; a single warning does not trip |
 | D4-T6 | Dedupe | A tripped (deployment, tripwire) emits no further trip events until it has recovered |
-| D4-T7 | Recovery | Cadence recovers on the next heartbeat; canary on the next successful canary; schema after `consecutive` valid entries; errorSignature when the window drops below threshold |
+| D4-T7 | Recovery | Cadence recovers on the next heartbeat; canary on the next successful canary; schema after `recoverAfter` consecutive valid entries (default `consecutive`); errorSignature when the window drops below threshold, where a run is one `runId` and its severity is the worst entry in it |
 | D4-T8 | Isolation | Property test: a fault on one environment, placed at random times across 50 seeded runs, never trips another environment's tripwires |
 | D4-T9 | Purity and replay | Tripwire functions perform no I/O (checked by import-linter rule and a monkeypatched `open`/socket); replaying the same stream and tick times twice yields identical event lists |
 | D4-T10 | Out-of-order tolerance | Entries arriving up to 60 s out of timestamp order cause no false trips |
-| D4-T11 | Golden fixtures | For each `fixtures/golden/X.jsonl`, the evaluator's events equal `X.expected.json` exactly (kind, deployment, tripwire, offset ± tick) |
+| D4-T11 | Golden fixtures | For each `fixtures/golden/X.jsonl`, replayed with the `deployments`, `t0`, `durationSeconds`, `tickSeconds` and `canariesPlanted` that `X.expected.json` declares (a canary is seen when an `alert.ingested` entry has `alert.canary: true` and `alert.ticket_id` equal to its `providerIncidentId`), the evaluator's events equal its `events` exactly (kind, deployment, tripwire, offset ± tick) |
 | D4-T12 | Reference scorecard | The reference contracts score `passed == True`, 100% expected hits, 0 false positives over their full scenario libraries |
 | D4-T13 | Mutants fail | Every contract in `fixtures/mutants/` scores `passed == False` |
 | D4-T14 | Latency reporting | Every expected trip in a passing scenario reports a latency ≤ its `withinSeconds` |
-| D4-T15 | Change-point mode | `enter_change_point` applies the overrides (e.g. `maxSilentIntervals: 1` trips after one silent interval) and reverts after `duration_s` |
+| D4-T15 | Change-point mode | `enter_change_point` applies the overrides (e.g. `maxSilentIntervals: 2` trips after two silent intervals), re-arms cadence from the moment it is entered (a heartbeat from before the change point never counts) and reverts after `duration_s` |
 | D4-T16 | Canary scheduler | Plants one canary per `everyMinutes` per deployment with a synthetic tripwire and calls `canary_planted` for each |
 | D4-T17 | Trip evidence | Every trip event carries at least one `insertId` of a relevant entry (the last heartbeat, the violating entry, or the warning entries), except canary misses, which carry the planted incident ID in `reason` |
 | D4-T18 | Speed | The full scenario library for both services replays in under 30 s on a laptop |
@@ -394,56 +416,76 @@ Deployment IDs are `<service>/<environment>`.
 
 ## D5 — SRE investigator
 
-**Target:** Fri Oct 30 · **Owner:** Muse; **you** write the SRE system prompt (`prompts/investigate.md`, committed in the tests PR, protected from then on; start from what worked in the D2 spike) · **Depends on:** D3, D4, D2 results
+**Target:** Fri Oct 30 · **Owner:** Muse; **you** write the SRE system prompt (`prompts/investigate.md`, committed in the tests PR, protected from then on; start from what worked in the D2 spike; it must state the loop rules of `spec.md` §6.1 and the gates of §6.3 and §6.5) · **Depends on:** D3, D4, D2 results
 
-**Goal.** A budgeted, tool-using investigation that returns a schema-valid, cite-checked diagnosis or an escalation, with every step recorded.
+**Goal.** A gated, budgeted investigation loop (`spec.md` §6.1–§6.6) that ends in an accepted diagnosis or a NEEDS_INPUT pause, with every turn saved and resumable.
 
 **Interfaces.**
 ```python
 # fleetsre/sre/schemas.py
-class Diagnosis(BaseModel): ...       # exactly spec.md §6.3
+class Hypothesis(BaseModel): id: str; statement: str; wouldConfirm: str; alternative: bool
+class Evidence(BaseModel): id: str; hypothesis: str; stance: Literal["supports", "refutes"]; kind: Literal["log", "toolResult"]
+    insertId: str | None; callId: str | None; field: str | None; value: Any; why: str; recordedAtTurn: int
+class Diagnosis(BaseModel): ...       # exactly spec.md §6.5
 class Incident(BaseModel): id; deployment; tripwire; opened_at; trip_event: TripEvent
+
+# fleetsre/sre/session.py   (one investigation; saved after every turn)
+class Session(BaseModel): incident_id; turn; read_calls; tokens; hypotheses; evidence; calls; refusals; status; reason; resumed_at_turns: list[int]
+class SessionStore: def save(self, s: Session) -> None; def load(self, incident_id: str) -> Session
+
+# fleetsre/sre/gates.py   (pure: inputs in, list of problems out)
+def check_hypotheses(items: list[dict]) -> list[str]
+def check_evidence(args: dict, session: Session, log_query: LogQuery, incident: Incident) -> list[str]
+def check_diagnosis(d: dict, session: Session, incident: Incident, contract: Contract) -> list[str]
 
 # fleetsre/sre/tools.py
 class ToolSet:
-    def __init__(self, log_query: LogQuery, chronicle: ChronicleClient, state: StateStore, registry: Registry): ...
-    def specs(self) -> list[dict]                  # JSON tool schemas, names per spec.md §6.1
-    def call(self, name: str, args: dict) -> dict
+    def __init__(self, log_query: LogQuery, chronicle: ChronicleClient, state: StateStore, registry: Registry, *, verification: bool = True): ...
+    def specs(self) -> list[dict]                       # read tools (spec.md §6.2) + working tools (§6.3)
+    def call(self, name: str, args: dict, session: Session) -> dict   # refusals return {"error", "problems"}; never raises
 
 # fleetsre/sre/gateway.py
-class GatewayConfig(BaseModel): roles: dict[str, str]; base_url: str; max_retries: int = 5
+class RoleConfig(BaseModel): model: str; reasoning_effort: str
+class GatewayConfig(BaseModel): roles: dict[str, RoleConfig]; base_url: str; max_retries: int = 5
 class ModelGateway:
     def __init__(self, config: GatewayConfig, transport: Transport): ...
-    def chat(self, role: str, messages: list[dict], tools: list[dict] | None) -> ModelResponse
-class ScriptedTransport(Transport): def __init__(self, responses: list[dict])   # tests
-
-# fleetsre/sre/citations.py
-def check_citations(d: Diagnosis, log_query: LogQuery, allowed_deployments: set[str]) -> list[str]
+    def respond(self, role: str, input_items: list[dict], tools: list[dict] | None) -> ModelResponse   # Responses API, store=False
+class ScriptedTransport(Transport): def __init__(self, responses: list[dict])   # tests and recorded replay
 
 # fleetsre/sre/investigator.py
-@dataclass class InvestigationResult: diagnosis: Diagnosis | None; escalated: bool; reason: str; transcript_id: str; tool_calls: int; tokens: dict
-def investigate(incident: Incident, tools: ToolSet, gateway: ModelGateway, *, max_tool_calls: int = 12) -> InvestigationResult
+@dataclass class InvestigationResult: diagnosis: Diagnosis | None; status: Literal["submitted", "needs_input"]; reason: str
+    transcript_id: str; turns: int; read_calls: int; tokens: dict; refusals: dict[str, int]
+def investigate(incident: Incident, tools: ToolSet, gateway: ModelGateway, *, max_turns: int = 24, max_read_calls: int = 12, max_tokens: int = 400_000) -> InvestigationResult
+def resume(incident: Incident, tools: ToolSet, gateway: ModelGateway, *, message: str, extra_turns: int = 8) -> InvestigationResult
 ```
+`status="submitted"` means an accepted `propose` or `none`; its `reason` is the action type. `status="needs_input"` carries one of the reasons in `spec.md` §6.1 (`escalated`, `refused`, `budget`, `token_budget`, `stuck`, `model_unavailable`); for `escalated`, `diagnosis` is set. `make record FAULT=<id>` runs one live investigation on its seeded world and writes it to `fixtures/recorded/<id>.json` for your review.
 
 | ID | Test | Pass condition |
 | --- | --- | --- |
-| D5-T1 | Tool set complete | `ToolSet.specs()` lists exactly the eight tools in `spec.md` §6.1, each with a JSON schema; each returns schema-valid output against a seeded local world |
+| D5-T1 | Tool set complete | `ToolSet.specs()` lists exactly the eight read tools in `spec.md` §6.2 and the four working tools in §6.3; every schema has `additionalProperties: false` and a required `rationale`; each read tool returns schema-valid output against a seeded local world |
 | D5-T2 | Tools are read-only | The ToolSet's Chronicle client uses the `obs-reader` identity; no tool can invoke a write method (attempt via a crafted call → error, world snapshot unchanged) |
-| D5-T3 | Budget | A scripted model that calls tools forever stops at 12 calls; result is `escalated=True`, `reason == "budget"` |
-| D5-T4 | Schema repair | Malformed final JSON → exactly one repair request → if still invalid, `escalated=True`, `reason == "schema"`; valid JSON parses into `Diagnosis` |
-| D5-T5 | Citation check | A diagnosis citing a nonexistent `insertId`, or one from a deployment the SRE did not query, is rejected; one retry; then `escalated=True`, `reason == "citation"` |
-| D5-T6 | Allowlist | An action method outside `spec.md` §6.2, or an `updateMask` field outside its allowed set, is rejected → `escalated=True`, `reason == "allowlist"` |
-| D5-T7 | Import boundary | import-linter contract: `fleetsre.sre` imports nothing from `google`, `fleetsre.adapters`, `fleetsre.mock` |
-| D5-T8 | Transcript | Every investigation persists a transcript with each model message, each tool call and result, token counts and estimated cost; retrievable by `transcript_id` |
-| D5-T9 | Backoff | With a transport returning 429 three times then success, the call succeeds after exponential delays (asserted on a fake sleeper); after `max_retries` 429s the investigation escalates with `reason == "model_unavailable"` |
-| D5-T10 | Role config | Changing `GatewayConfig.roles["investigate"]` changes the model ID sent in requests, with no code change |
-| D5-T11 | Scripted end-to-end | With scripted model responses for each of F1–F5 and F7 (from `fixtures/scripted/`), `investigate` returns the right-answer category and action from `mocks.md` §6 |
-| D5-T12 (live) | Live eval | For F1, F2, F3, F4, F5 and F7 on a seeded world, 3 runs each with the configured model: at least 2 of 3 per fault get deployment, component and category right, pass the citation check and stay within budget. Results written to `evals/d5-<date>.json` |
-| D5-T13 (live) | Investigation quality (reported, not gating) | For F2, the share of runs whose transcript calls `compare_siblings` or `test_integration_instance` is recorded in the eval file |
+| D5-T3 | Loop shape | Every model request is a Responses call with `store=False`, `parallel_tool_calls=False` and encrypted reasoning included, carrying the full history; only the first tool call in a response runs; a response with no tool call gets the plain-text message from `spec.md` §6.1 and runs no tool |
+| D5-T4 | Order gate | Before `set_hypotheses` is accepted, `record_evidence` and `submit_diagnosis` return an error result (no exception) and the loop continues |
+| D5-T5 | Hypotheses gate | Fewer than 2 or more than 4 items, or none marked `alternative`, is refused with problems; a valid set is accepted; replacing the set drops evidence for removed hypotheses |
+| D5-T6 | Evidence gate | Refused, each with a problem naming why: an `insertId` that does not exist; one from a deployment that is neither the incident's nor a sibling queried in this session; a `callId` not in this session; a `field`/`value` that does not match that call's result; an unknown hypothesis; a fourth item for one hypothesis. Accepted evidence gets the next `E<n>` ID |
+| D5-T7 | Diagnosis gate | Each rule in `spec.md` §6.5 refuses a diagnosis that breaks it, with a problem naming it: schema invalid; an unrecorded evidence ID; hypothesis coverage missing; each category's evidence rule unmet (one row per category); an action outside the allowlist or an `updateMask` outside its fields; a resource that is not the incident's component; `none` without evidence recorded after the last resume |
+| D5-T8 | Refusal cap | Three refused submissions → `status="needs_input"`, `reason="refused"`; every refusal and its problems are in the transcript |
+| D5-T9 | Budgets | The model is told on turn `max_turns` that it is the last turn; with no accepted submission the result is `needs_input`/`budget`. The 13th read call is refused with an error and the loop continues. Exceeding `max_tokens` → `needs_input`/`token_budget` |
+| D5-T10 | Stuck | The same tool with the same canonical arguments (keys sorted, `rationale` excluded) a third time → `needs_input`/`stuck` |
+| D5-T11 | Import boundary | import-linter contract: `fleetsre.sre` imports nothing from `google`, `fleetsre.adapters`, `fleetsre.mock` |
+| D5-T12 | Transcript and per-turn save | After every turn the session and transcript are saved: each output item, tool call, result, gate verdict, token counts (reasoning and cached separately) and estimated cost; retrievable by `transcript_id`. An investigation killed after turn k and resumed continues at turn k+1 without re-running turns 1..k |
+| D5-T13 | Resume | `resume` continues the same session: hypotheses and evidence are kept, `message` is the next input, `extra_turns` extends the turn budget, and evidence recorded after the resume carries its turn |
+| D5-T14 | Backoff | With a transport returning 429 three times then success, the call succeeds after exponential delays (asserted on a fake sleeper); after `max_retries` 429s the result is `needs_input`/`model_unavailable` |
+| D5-T15 | Role config | Changing `GatewayConfig.roles["investigate"]` changes the model ID and the reasoning effort sent in requests, with no code change |
+| D5-T16 | Scripted end-to-end | With scripted model responses for each of F1–F5 and F7 (from `fixtures/scripted/`), every submission passes the gates and `investigate` returns the right-answer category and action from `mocks.md` §6; F2 and F5 end `needs_input`/`escalated` |
+| D5-T17 | Recorded replay | Each `fixtures/recorded/*.json` replays offline through `ScriptedTransport` on its seeded world with identical tool results, gate verdicts and final diagnosis; any difference fails. At least one recording exists |
+| D5-T18 | Gates off | With `ToolSet(verification=False)` the gates never refuse, and each verdict they would have given is recorded in the transcript as `wouldRefuse` |
+| D5-T19 (live) | Live eval | For F1, F2, F3, F4, F5 and F7 on a seeded world, 3 runs each, gates on: at least 2 of 3 per fault end accepted (or `escalated` for F2 and F5) with the right deployment, component and category, within budgets. Results written to `evals/d5-<date>.json` |
+| D5-T20 (live) | Reported, not gating | In the D5-T19 eval file: refusals by gate per run; for F2, the share of runs that call `compare_siblings` or `test_integration_instance`; and a gates-off run of the same seeds (D5-T18) with the number of submissions the gates would have refused, by gate |
 
-`fixtures/scripted/` (Session A, you review): scripted model response sequences per fault, including the tool calls a good investigator makes.
+`fixtures/scripted/` (Session A, you review): scripted model response sequences per fault, including the tool calls a good investigator makes. `fixtures/recorded/` (you): after D5-T19 passes, record 2–3 live runs with `make record` and review them; the implementation PR merges once at least one is committed.
 
-**Out of scope:** approvals, executor, verification, authoring.
+**Out of scope:** approvals, executor, verification, authoring, the NEEDS_INPUT resume rules (D6).
 
 ---
 
@@ -451,23 +493,30 @@ def investigate(incident: Incident, tools: ToolSet, gateway: ModelGateway, *, ma
 
 **Target:** Sat Oct 31 · **Owner:** Muse; **you** write the authoring prompt (`prompts/author.md`, committed in the tests PR) · **Depends on:** D4, D5
 
-**Goal.** The full loop of `spec.md` §3: incident lifecycle, approval, apply, verify, postmortem; contract authoring against the scorecard; amendments that apply fleet-wide.
+**Goal.** The full loop of `spec.md` §3: incident lifecycle with NEEDS_INPUT pauses, approval or rejection, journaled apply, verify, postmortem; contract authoring against the scorecard with held-out scenarios; amendments that apply fleet-wide.
 
 **Interfaces.**
 ```python
 # fleetsre/control/incidents.py
-class IncidentState(StrEnum): OPEN; INVESTIGATING; AWAITING_APPROVAL; APPLYING; VERIFYING; RESOLVED; ESCALATED
+class IncidentState(StrEnum): OPEN; INVESTIGATING; NEEDS_INPUT; AWAITING_APPROVAL; APPLYING; VERIFYING; RESOLVED; ESCALATED
 class IncidentManager:
-    def __init__(self, evaluator, investigator, approvals, executor, verifier, state: StateStore, clock): ...
+    def __init__(self, evaluator, investigator, approvals, executor, verifier, state: StateStore, clock): ...   # raises if the investigator's ToolSet has verification=False
     def on_trip(self, event: TripEvent) -> Incident
-    def tick(self) -> None                         # drives state transitions
+    def tick(self) -> None                         # drives transitions; resumes NEEDS_INPUT incidents whose tripwire state changed since they paused
+    def reply(self, incident_id: str, message: str, *, by: str, extra_turns: int = 0) -> None
+    def close(self, incident_id: str, *, by: str, note: str) -> None     # NEEDS_INPUT -> ESCALATED
 # fleetsre/control/approvals.py
-class ApprovalStore: def approve(self, incident_id: str, proposal_hash: str, approver: str) -> Approval
+class ApprovalStore:
+    def approve(self, incident_id: str, proposal_hash: str, approver: str) -> Approval
+    def reject(self, incident_id: str, proposal_hash: str, approver: str, notes: str) -> Rejection
+# fleetsre/control/journal.py
+class Journal: def append(self, record: dict) -> None; def records(self) -> list[dict]          # append-only
 # fleetsre/control/executor.py
 class NotApproved(Exception): ...;  class Conflict(Exception): ...
 class Executor:
-    def __init__(self, chronicle: ChronicleClient, approvals: ApprovalStore): ...   # deployer identity
+    def __init__(self, chronicle: ChronicleClient, approvals: ApprovalStore, journal: Journal): ...   # deployer identity
     def apply(self, incident: Incident, diagnosis: Diagnosis) -> ApplyResult
+    def recover(self) -> list[ApplyResult]         # reconciles intents that have no terminal record
 # fleetsre/control/verify.py
 class Verifier: def start(self, incident, diagnosis) -> None; def check(self) -> Literal["pending", "verified", "failed"]
 # fleetsre/authoring/loop.py
@@ -477,7 +526,7 @@ def propose_amendment(incident: Incident, contract: Contract, gateway: ModelGate
 # fleetsre/registry.py
 class Registry: def apply_contract(self, contract: Contract, approval: Approval) -> None   # reloads evaluator for all deployments of the service
 ```
-Concurrency: when a proposal is created, the platform records the target resource's `version` (connector) or `updateTime` (job); the executor compares at apply time.
+Concurrency: when a proposal is created, the platform records the target resource's `version` (connector) or `updateTime` (job); the executor compares at apply time. Resume rules: a NEEDS_INPUT incident resumes only through `reply` or through `tick` seeing its tripwire state change; anything else makes no model call (`spec.md` §6.1).
 
 | ID | Test | Pass condition |
 | --- | --- | --- |
@@ -487,15 +536,21 @@ Concurrency: when a proposal is created, the platform records the target resourc
 | D6-T4 | Restart macro | `connectorInstances.restart` and `jobInstances.restart` issue `enabled=false` then `enabled=true` patches in order |
 | D6-T5 | Verification | After apply, the change-point window is armed with the contract's overrides; the diagnosis's `expectedVerification` met → RESOLVED; not met within `seconds` → back to INVESTIGATING; a second failure → ESCALATED |
 | D6-T6 | E2E F1 | Scripted model, SimClock: inject F1 → trip → investigation → proposal → approval → restart → verification → RESOLVED |
-| D6-T7 | E2E F2 | Inject F2 → trip → investigation → ESCALATED with category `credential_failure`; no write call is made |
+| D6-T7 | E2E F2 | Inject F2 → trip → investigation → NEEDS_INPUT (`escalated`, category `credential_failure`). Advancing the clock 1 h makes no model call, and `tick` does not resume while the fault is active and nobody replied. Clearing F2 ("mark rotated") → the tripwire recovers → `tick` resumes the same session with that change as its message → the SRE submits action `none` → verification → RESOLVED. No write call is made at any point |
 | D6-T8 | E2E F3 | Inject F3 → schema trip → parameter patch → approval → priorities ints again → RESOLVED |
 | D6-T9 | E2E F4 | Inject F4 → hollow-run trip → `Lookback Hours` patch → RESOLVED |
-| D6-T10 | Postmortem | Every RESOLVED or ESCALATED incident has a postmortem with timeline, root cause category, action taken and transcript IDs |
-| D6-T11 | Authoring loop | Scripted model: v1 fails the scorecard → the next prompt contains the scorecard's missing/unexpected list → v2 passes → result `passed=True`, 2 scorecards recorded; with a model that never passes, stops after `max_revisions` with `passed=False` |
+| D6-T10 | Postmortem | Every RESOLVED or ESCALATED incident has a postmortem with timeline (including NEEDS_INPUT pauses and what resumed them), root cause category, action taken and transcript IDs |
+| D6-T11 | Authoring loop | Scripted model: v1 fails the scorecard → the next prompt contains the scorecard's missing/unexpected list for visible scenarios → v2 passes → result `passed=True`, 2 scorecards recorded; with a model that never passes, stops after `max_revisions` with `passed=False` |
 | D6-T12 | Authoring hides the exam | The authoring prompts never contain scenario `expected` blocks (asserted on the prompt text); they contain scorecard results only |
 | D6-T13 | Authored output valid | Every authored contract validates via `load_contract` before scoring; invalid output counts as a failed revision |
 | D6-T14 | Amendment | From an incident whose detection latency exceeded `withinSeconds` (a scripted slow contract), `propose_amendment` returns a contract that scores higher; it is not applied until approved; once approved, `Registry.apply_contract` reloads every deployment of that service |
-| D6-T15 (live) | Live authoring eval | With the configured authoring model and the alert-ingestion brief and samples, at least 2 of 3 runs reach a passing scorecard within 3 revisions. Results to `evals/d6-<date>.json` |
+| D6-T15 (live) | Live authoring eval | With the configured authoring model and the alert-ingestion brief and samples, at least 2 of 3 runs reach a passing scorecard, holdouts included, within 3 revisions. Results to `evals/d6-<date>.json` |
+| D6-T16 | Needs-input handling | `reply` resumes the session with the reply as the next message; `reply` with `extra_turns` resumes a `budget` pause; `close` moves the incident to ESCALATED with a postmortem; a resume attempt with nothing changed makes no model call |
+| D6-T17 | Reject with notes | `reject` returns the incident to INVESTIGATING with the notes as the next message; the revised proposal has a new hash; the earlier approval cannot apply it |
+| D6-T18 | Executor journal | For every apply the journal holds `intent` (approval ID, proposal hash, resource version) before the API call, then `started`, then `terminal`; no write call happens without a prior `intent` |
+| D6-T19 | Crash-safe apply | An executor stopped after `intent` and before `terminal`, then `recover()`: if the resource already shows the change, it is marked terminal without an API call; otherwise it is applied once. In both cases the patch lands exactly once |
+| D6-T20 | Gates always on | `IncidentManager` raises when given an investigator whose ToolSet has `verification=False` |
+| D6-T21 | Held-out scenarios | Authoring and amendment prompts never contain a holdout scenario's ID, fault schedule or result; `passed` requires the holdouts to pass; when only a holdout fails, the feedback says a held-out scenario failed and nothing more |
 
 **Out of scope:** UI, GCP.
 
@@ -515,7 +570,7 @@ Concurrency: when a proposal is created, the platform records the target resourc
 | D7-T2 (gcp) | Sink filter | Of one matching and one non-matching entry, only the matching one arrives on the subscription |
 | D7-T3 | Push handler auth | Offline: the push app rejects requests without a valid OIDC token for the expected audience and service account (401/403), using a fake verifier |
 | D7-T4 | Push idempotency | Offline: redelivering the same message (same `insertId`) produces no duplicate evaluator events |
-| D7-T5 | Firestore state | Offline against the Firestore emulator (`make emulators`): deployments, tripwire state, incidents, approvals and transcripts round-trip; a restarted evaluator resumes without re-emitting trips |
+| D7-T5 | Firestore state | Offline against the Firestore emulator (`make emulators`): deployments, tripwire state, incidents, investigation sessions, approvals, the executor journal and transcripts round-trip; a restarted evaluator resumes without re-emitting trips; a restarted executor reconciles open intents as in D6-T19 |
 | D7-T6 | Tick auth | Offline: the tick endpoint accepts only OIDC tokens from the scheduler service account |
 | D7-T7 (gcp) | IAM positive | Each identity completes its own path: mock-soar writes logs, obs-reader reads logs and pulls from the subscription and reads the mock API, deployer patches via the mock API |
 | D7-T8 (gcp) | IAM negative | obs-reader: mock write → 403, `logging.logEntries.create` → denied; deployer: subscription pull → denied; mock-soar: log read → denied; the SRE runtime has no credentials of its own |
@@ -532,19 +587,22 @@ Concurrency: when a proposal is created, the platform records the target resourc
 
 **Target:** Mon Nov 2 · **Owner:** Muse; keep the UI minimal · **Depends on:** D6, D7
 
-**Goal.** A judge can open a URL and watch faults trip, get investigated and recover without touching anything; you can approve fixes in admin mode; `make demo` reproduces it locally.
+**Goal.** A judge can open a URL and watch faults trip, get investigated turn by turn and recover without touching anything; you can approve, reject and answer handoffs in admin mode; `make demo` reproduces it locally.
 
 **Interfaces.** `fleetsre/web/app.py` `create_app(mode: Literal["admin", "public"], ...)`; `fleetsre/live/chaos_loop.py` `ChaosLoop(world, schedule, clock).tick()`.
 
 | ID | Test | Pass condition |
 | --- | --- | --- |
 | D8-T1 | Fleet grid | `GET /api/fleet` returns services × deployments × components with health from `Evaluator.status()`; the HTML grid renders every deployment |
-| D8-T2 | Incident view | `GET /incidents/{id}` shows hypothesis, category, evidence entries (resolved from `insertId`s), the patch diff, verification state and the postmortem |
-| D8-T3 | Approve (admin) | In admin mode, approving creates an approval for the current proposal hash and moves the incident to APPLYING; requests without the admin credential get 403 |
-| D8-T4 | Public mode | In public mode: no `/_chaos` routes, no approve route, a cap of N model calls per hour (beyond it, cached diagnoses are served). Proposals from the chaos loop are approved by a demo auto-approver, and every such approval is labelled "demo auto-approval" on the page and in the incident record |
-| D8-T5 | Chaos loop | Over a simulated 2 hours, the loop cycles F1, F2, F3, F4 on schedule and clears each after its incident closes; no unhandled exceptions |
+| D8-T2 | Incident view | `GET /incidents/{id}` shows hypotheses, recorded evidence (resolved from `insertId`s and call IDs), category, the patch diff, verification state and the postmortem |
+| D8-T3 | Approve and reject (admin) | In admin mode, approving creates an approval for the current proposal hash and moves the incident to APPLYING; rejecting with notes calls `ApprovalStore.reject`; requests without the admin credential get 403 |
+| D8-T4 | Public mode | In public mode: no `/_chaos` routes, no approve, reject or reply routes, a cap of N model calls per hour (beyond it, cached diagnoses are served). Proposals from the chaos loop are approved by a demo auto-approver, and when an F2 incident reaches NEEDS_INPUT the chaos loop clears the fault. Every such action is labelled ("demo auto-approval", "demo: credential rotated") on the page and in the incident record |
+| D8-T5 | Chaos loop | Over a simulated 2 hours, the loop cycles F1, F2, F3, F4 on schedule and clears each after its incident closes (F2: when it reaches NEEDS_INPUT, per D8-T4); no unhandled exceptions |
 | D8-T6 | Local demo | `make demo` from a clean clone starts mock, evaluator, SRE (scripted model unless a key is set) and UI; the grid shows a trip within 5 minutes |
 | D8-T7 (gcp) | Unattended hour | The public instance runs one hour unattended: at least 3 incidents opened and closed, no 5xx in logs, Meta spend within the configured cap |
-| D8-T8 | README | Contains: what it is, how to run locally, architecture, "Built during the hackathon" (list of components with deliverable IDs), faithful-vs-invented table from `mocks.md` §9, and links to the live instance and video |
+| D8-T8 | README | Contains: what it is, how to run locally, architecture, where each gate sits and what it refuses, "Built during the hackathon" (list of components with deliverable IDs), faithful-vs-invented table from `mocks.md` §9, and links to the live instance and video |
+| D8-T9 | Turn timeline | The incident page has one card per turn with Think (the call's `rationale`), Act (tool and arguments) and Observe (the result, or the gate's refusal and problems, coloured by outcome); expanding a card shows the exact input the model saw that turn; a header shows turns, read calls, tokens (reasoning and cached) and refusals by gate |
+| D8-T10 | Handoff card | A NEEDS_INPUT incident shows its reason, hypotheses, recorded evidence and last refusal. Admin mode offers reply, grant turns and close, wired to `IncidentManager.reply` and `close`; public mode shows the card without actions |
+| D8-T11 | Step mode (admin) | With step mode on, an investigation pauses before each turn until "Next turn" or "Run to end"; with it off, there is no pause |
 
 **Out of scope:** anything new. After D8, only fixes.
