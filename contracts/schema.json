@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Fleet SRE service contract",
+  "description": "One contract per service version (spec.md §5). Referential checks (component IDs, ${param} references, override keys, threshold <= windowRuns) are done by fleetsre.contracts.load_contract, not here.",
+  "type": "object",
+  "required": ["service", "version", "parameters", "components", "tripwires", "changePoint", "provenance"],
+  "additionalProperties": false,
+  "patternProperties": { "^_": {} },
+  "properties": {
+    "service": { "$ref": "#/$defs/id" },
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "description": { "type": "string" },
+    "parameters": {
+      "type": "object",
+      "propertyNames": { "pattern": "^[a-zA-Z][a-zA-Z0-9]*$" },
+      "additionalProperties": { "$ref": "#/$defs/parameter" }
+    },
+    "components": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/component" } },
+    "tripwires": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/tripwire" } },
+    "changePoint": { "$ref": "#/$defs/changePoint" },
+    "provenance": { "$ref": "#/$defs/provenance" }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "paramRef": { "type": "string", "pattern": "^\\$\\{[a-zA-Z][a-zA-Z0-9]*\\}$" },
+    "posIntOrParam": {
+      "oneOf": [ { "type": "integer", "minimum": 1 }, { "$ref": "#/$defs/paramRef" } ]
+    },
+    "parameter": {
+      "type": "object",
+      "required": ["type", "required"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "enum": ["integer", "number", "string", "boolean"] },
+        "required": { "type": "boolean" },
+        "default": {},
+        "description": { "type": "string" }
+      }
+    },
+    "component": {
+      "type": "object",
+      "required": ["id", "kind", "logs"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "kind": { "enum": ["connectorInstance", "etlFlow", "jobInstance"] },
+        "description": { "type": "string" },
+        "logs": {
+          "type": "object",
+          "required": ["container_name", "match", "deploymentBy"],
+          "additionalProperties": false,
+          "properties": {
+            "container_name": { "enum": ["python", "etl"] },
+            "match": {
+              "type": "array", "minItems": 1, "uniqueItems": true,
+              "items": { "enum": ["integration_name", "integration_version", "connector_name", "connector_instance", "job_name", "correlation_id"] }
+            },
+            "deploymentBy": {
+              "description": "Entry field that identifies the deployment. invented: jsonPayload.environment (mocks.md §5).",
+              "type": "string",
+              "pattern": "^(labels\\.[a-z_]+|jsonPayload\\.[A-Za-z0-9_.]+)$"
+            }
+          }
+        }
+      }
+    },
+    "tripwire": {
+      "oneOf": [
+        { "$ref": "#/$defs/cadence" },
+        { "$ref": "#/$defs/synthetic" },
+        { "$ref": "#/$defs/schemaTripwire" },
+        { "$ref": "#/$defs/errorSignature" }
+      ]
+    },
+    "cadence": {
+      "type": "object",
+      "required": ["id", "component", "type", "spec"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" }, "component": { "$ref": "#/$defs/id" },
+        "type": { "const": "cadence" }, "description": { "type": "string" },
+        "spec": {
+          "type": "object",
+          "required": ["event", "intervalSeconds", "maxSilentIntervals"],
+          "additionalProperties": false,
+          "properties": {
+            "event": { "type": "string" },
+            "intervalSeconds": { "$ref": "#/$defs/posIntOrParam" },
+            "maxSilentIntervals": { "$ref": "#/$defs/posIntOrParam" }
+          }
+        }
+      }
+    },
+    "synthetic": {
+      "type": "object",
+      "required": ["id", "component", "type", "spec"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" }, "component": { "$ref": "#/$defs/id" },
+        "type": { "const": "synthetic" }, "description": { "type": "string" },
+        "spec": {
+          "type": "object",
+          "required": ["everyMinutes", "deadlineSeconds"],
+          "additionalProperties": false,
+          "properties": {
+            "everyMinutes": { "$ref": "#/$defs/posIntOrParam" },
+            "deadlineSeconds": { "$ref": "#/$defs/posIntOrParam" }
+          }
+        }
+      }
+    },
+    "schemaTripwire": {
+      "type": "object",
+      "required": ["id", "component", "type", "spec"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" }, "component": { "$ref": "#/$defs/id" },
+        "type": { "const": "schema" }, "description": { "type": "string" },
+        "spec": {
+          "type": "object",
+          "required": ["field", "type", "required"],
+          "additionalProperties": false,
+          "properties": {
+            "event": { "type": "string", "description": "Only entries with this jsonPayload.event are checked" },
+            "field": { "type": "string", "pattern": "^jsonPayload\\.[A-Za-z0-9_.]+$" },
+            "type": { "enum": ["integer", "number", "string", "boolean"] },
+            "required": { "type": "boolean" },
+            "enum": { "type": "array", "minItems": 1 },
+            "minimum": { "type": "number" },
+            "maximum": { "type": "number" },
+            "consecutive": { "type": "integer", "minimum": 1, "default": 1 },
+            "recoverAfter": { "type": "integer", "minimum": 1 }
+          }
+        }
+      }
+    },
+    "errorSignature": {
+      "type": "object",
+      "required": ["id", "component", "type", "spec"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" }, "component": { "$ref": "#/$defs/id" },
+        "type": { "const": "errorSignature" }, "description": { "type": "string" },
+        "spec": {
+          "type": "object",
+          "required": ["minSeverity", "windowRuns", "threshold"],
+          "additionalProperties": false,
+          "properties": {
+            "minSeverity": { "enum": ["WARNING", "ERROR", "CRITICAL"] },
+            "windowRuns": { "$ref": "#/$defs/posIntOrParam" },
+            "threshold": { "$ref": "#/$defs/posIntOrParam" }
+          }
+        }
+      }
+    },
+    "changePoint": {
+      "type": "object",
+      "required": ["durationSeconds", "overrides"],
+      "additionalProperties": false,
+      "properties": {
+        "durationSeconds": { "type": "integer", "minimum": 60 },
+        "overrides": {
+          "type": "object",
+          "additionalProperties": { "type": "object", "minProperties": 1 }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["authoredBy"],
+      "additionalProperties": false,
+      "properties": {
+        "authoredBy": { "type": "string" },
+        "scorecard": { "type": ["string", "null"] },
+        "approvedBy": { "type": ["string", "null"] }
+      }
+    }
+  }
+}
