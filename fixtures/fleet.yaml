@@ -1,0 +1,106 @@
+# fixtures/fleet.yaml
+# The demo MSSP fleet: four fictional tenants on one mock SOAR instance (mocks.md §2).
+# Human-owned; protected once merged. Loaded by fleetsre.mock.fleet.load_fleet.
+#
+# invented: every tenant, credential and instance ID, and both custom integrations.
+# Faithful: resource-name shapes and parameter fields (mocks.md §4.1, specs/chronicle/*.yaml).
+
+version: 1
+
+# Prefix for fake Chronicle resource names ONLY. Cloud Logging's resource.labels.project_id
+# comes from $PROJECT at runtime, never from this file (docs/decisions/logging-resource.md).
+instance: projects/fleet-sre-demo/locations/us/instances/mock-soar
+
+# Integration instances: one per (integration, environment that uses it); ID = environment ID.
+integrations:
+  MockSentinel:                                   # invented: custom integration (mocks.md §3.2)
+    version: "1.0"
+    custom: true
+    connectors:
+      mock-sentinel-incidents:
+        displayName: Mock Sentinel Incidents Connector
+        productFieldName: device_product
+        eventFieldName: event_name
+        # Chronicle parameter values are strings. fromCredential = filled from the
+        # environment's credentials block; default = same for every instance.
+        parameters:
+          - { displayName: Tenant ID,                 type: STRING,   mandatory: true,  fromCredential: tenantId }
+          - { displayName: Client ID,                 type: STRING,   mandatory: true,  fromCredential: clientId }
+          - { displayName: Client Secret,             type: PASSWORD, mandatory: true,  fromCredential: clientSecret }
+          - { displayName: Workspace Name,            type: STRING,   mandatory: true,  fromCredential: workspaceName }
+          - { displayName: Max Incidents Per Cycle,   type: INT,      mandatory: false, default: "50" }
+          - { displayName: Unknown Severity Priority, type: INT,      mandatory: false, default: "" }   # empty = F3 passthrough bug
+  MockThreatIntel:                                # invented: custom integration (mocks.md §3.4)
+    version: "1.0"
+    custom: true
+    jobs:
+      sync-indicators:
+        displayName: Sync Indicators
+        parameters:
+          - { displayName: Feed URL,       type: URL, mandatory: true, default: "/_upstream/{env}/indicators" }
+          - { displayName: Lookback Hours, type: INT, mandatory: true, default: "24" }       # "0" = F4
+
+# Deployment parameters are the contract's expectations. The mock world also reads its
+# initial behaviour from them (upstream incident rate, run interval).
+environments:
+  alpha:
+    displayName: Alpha Corp
+    description: High-volume tenant
+    contactEmails: [soc@alpha.example]
+    credentials:
+      tenantId: 00000000-0000-4000-a000-0000000000a1
+      clientId: 00000000-0000-4000-b000-0000000000a1
+      clientSecret: not-a-secret-alpha
+      workspaceName: law-alpha
+    deployments:
+      alert-ingestion:
+        connectorInstance: alpha-sentinel
+        parameters: { expectedAlertsPerHour: 120, intervalSeconds: 60 }
+      intel-sync:
+        jobInstance: alpha-intel
+        parameters: { intervalSeconds: 300 }
+
+  bravo:
+    displayName: Bravo Health
+    description: Medium-volume tenant
+    contactEmails: [soc@bravo.example]
+    credentials:
+      tenantId: 00000000-0000-4000-a000-0000000000b2
+      clientId: 00000000-0000-4000-b000-0000000000b2
+      clientSecret: not-a-secret-bravo
+      workspaceName: law-bravo
+    deployments:
+      alert-ingestion:
+        connectorInstance: bravo-sentinel
+        parameters: { expectedAlertsPerHour: 30, intervalSeconds: 60 }
+      intel-sync:
+        jobInstance: bravo-intel
+        parameters: { intervalSeconds: 300 }
+
+  charlie:
+    displayName: Charlie Retail
+    description: Deliberately quiet tenant; a naive volume detector false-alarms here
+    contactEmails: [soc@charlie.example]
+    credentials:
+      tenantId: 00000000-0000-4000-a000-0000000000c3
+      clientId: 00000000-0000-4000-b000-0000000000c3
+      clientSecret: not-a-secret-charlie
+      workspaceName: law-charlie
+    deployments:
+      alert-ingestion:
+        connectorInstance: charlie-sentinel
+        parameters: { expectedAlertsPerHour: 2, intervalSeconds: 60 }
+
+  canary:
+    displayName: MSSP Canary
+    description: MSSP-owned canary tenant; no organic alerts (spec.md §5 canary scope)
+    contactEmails: [soc@mssp.example]
+    credentials:
+      tenantId: 00000000-0000-4000-a000-0000000000d4
+      clientId: 00000000-0000-4000-b000-0000000000d4
+      clientSecret: not-a-secret-canary
+      workspaceName: law-canary
+    deployments:
+      alert-ingestion:
+        connectorInstance: canary-sentinel
+        parameters: { expectedAlertsPerHour: 0, intervalSeconds: 60 }
