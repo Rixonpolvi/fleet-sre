@@ -1,0 +1,8 @@
+# Documented fields of the Chronicle connectorInstances.logs resource (mocks.md §4.1). Human-owned.
+resource: connectorInstanceLogs
+source: https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.integrations.connectors.connectorInstances.logs
+name: projects/{project}/locations/{location}/instances/{instance}/integrations/{integration}/connectors/{connector}/connectorInstances/{connectorInstance}/logs/{log}
+methods: [get, list]
+fields: [name, time, message, connectorInstanceId, logLevel]
+enums:
+  logLevel: [DEBUG, INFO, WARNING, ERROR, ALERT, VERBOSE]

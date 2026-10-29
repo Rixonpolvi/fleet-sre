@@ -1,0 +1,11 @@
+# Documented fields of the Chronicle integrationInstances resource (mocks.md §4.1). Human-owned.
+resource: integrationInstances
+source: https://docs.cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.integrations.integrationInstances
+name: projects/{project}/locations/{location}/instances/{instance}/integrations/{integration}/integrationInstances/{integrationInstance}
+methods: [get, list, executeTest]
+fields: [name, environment, displayName, parameters, integrationIdentifier, identifier, description,
+  configured, remote, agent, systemDefault]
+nested:
+  parameters: [id, displayName, type, description, propertyName, mandatory, value]
+enums:
+  paramType: [BOOLEAN, INT, STRING, PASSWORD, IP, IP_OR_HOST, URL, DOMAIN, EMAIL, VALUES_LIST, VALUES_AS_SEMI_COLON_SEPARATED_STRING, MULTI_VALUES_SELECTION, SCRIPT, FILTER_LIST, NUMERICAL_VALUES]  # assumed: same enum as connectorInstances, not checked

@@ -1,0 +1,15 @@
+# Documented fields of the Chronicle jobInstances resource (mocks.md §4.1). Human-owned.
+resource: jobInstances
+source: https://docs.cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.integrations.jobs.jobInstances
+name: projects/{project}/locations/{location}/instances/{instance}/integrations/{integration}/jobs/{job}/jobInstances/{jobInstance}
+methods: [get, list, patch, runOnDemand]
+fields: [name, createTime, updateTime, displayName, intervalSeconds, script, author, lastRunTime, parameters,
+  job, integration, advancedConfig, nextScheduledRunTime, custom, enabled, description, lastRunStatus, agent,
+  advanced, uniqueIdentifier, documentationLink]
+nested:
+  parameters: [id, mandatory, value, displayName, type]
+enums:
+  lastRunStatus: [SUCCESS, ERROR]
+  paramType: [BOOLEAN, INT, STRING, PASSWORD, IP, IP_OR_HOST, URL, DOMAIN, EMAIL, VALUES_LIST, VALUES_AS_SEMI_COLON_SEPARATED_STRING, MULTI_VALUES_SELECTION, SCRIPT, FILTER_LIST, NUMERICAL_VALUES]  # assumed: same enum as connectorInstances, not checked
+constraints:
+  intervalSeconds: { minimum: 60 }
