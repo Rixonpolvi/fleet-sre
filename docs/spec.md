@@ -10,6 +10,8 @@ Revised 2026-10-29 during D1: the contracts settled the fields and values in §5
 
 Revised 2026-10-29 (evening) after D2: every tool result reaches the model with its `callId` (§6.3); usage fields and cost confirmed (§8); the gated protocol passed live (§12).
 
+Revised 2026-10-29 (night) before D3: Chronicle method bodies, permissions and connector log collection checked against Google's docs (`mocks.md` §4); `setLogsCollection` leaves the action allowlist (§6.4).
+
 ---
 
 ## 1. Summary
@@ -197,7 +199,7 @@ Every read tool also takes `rationale`. Reads are capped at 12 per session; a 13
 | --- | --- | --- |
 | `query_logs(deployment, window, filter)` | Log entries with `insertId` | `LogQuery` port |
 | `get_resource(name)` | A connector instance, job instance, integration instance or environment | Mock Chronicle API `get` |
-| `list_connector_logs(connectorInstance)` | Recent `ConnectorLog` records | Mock `connectorInstances.logs.list` |
+| `list_connector_logs(connectorInstance)` | Recent `ConnectorLog` records (empty unless log collection is on for that instance) | Mock `connectorInstances.logs.list` |
 | `list_job_logs(jobInstance)` | Recent `JobInstanceLog` records | Mock `jobInstances.logs.list` |
 | `test_integration_instance(name)` | Connectivity test result | Mock `integrationInstances.executeTest` (changes no state) |
 | `compare_siblings(service, component, window)` | The same component's signals across every deployment of the service | Platform, computed |
@@ -206,7 +208,7 @@ Every read tool also takes `rationale`. Reads are capped at 12 per session; a 13
 
 ### 6.3 Working tools and their gates
 
-The gates run inside these tools. A refused call returns `{"error": "...", "problems": ["..."]}` and never raises. Every tool result reaches the model as `{"callId": "...", "result": {...}}`, because the model cannot read call IDs back from the replayed history (D2 finding). A tool source's `field` is a dotted path into `result` (`success`, not `result.success`).
+The gates run inside these tools. A refused call returns `{"error": "...", "problems": ["..."]}` and never raises. Every tool result reaches the model as `{"callId": "...", "result": {...}}`, because the model cannot read call IDs back from the replayed history (D2 finding). A tool source's `field` is a dotted path into `result` (`successful`, not `result.successful`).
 
 | Tool | Does | Gate (inside the tool) |
 | --- | --- | --- |
@@ -222,12 +224,13 @@ The gates run inside these tools. A refused call returns `{"error": "...", "prob
 | `connectorInstances.patch` | `updateMask` limited to `enabled`, `intervalSeconds`, `parameters` |
 | `connectorInstances.restart` | Platform macro: patch `enabled=false`, then `enabled=true` |
 | `connectorInstances.runOnDemand` | |
-| `connectorInstances.setLogsCollection` | |
 | `jobInstances.patch` | `updateMask` limited to `enabled`, `parameters` |
 | `jobInstances.restart` | Platform macro: patch `enabled=false`, then `enabled=true` |
 | `jobInstances.runOnDemand` | |
 | `none` | No write: the fault has cleared (for example, after a human acted on an escalation). Goes straight to verification |
 | `escalate` | Required when the fix is outside the allowlist (e.g. a credential rotation). Pauses the incident at NEEDS_INPUT |
+
+`connectorInstances.setLogsCollection` is not an action: turning on logging fixes nothing, so verification would fail it. The SRE can ask for it in an `escalationSummary`.
 
 ### 6.5 Diagnosis schema and submission rules
 
@@ -273,7 +276,7 @@ After three refused submissions the incident goes to NEEDS_INPUT with reason `re
 | --- | --- |
 | `connector_stalled` | The deployment's last `connector.run.completed` entry before the trip |
 | `job_stalled` | The deployment's last `job.run.completed` entry before the trip |
-| `credential_failure` | A WARNING or ERROR entry from the deployment's connector, and a `test_integration_instance` result with `success: false` |
+| `credential_failure` | A WARNING or ERROR entry from the deployment's connector, and a `test_integration_instance` result with `successful: false` |
 | `schema_drift` | An `alert.ingested` entry that violates the tripped schema tripwire |
 | `job_hollow_success` | A `job.run.completed` entry with `indicatorsSynced: 0` |
 | `job_failing` | A `job.run.error` entry, or a `job.run.completed` entry with `status: ERROR` |
