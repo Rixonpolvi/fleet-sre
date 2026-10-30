@@ -144,3 +144,42 @@ and estimated cost here.
 - **Finding 2 (D5):** models first write field paths as `result.success`. One refusal per run, self-corrected next turn. D5: say paths are relative to `result` in the prompt, or accept a leading `result.`.
 - **Finding 3 (D5):** the `connector-errors` description in the contract names the failure ("Green Liar"), which hints at the answer. Consider neutral tripwire descriptions.
 - **Cost:** about $0.08 per run at ~120k input tokens (~70% cached). The preview is billed on this account.
+
+## 2026-10-30T00:58:58Z model muse-spark-1.3 run 1
+- date: 2026-10-30T00:58:58Z
+- model: muse-spark-1.3
+- tokens in: 144322 (cached: 78939)
+- tokens out: 3644 (reasoning: 1845)
+- turns: 11
+- read calls: 4
+- refusals by gate: {"record_evidence": 1}
+- multiCallTurns: 0
+- latency: 30.0s
+- final status: accepted
+- estimated cost: $0.0000 (rates FLEETSRE_PRICE_IN=0.0/M, FLEETSRE_PRICE_OUT=0.0/M; preview pricing is unconfirmed)
+
+## 2026-10-30T00:59:32Z model muse-spark-1.3 run 2
+- date: 2026-10-30T00:59:32Z
+- model: muse-spark-1.3
+- tokens in: 109661 (cached: 60364)
+- tokens out: 4444 (reasoning: 2499)
+- turns: 12
+- read calls: 4
+- refusals by gate: {"record_evidence": 1}
+- multiCallTurns: 0
+- latency: 33.4s
+- final status: accepted
+- estimated cost: $0.0000 (rates FLEETSRE_PRICE_IN=0.0/M, FLEETSRE_PRICE_OUT=0.0/M; preview pricing is unconfirmed)
+
+## 2026-10-30T01:00:00Z model muse-spark-1.3 run 3
+- date: 2026-10-30T01:00:00Z
+- model: muse-spark-1.3
+- tokens in: 124957 (cached: 80490)
+- tokens out: 3648 (reasoning: 1962)
+- turns: 10
+- read calls: 4
+- refusals by gate: {}
+- multiCallTurns: 0
+- latency: 27.8s
+- final status: accepted
+- estimated cost: $0.0000 (rates FLEETSRE_PRICE_IN=0.0/M, FLEETSRE_PRICE_OUT=0.0/M; preview pricing is unconfirmed)
