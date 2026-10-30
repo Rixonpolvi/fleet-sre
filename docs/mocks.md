@@ -2,6 +2,8 @@
 
 As of 2026-10-28. Companion to [`spec.md`](spec.md) (source of truth) and [`deliverables.md`](deliverables.md) (D3 builds everything here).
 
+Revised 2026-10-29 (night) before D3: Chronicle method bodies (§4.1), method permissions (§4.2) and connector log collection (§4.1) checked against Google's docs.
+
 The mock simulates only what the SRE, the evaluator and the executor touch. Everything below is either **faithful** (copied from Google's or Microsoft's published docs, with a URL) or **invented** (labelled, because the docs do not publish it). §9 lists which is which.
 
 ---
@@ -62,9 +64,9 @@ One worker per connector instance. Every `intervalSeconds` (while `enabled` and 
    - `environment` ← the instance's environment
    - `events` ← one event dict per incident with `device_product`
 4. Hand alerts to ingestion.
-5. Emit logs (see §5) and append `ConnectorLog` records. Every run ends with `connector.run.completed`, including a run that failed; a failed run writes `connector.run.warning` or `connector.run.error` first (invented). So `dead-connector` measures whether the connector ran, and `connector-errors` whether it ran cleanly.
+5. Emit logs (see §5) and, while log collection is on (§4.1), append `ConnectorLog` records. Every run ends with `connector.run.completed`, including a run that failed; a failed run writes `connector.run.warning` or `connector.run.error` first (invented). So `dead-connector` measures whether the connector ran, and `connector-errors` whether it ran cleanly.
 
-**Swallowed failure (Green Liar).** On a 401 from upstream, the worker catches the exception, writes a `WARNING` log and a `WARNING` ConnectorLog ("Failed to authenticate to Sentinel workspace: 401 Unauthorized"), returns zero alerts and still emits `connector.run.completed`. Status stays `LIVE`.
+**Swallowed failure (Green Liar).** On a 401 from upstream, the worker catches the exception, writes a `WARNING` log (and, while log collection is on, a `WARNING` ConnectorLog) ("Failed to authenticate to Sentinel workspace: 401 Unauthorized"), returns zero alerts and still emits `connector.run.completed`. Status stays `LIVE`.
 
 **Custom connector definition (invented — not the Marketplace integration's real parameters).**
 
@@ -124,25 +126,35 @@ Only these. Field lists are copied from the v1/v1beta reference; implement every
 **integrationInstances** — `.../integrations/{integration}/integrationInstances/{instance}` — [docs](https://docs.cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.integrations.integrationInstances)
 - Methods: `get`, `list`, `executeTest`
 - Fields: `name`, `environment`, `displayName`, `parameters[]` (`id`, `displayName`, `type`, `description`, `propertyName`, `mandatory`, `value`), `integrationIdentifier`, `identifier`, `description`, `configured`, `remote`, `agent`, `systemDefault`
-- `executeTest` (invented response body): `{"success": bool, "message": string}`. Calls the fake token endpoint with the environment's credential. Changes no state.
+- `executeTest`: empty request body; response `{"successful": bool, "message": string}` ([docs](https://docs.cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.integrations.integrationInstances/executeTest)). Calls the fake token endpoint with the environment's credential. Changes no state.
 
 **connectorInstances** — `.../integrations/{integration}/connectors/{connector}/connectorInstances/{connectorInstance}` — [docs](https://docs.cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.integrations.connectors.connectorInstances)
 - Methods: `get`, `list`, `create`, `patch`, `runOnDemand`, `setLogsCollection`
 - Fields: `name`, `agent`, `environment`, `displayName`, `description`, `intervalSeconds`, `documentationLink`, `allowList[]`, `productFieldName`, `eventFieldName`, `timeoutSeconds`, `connectorDefinitionName`, `integrationVersion`, `version`, `loggingEnabledUntilUnixMs`, `statistics` (`pastDayAlertsCount`, `avgAlertsPerDay`), `parameters[]` (`value`, `displayName`, `description`, `mandatory`, `advanced`, `type`), `connectorId`, `identifier`, `id`, `updateAvailable`, `custom`, `enabled`, `remote`, `status` (`LIVE` | `NOT_LIVE`), `integration`
 - `patch`: `integrationVersion` is required on patch (per docs); 400 without it. Every successful patch increments `version`.
-- `PASSWORD` parameter values are returned as `"********"` (mock policy).
+- `runOnDemand`: request `{"connectorInstance": ConnectorInstance}` (required). Response `{"debugOutput": string, "success": bool, "sampleCases": [SampleCase]}`. `SampleCase` has `displayName`, `productName`, `startTime`, `endTime`, `eventCount`, `fullCaseInfoAsJson` ([docs](https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.integrations.connectors.connectorInstances/runOnDemand)).
+  - Mock: one extra run with the stored configuration. The body's values are not used (invented). The regular schedule is unchanged.
+- `setLogsCollection`: request `{"enabled": bool}`; response `{"logEnableExpirationTime": "<unix ms>"}` ([docs](https://docs.cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.integrations.connectors.connectorInstances/setLogsCollection)).
+  - `enabled: true` clears the instance's existing ConnectorLogs and starts a 3-hour collection period ([UI docs](https://docs.cloud.google.com/chronicle/docs/soar/ingest/connectors/view-connector-logs)).
+  - It sets `loggingEnabledUntilUnixMs` to the returned value.
+  - `enabled: false` ends the period now.
+- `PASSWORD` parameter values are returned as `"********"` (mock policy). A patch whose `PASSWORD` parameter value is `"********"` keeps the stored value (invented; makes GET → edit → PATCH safe).
 - `status` semantics are not documented. Mock rule: `LIVE` while `enabled`, `NOT_LIVE` when disabled. Stalls and swallowed errors do not change it.
 - `statistics` are daily counts, too coarse to see a stall within minutes.
 
 **connectorInstances.logs** — `.../connectorInstances/{connectorInstance}/logs/{log}` — [docs](https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.integrations.connectors.connectorInstances.logs)
 - Methods: `get`, `list` (newest first)
 - Fields: `name`, `time` (int64 string, unix ms), `message`, `connectorInstanceId`, `logLevel` (`DEBUG`, `INFO`, `WARNING`, `ERROR`, `ALERT`, `VERBOSE`)
-- `DEBUG` records are only written while `loggingEnabledUntilUnixMs` is in the future (set by `setLogsCollection`).
+- Records are written only while log collection is on (`loggingEnabledUntilUnixMs` in the future), as on the connector's Logs tab.
+- Collection is off for every instance when the world starts.
+- While it is on, every run writes records at all levels, DEBUG included. This part is invented: the UI picks a level, the API has none.
+- When the period ends, no new records are written and existing ones stay until the next enable.
 
 **jobInstances** — `.../integrations/{integration}/jobs/{job}/jobInstances/{jobInstance}` — [docs](https://docs.cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.integrations.jobs.jobInstances)
 - Methods: `get`, `list`, `patch`, `runOnDemand`
 - Fields: `name`, `createTime`, `updateTime`, `displayName`, `intervalSeconds` (min 60), `script`, `author`, `lastRunTime`, `parameters[]` (`id`, `mandatory`, `value`, `displayName`, `type`), `job`, `integration`, `advancedConfig`, `nextScheduledRunTime`, `custom`, `enabled`, `description`, `lastRunStatus` (`SUCCESS` | `ERROR`), `agent`, `advanced`, `uniqueIdentifier`, `documentationLink`
 - `patch` with `intervalSeconds < 60` → 400.
+- `runOnDemand`: request `{"parameters": [{"displayName", "value"}]}` (optional); response `{"success": bool}` ([docs](https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.integrations.jobs.jobInstances/runOnDemand)). Mock: one extra run with the stored configuration.
 
 **jobInstances.logs** — `.../jobInstances/{jobInstance}/logs/{log}` — [docs](https://docs.cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.integrations.jobs.jobInstances.logs)
 - Methods: `get`, `list` (newest first)
@@ -157,10 +169,18 @@ Every request carries an identity. Local dev: header `X-Fleetsre-Identity: obs-r
 
 | Identity | Permissions |
 | --- | --- |
-| `obs-reader` | `chronicle.environments.{get,list}`, `chronicle.integrationInstances.{get,list,executeTest}`, `chronicle.connectorInstances.{get,list}`, `chronicle.connectorInstanceLogs.{get,list}`, `chronicle.jobInstances.{get,list}`, `chronicle.jobInstanceLogs.{get,list}` |
-| `deployer` | all of `obs-reader` plus `chronicle.connectorInstances.{create,update,runOnDemand,setLogsCollection}`, `chronicle.jobInstances.{update,runOnDemand}`, `chronicle.environments.create` |
+| `obs-reader` | `chronicle.environments.{get,list}`, `chronicle.integrationInstances.{get,list}`, `chronicle.connectorInstances.{get,list}`, `chronicle.connectorInstanceLogs.{get,list}`, `chronicle.jobInstances.{get,list}`, `chronicle.jobInstanceLogs.{get,list}` |
+| `deployer` | all of `obs-reader` plus `chronicle.connectorInstances.{create,update}`, `chronicle.jobInstances.{update,run}`, `chronicle.environments.create` |
 
-Missing permission → 403 `PERMISSION_DENIED`. Exact permission strings beyond the documented one are assumptions; check them on D1 day where docs pages show them.
+Documented method permissions (checked 2026-10-29):
+- `connectorInstances.patch` and `connectorInstances.runOnDemand` → `chronicle.connectorInstances.update`.
+- `jobInstances.runOnDemand` → `chronicle.jobInstances.run`.
+
+Deliberate deviations (invented, labelled in code):
+- `setLogsCollection`: the docs require only `chronicle.connectorInstances.get`. The mock requires `chronicle.connectorInstances.update`, because enabling it clears existing logs.
+- `executeTest`: the docs require `chronicle.integrationInstances.update`. The mock allows it with `chronicle.integrationInstances.get`, because it changes no state and the read-only SRE needs it. A real deployment would need a custom role granting the reader `integrationInstances.update` (README).
+
+Missing permission → 403 `PERMISSION_DENIED`. Other permission strings follow the documented `chronicle.<resource>.<verb>` pattern.
 
 ## 5. Log format
 
@@ -226,9 +246,9 @@ Each fault has a defined cause, what the native API shows, what should trip, and
 | ID | Fault | Mock behaviour | Native API shows | Should trip | Right answer |
 | --- | --- | --- | --- | --- | --- |
 | F1 | `connector_stall` | Worker for one instance stops running. No logs, no ConnectorLogs | `status: LIVE`, `enabled: true` | `dead-connector` (cadence) | `connectorInstances.restart`. The mock clears a stall on any `enabled` false→true transition |
-| F2 | `credential_expiry` | Upstream token endpoint returns 401 for one env. Connector swallows it: WARNING logs and ConnectorLogs every run, zero alerts, runs on schedule | `status: LIVE`; `executeTest` → `success: false` | `connector-errors` (errorSignature), `canary` (synthetic) | `escalate`, category `credential_failure`. Siblings healthy → tenant-specific. Fix (rotate secret) is outside the allowlist |
+| F2 | `credential_expiry` | Upstream token endpoint returns 401 for one env. Connector swallows it: WARNING logs every run (and WARNING ConnectorLogs while log collection is on), zero alerts, runs on schedule | `status: LIVE`; `executeTest` → `successful: false`; the Logs tab is empty unless log collection is on | `connector-errors` (errorSignature), `canary` (synthetic) | `escalate`, category `credential_failure`. Siblings healthy → tenant-specific. Fix (rotate secret) is outside the allowlist |
 | F3 | `severity_drift` | A fraction `rate` (fault `params`, e.g. 0.5) of new upstream incidents arrive with an unmapped severity (`"Critical"`); with `Unknown Severity Priority` empty, their `priority` becomes a string | `status: LIVE`, volume normal | `priority-shape` (schema) | `connectorInstances.patch` `parameters`: set `Unknown Severity Priority` to `100` (or `80`) |
-| F4 | `job_hollow_success` | Job parameter `Lookback Hours` set to `0` (simulates a bad config change, visible in `tripwire_history` as a recent change); runs succeed with 0 indicators | `lastRunStatus: SUCCESS` | intel-sync `hollow-run` (schema on `indicatorsSynced > 0` over N runs) | `jobInstances.patch` `parameters`: `Lookback Hours` → `24` |
+| F4 | `job_hollow_success` | Job parameter `Lookback Hours` set to `0` (simulates a bad config change, visible in `tripwire_history` as a recent change); runs succeed with 0 indicators. Injection sets the parameter through the same path as a patch (bumps `updateTime`); `clear()` restores the value it replaced | `lastRunStatus: SUCCESS` | intel-sync `hollow-run` (schema on `indicatorsSynced > 0` over N runs) | `jobInstances.patch` `parameters`: `Lookback Hours` → `24` |
 | F5 | `job_error` | Fake TI feed returns 500; job runs end `ERROR` | `lastRunStatus: ERROR` | intel-sync `job-errors` (errorSignature) | `escalate`, category `job_failing` (upstream outage) |
 | F6 | `connector_flap` | Instance emits ERROR on a fraction `rate` of runs (fault `params`, e.g. 0.2 or 0.7). ERROR runs still fetch and ingest normally | `status: LIVE` | `connector-errors` only if threshold met | Harness-only scenarios for false-positive and threshold tuning |
 | F7 | `job_stall` | Job worker stops running; `nextScheduledRunTime` goes stale | `lastRunStatus` unchanged, `enabled: true` | intel-sync `dead-job` (cadence) | `jobInstances.restart`, category `job_stalled`. The mock clears a job stall on any `enabled` false→true transition |
@@ -258,8 +278,10 @@ Enabled only when `FLEETSRE_CHAOS=1`; otherwise every `/_chaos` route returns 40
 | --- | --- |
 | Resource names, paths, methods and field lists (§4.1) | Fake Sentinel transport and token endpoint |
 | `status` enum values, `logLevel` and `JobResultStatus` enums, `ParamType` enum | Meaning of `LIVE` (mock rule in §4.1) |
-| `integrationVersion` required on connector patch; job `intervalSeconds` minimum 60 | `executeTest` response body |
-| Permission name pattern (`chronicle.connectorInstanceLogs.get`) | Other permission strings, until verified |
+| `integrationVersion` required on connector patch; job `intervalSeconds` minimum 60 | Collection captures all log levels |
+| Method request and response bodies: `executeTest`, `runOnDemand`, `setLogsCollection` | `runOnDemand` ignoring the body's values |
+| ConnectorLogs collected only during a 3-hour collection period; enabling clears existing records | PASSWORD round-trip on patch |
+| Permission name pattern and the method permissions in §4.2 | The two permission deviations in §4.2 |
 | Log namespace, containers and entry labels (§5) | `logName`, `pod_name`, every `jsonPayload` field, event names |
 | AlertInfo field names and the priority scale | The custom connector's and job's parameters |
 | Sentinel incident payload fields and severities | Fault mechanics (§6) |

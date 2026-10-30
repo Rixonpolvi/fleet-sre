@@ -8,6 +8,8 @@ Revised 2026-10-29 during D1: contract rules, scenario values, `ContractError` c
 
 Revised 2026-10-29 (evening) after D2: the spike interface, fixture files and output lines in §D2 match what was built; result and decision in `spikes/RESULTS.md`.
 
+Revised 2026-10-29 (night) before D3: §D3 matches the Chronicle method bodies, permissions and connector log collection checked against Google's docs (`mocks.md` §4); `map_priority` added to the D3 interfaces (D3-T5–T8, T15, T17–T20).
+
 Nine deliverables, D0–D8. Each one is **two merges**: a tests PR, then an implementation PR. The acceptance tests below are the definition of done. The coding agent translates them into code; it does not decide them.
 
 ---
@@ -313,6 +315,9 @@ class World:
     def plant_canary(self, environment: str) -> str          # returns providerIncidentId
     def snapshot(self) -> dict                                # all resource state, deterministic
 
+# fleetsre/mock/connector.py
+def map_priority(severity: str, unknown_severity_priority: str) -> int | str
+
 # fleetsre/mock/chronicle_api.py
 def create_app(world: World, *, chaos: bool = False, dev_auth: bool = False) -> FastAPI
 ```
@@ -325,22 +330,22 @@ Tests use FastAPI's `TestClient` with `X-Fleetsre-Identity` and `dev_auth=True`.
 | D3-T2 | Resource names | Every returned `name` matches the path pattern for its resource in `mocks.md` §4.1 with the fixed prefix |
 | D3-T3 | Enums and redaction | `status` ∈ {LIVE, NOT_LIVE}; every `parameters[].type` is a documented ParamType; `PASSWORD` values read `"********"` |
 | D3-T4 | Patch semantics | `PATCH ...?updateMask=enabled` changes only `enabled`; patch without `integrationVersion` returns 400 `INVALID_ARGUMENT`; each successful patch increments `version` |
-| D3-T5 | runOnDemand | Triggers exactly one extra run: one new `connector.run.completed` entry and new ConnectorLog records, without shifting the regular schedule |
-| D3-T6 | setLogsCollection | After the call, DEBUG ConnectorLogs appear until `loggingEnabledUntilUnixMs`; none before or after |
-| D3-T7 | Connector logs list | Records have the doc field set; `logLevel` is a documented value; newest first; `pageSize`/`pageToken` paginate without gaps or duplicates |
-| D3-T8 | executeTest | Returns `success: true` normally and `success: false` with a message while F2 is active on that environment; `world.snapshot()` is identical before and after the call |
+| D3-T5 | runOnDemand | Triggers exactly one extra run, with the documented request and response bodies (`mocks.md` §4.1): one new `connector.run.completed` entry and, with log collection on, new ConnectorLog records, without shifting the regular schedule |
+| D3-T6 | setLogsCollection | With collection off (the initial state), no ConnectorLogs are written. `setLogsCollection({enabled: true})` clears existing records and returns `logEnableExpirationTime` = now + 3 h, equal to the resource's `loggingEnabledUntilUnixMs`. Records at all levels, DEBUG included, appear for runs inside the period and none after it; records from the period stay listed. `enabled: false` stops new records at once |
+| D3-T7 | Connector logs list | With log collection on, records have the doc field set; `logLevel` is a documented value; newest first; `pageSize`/`pageToken` paginate without gaps or duplicates |
+| D3-T8 | executeTest | Returns `successful: true` normally and `successful: false` with a message while F2 is active on that environment; `world.snapshot()` is identical before and after the call |
 | D3-T9 | Job instances | Shape equals the doc field set; `list`, `get`, `patch`, `runOnDemand` work; patch with `intervalSeconds < 60` returns 400; job logs have `status` ∈ {SUCCESS, ERROR} |
 | D3-T10 | Environments | `list` returns alpha, bravo, charlie, canary with the doc field set |
 | D3-T11 | Errors | Unknown resource → 404 with body `{"error": {"code": 404, "message": <str>, "status": "NOT_FOUND"}}` |
 | D3-T12 | Run cadence | Over 1 simulated hour with no faults, each connector instance emits 60 ± 1 `connector.run.completed` entries and each job instance 12 ± 1 `job.run.completed` entries |
 | D3-T13 | Alert volume | Over 6 simulated hours (seeded), etl `alert.ingested` count per environment is within ±30% of `expectedAlertsPerHour × 6` for alpha and bravo, and between 2 and 30 for charlie |
 | D3-T14 | Ingestion records | Every ingested alert yields exactly one etl entry with a unique `correlation_id`; with no faults, `jsonPayload.alert.priority` is always an int in {-1, 40, 60, 80, 100} |
-| D3-T15 | Severity map | Sentinel `High/Medium/Low/Informational` map to 80/60/40/-1; an unmapped severity maps to `Unknown Severity Priority` when set, else passes through as the raw string |
+| D3-T15 | Severity map | `map_priority` maps Sentinel `High/Medium/Low/Informational` to 80/60/40/-1, and an unmapped severity to `Unknown Severity Priority` when set, else passes it through as the raw string; end to end, F3 alerts are strings with the parameter empty and `100` once it is patched |
 | D3-T16 | Determinism | Two worlds with the same seed, fleet and fault schedule produce byte-identical JSONL over 2 simulated hours; a different seed produces a different stream |
-| D3-T17 | F1 stall | After injection, the target instance emits no python entries and no ConnectorLogs; `status` stays LIVE; siblings unchanged; an `enabled` false→true transition clears it within 2 intervals |
-| D3-T18 | F2 credential expiry | Target environment: runs continue on schedule, each with a WARNING entry and a WARNING ConnectorLog, zero etl entries; `status` stays LIVE; other environments unaffected |
-| D3-T19 | F3 severity drift | Target environment: etl volume within ±30% of normal; some `priority` values are strings; patching `Unknown Severity Priority` to `100` makes new entries ints again |
-| D3-T20 | F4 hollow success | `Lookback Hours` becomes `0`; job runs report SUCCESS with `indicatorsSynced == 0`; patching it back to `24` restores non-zero syncs |
+| D3-T17 | F1 stall | After injection, the target instance emits no python entries and, with log collection on, no ConnectorLogs; `status` stays LIVE; siblings unchanged; an `enabled` false→true transition clears it within 2 intervals |
+| D3-T18 | F2 credential expiry | Target environment: runs continue on schedule, each with a WARNING entry and, with log collection on, a WARNING ConnectorLog, zero etl entries; `status` stays LIVE; other environments unaffected |
+| D3-T19 | F3 severity drift | Target environment: etl volume within ±30% of normal; some `priority` values are strings; patching `Unknown Severity Priority` to `100` makes new entries ints again (at least one new `alert.ingested` entry after the patch) |
+| D3-T20 | F4 hollow success | `Lookback Hours` becomes `0`; job runs report SUCCESS with `indicatorsSynced == 0`; patching it back to `24` restores non-zero syncs (at least one SUCCESS run with `indicatorsSynced > 0` after the patch) |
 | D3-T21 | F5 job error | Job runs end ERROR (`lastRunStatus`, job log `status`, python entry severity ERROR); every run still ends with a `job.run.completed` entry with `status: ERROR` |
 | D3-T22 | F6 flap | With `rate` r, the fraction of ERROR runs over 100 runs is r ± 0.1; every run, ERROR or not, ends with `connector.run.completed` and still ingests its alerts |
 | D3-T23 | F7 job stall | No job runs; `nextScheduledRunTime` goes stale; an `enabled` false→true transition clears it |
