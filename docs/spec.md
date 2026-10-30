@@ -8,6 +8,8 @@ Revised 2026-10-28 (afternoon) after reviewing Meta's `legal-agent-workshop`, `m
 
 Revised 2026-10-29 during D1: the contracts settled the fields and values in §5.
 
+Revised 2026-10-29 (evening) after D2: every tool result reaches the model with its `callId` (§6.3); usage fields and cost confirmed (§8); the gated protocol passed live (§12).
+
 ---
 
 ## 1. Summary
@@ -204,7 +206,7 @@ Every read tool also takes `rationale`. Reads are capped at 12 per session; a 13
 
 ### 6.3 Working tools and their gates
 
-The gates run inside these tools. A refused call returns `{"error": "...", "problems": ["..."]}` and never raises.
+The gates run inside these tools. A refused call returns `{"error": "...", "problems": ["..."]}` and never raises. Every tool result reaches the model as `{"callId": "...", "result": {...}}`, because the model cannot read call IDs back from the replayed history (D2 finding). A tool source's `field` is a dotted path into `result` (`success`, not `result.success`).
 
 | Tool | Does | Gate (inside the tool) |
 | --- | --- | --- |
@@ -316,10 +318,10 @@ One gateway, per-role config. Assignments are provisional until the D2 spike and
 - **Endpoint and key.** Base URL `https://api.meta.ai/v1`. The key lives in `MODEL_API_KEY` and is passed explicitly; the OpenAI SDK does not read that variable on its own.
 - **Investigation loop.** Responses API with `store=False` and the full history sent every turn, `include=["reasoning.encrypted_content"]` so reasoning is replayed between turns, `parallel_tool_calls=False`, and `reasoning={"effort": ...}` per role. Effort levels: `none` < `minimal` < `low` < `medium` < `high` (`xhigh` is the same as `high`).
 - **JSON outside tools** (authoring, postmortem). On the Responses API use `text.format` with a JSON schema; `response_format` returns HTTP 400 there. A recursive `$ref` also returns 400, so the schema given to the authoring model must be flattened.
-- **Prompt caching.** Keep the stable prefix first (system prompt, tool specs, contract) and record `usage.prompt_tokens_details.cached_tokens` in the transcript.
-- **Cost.** The cookbook says the Muse Spark preview is free; confirm on the dashboard. If so, the $150 credit covers Muse Wonder and anything outside the preview. Baseten, Modal and Fireworks each offer $100 to select participants for open-weights models.
+- **Prompt caching.** Keep the stable prefix first (system prompt, tool specs, contract) and record `usage.input_tokens_details.cached_tokens` and `usage.output_tokens_details.reasoning_tokens` in the transcript (field names confirmed in D2).
+- **Cost.** Muse Spark is billed against the $150 credit on this account (D2: about $0.08 per investigation at ~120k input tokens, ~70% cached). Baseten, Modal and Fireworks each offer $100 to select participants for open-weights models.
 
-Check whether Muse Code bills the same account as the $150 API credit before the first session.
+Muse Code bills the same $150 credit (verified by usage delta).
 
 ## 9. Build plan
 
@@ -370,11 +372,11 @@ Live instance: Cloud Run, scheduled chaos loop, no public fault buttons, no publ
 | Weak code from the coding agent | Tests-first PRs, human review per deliverable |
 | Logging API rejects `k8s_container` labels from outside GKE | Checked by hand on D1 day; fallback to a generic resource with the same entry `labels` |
 | SRE wanders or fabricates evidence | Budgets, stuck detection, evidence checked when recorded, category evidence rules |
-| The model does not follow the gated protocol (one call per turn, hypotheses first) | The D2 spike tests it today. Fallback order: drop `update_plan`; then drop `set_hypotheses` (rule 3 of §6.5 becomes report-only); then pre-computed evidence in the incident |
+| The model does not follow the gated protocol (one call per turn, hypotheses first) | D2 passed with the full protocol (`spikes/RESULTS.md`). If a later model fails it, fallback order: drop `update_plan`; then drop `set_hypotheses` (rule 3 of §6.5 becomes report-only); then pre-computed evidence in the incident |
 | Authoring fits the visible scenarios | Held-out scenarios (§5.1) |
 | Live instance abuse or cost | Public mode, caps |
 
-Open: partner credits for the fallback; Muse Wonder's model ID; whether the Muse Spark preview is free; model per role after evals; escalation channel (UI only or email); whether `intel-sync` appears in the video.
+Open: partner credits for the fallback; Muse Wonder's model ID; model per role after evals; escalation channel (UI only or email); whether `intel-sync` appears in the video.
 
 ## Sources
 
