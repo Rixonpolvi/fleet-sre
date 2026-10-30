@@ -94,6 +94,10 @@ def _values_equal(actual: object, expected: object) -> bool:
     return actual == expected
 
 
+def _format_tool_output(call_id: str, result: dict) -> str:
+    return json.dumps({"callId": call_id, "result": result})
+
+
 class StubTools:
     """Stub tools over one fixture dir."""
 
@@ -733,11 +737,14 @@ def _run_scripted(
         rationale = args.get("rationale", "")
         if not isinstance(rationale, str):
             rationale = str(rationale)
-        verdict, _ = _execute(tools, state, tname, args, call_id, gates_on, schema)
-        print("TRACE " + json.dumps({
+        verdict, result = _execute(tools, state, tname, args, call_id, gates_on, schema)
+        trace: dict = {
             "run": run_id, "turn": turn, "tool": tname,
             "verdict": verdict, "rationale": rationale,
-        }), flush=True)
+        }
+        if verdict in ("refused", "would_refuse"):
+            trace["problems"] = result.get("problems", [])
+        print("TRACE " + json.dumps(trace), flush=True)
         if tname == "submit_diagnosis" and verdict in ("accepted", "would_refuse"):
             if gates_on and verdict == "accepted":
                 status = "accepted"
@@ -1029,14 +1036,17 @@ def _run_live(
             if not isinstance(rationale, str):
                 rationale = str(rationale)
             verdict, result = _execute(tools, state, tname, args, call_id, gates_on, schema)
-            print("TRACE " + json.dumps({
+            trace = {
                 "run": run_id, "turn": turn, "tool": tname,
                 "verdict": verdict, "rationale": rationale,
-            }), flush=True)
+            }
+            if verdict in ("refused", "would_refuse"):
+                trace["problems"] = result.get("problems", [])
+            print("TRACE " + json.dumps(trace), flush=True)
             history.append({
                 "type": "function_call_output",
                 "call_id": call_id,
-                "output": json.dumps(result),
+                "output": _format_tool_output(call_id, result),
             })
             for extra in calls[1:]:
                 extra_id = str(extra.get("call_id", ""))
@@ -1044,7 +1054,7 @@ def _run_live(
                     history.append({
                         "type": "function_call_output",
                         "call_id": extra_id,
-                        "output": json.dumps({
+                        "output": _format_tool_output(extra_id, {
                             "error": "not executed: only the first call in a response runs"
                         }),
                     })

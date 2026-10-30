@@ -20,6 +20,7 @@ Evidence:
 - Log source: {insertId} must exist in the logs.
 - Tool source: {callId, field, value} must name a call made in this run,
   with field a dotted path into that call's result and value equal to it.
+- Every tool output shows its callId. Use that exact string as source.callId; do not guess.
 - Cite only recorded IDs (E1, E2, ...) in submit_diagnosis.
 - Before submitting, record at least one supports item for the
   hypothesis you conclude and at least one refutes item for every
