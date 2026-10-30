@@ -1,0 +1,2657 @@
+Muse Code Conversation Export
+=============================
+
+Exported At: 2026-10-30 02:03:47 UTC
+Session: 01a18a79-1aa1-7d32-b91e-17f0748bcce0
+Workspace: /home/rixon/fleet-sre
+
+## Conversation
+
+❯ Objective: Write the acceptance tests for D3 exactly as specified in
+  docs/deliverables.md §D3.
+  Inputs: docs/spec.md §4, docs/mocks.md (all), docs/deliverables.md §1 and §D3,
+  .agents/AGENTS.md,
+  fixtures/fleet.yaml, specs/chronicle/*.yaml, fleetsre/logmodel.py,
+  fleetsre/mock/fleet.py,
+  tests/acceptance/d1/ (for the D1-T7 label rules).
+  Deliverables:
+  1. tests/acceptance/d3/*.py, one function per D3-T1..D3-T29 (parametrised rows
+  stay one function).
+  2. Interface stubs raising NotImplementedError for every signature in §D3:
+  fleetsre/clock.py
+  (Clock, SimClock, WallClock), fleetsre/ports.py (LogSink, MemorySink),
+  fleetsre/adapters/jsonl.py
+  (JsonlSink), fleetsre/mock/world.py (FaultSpec, World),
+  fleetsre/mock/connector.py (map_priority),
+  fleetsre/mock/chronicle_api.py (create_app). FaultSpec may be a real pydantic
+  model (fields only);
+  nothing else has behaviour.
+  3. fastapi and httpx added to pyproject.toml if missing, then pip install -e
+  ".[dev]".
+  Test rules:
+  - Every behavioural test uses SimClock and an explicit seed. No sleep, no wall
+  clock.
+  - "Doc field set" = the fields: list in specs/chronicle/<resource>.yaml,
+  loaded by the test, not
+  hard-coded. Method request/response bodies (mocks.md §4.1) are not in specs/:
+  hard-code them in
+  the test with the doc URL in a comment.
+  - API tests use TestClient(create_app(world, dev_auth=True)) with the
+  X-Fleetsre-Identity header;
+  T26 builds both chaos=False and chaos=True apps.
+  - Tests that need $PROJECT set it with monkeypatch to "fleet-sre-test". Never
+  read the real
+  environment.
+  - Fault types use the mocks.md §6 names (connector_stall, credential_expiry,
+  severity_drift,
+  job_hollow_success, job_error, connector_flap, job_stall); F3 and F6 pass
+  params.rate.
+  - ConnectorLogs exist only while log collection is on (mocks.md §4.1). Any
+  test that checks
+  ConnectorLog records (T5, T7, T17, T18) first calls setLogsCollection
+  {enabled: true} as deployer.
+  - Assert exactly the stated tolerances: T12 60 ± 1 and 12 ± 1; T13 ±30% for
+  alpha and bravo over
+  6 h and 2–30 for charlie; T22 r ± 0.1 over 100 runs (r = 0.2 and 0.7).
+  - T2: with $PROJECT = "fleet-sre-test", resource names still use the prefix
+  projects/fleet-sre-demo/locations/us/instances/mock-soar.
+  - T5: POST :runOnDemand with {"connectorInstance": <the GET body>} as
+  deployer; response keys are
+  exactly {debugOutput, success, sampleCases}; exactly one extra
+  connector.run.completed and new
+  ConnectorLog records for it; regular runs before and after keep their 60 s
+  spacing from the
+  original schedule.
+  - T6: after several runs with collection off, the logs list is empty.
+  setLogsCollection
+  {enabled: true} returns logEnableExpirationTime equal to enable time + 3 h in
+  unix ms and to the
+  resource's loggingEnabledUntilUnixMs. Runs inside the period write records,
+  including DEBUG. A
+  second {enabled: true} clears the records written before it. Advancing past
+  the period's end:
+  no new records, and the period's records are still listed. A separate
+  instance: {enabled: false}
+  during a period stops new records at once.
+  - T8: the response field is `successful`; compare world.snapshot() before and
+  after.
+  - T13: also assert alpha's six hourly counts are not all equal (arrivals are
+  Poisson, not evenly
+  spaced).
+  - T15: map_priority for High/Medium/Low/Informational → 80/60/40/-1;
+  "Critical" with "" → the raw
+  string; "Critical" with "100" → 100. End to end under F3 (rate 0.5): string
+  priorities appear
+  with the parameter empty; after patching it to 100, new entries are ints.
+  - T16: compares the JSONL bytes of two independent worlds with the same seed,
+  fleet and faults over
+  2 simulated hours, the second built in a subprocess with a different
+  PYTHONHASHSEED; a third
+… output capped
+
+◆ Writing your D3 acceptance suite — 29 failing-first tests plus stubs.
+
+  Read docs/deliverables.md
+  Read docs/mocks.md
+  Read docs/spec.md
+  Read fixtures/fleet.yaml
+  Read fleetsre/logmodel.py
+  Read fleetsre/mock/fleet.py
+  Read pyproject.toml
+
+◆ Ran command · List tests and project layout · ✓ · 0.6s
+├ ls -R tests/acceptance spec* specs/chronicle fleetsre 2>&1 | head -100; echo
+│ ---; cat Makefile 2>&1 | head -80
+├ exit 0
+└ fleetsre:
+  __init__.py
+  __pycache__
+  adapters
+  contracts.py
+  harness
+  logmodel.py
+  mock
+  … 91 lines omitted
+  test-live:
+      python -m pytest -m live
+
+  test-gcp:
+      python -m pytest -m gcp
+
+  demo:
+      @echo "not yet: D8"
+
+  Read tests/acceptance/d1/test_d1.py
+  Read tests/acceptance/d0/test_d0.py
+
+◆ Ran command · Show chronicle field specs · ✓ · 3.1s
+├ for f in specs/chronicle/*.yaml; do echo "=== $f ==="; cat "$f"; echo; done
+├ exit 0
+└ === specs/chronicle/connectorInstanceLogs.yaml ===
+  # Documented fields of the Chronicle connectorInstances.logs resource (mocks.…
+  resource: connectorInstanceLogs
+  source: https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/pr…
+  name: projects/{project}/locations/{location}/instances/{instance}/integratio…
+  methods: [get, list]
+  fields: [name, time, message, connectorInstanceId, logLevel]
+  enums:
+  … 60 lines omitted
+    advanced, uniqueIdentifier, documentationLink]
+  nested:
+    parameters: [id, mandatory, value, displayName, type]
+  enums:
+    lastRunStatus: [SUCCESS, ERROR]
+    paramType: [BOOLEAN, INT, STRING, PASSWORD, IP, IP_OR_HOST, URL, DOMAIN, EM…
+  constraints:
+    intervalSeconds: { minimum: 60 }
+
+  Read scripts/check_trace.py
+  Read fleetsre/__init__.py
+  Read fleetsre/mock/__init__.py
+  Read fleetsre/adapters/__init__.py
+  Read tests/acceptance/d2/test_d2.py
+
+◆ Read skill durable-test-collateral · built-in · 5 KB
+
+◆ Suite design is clear — now mapping exact contracts before drafting.
+
+◆ Ran command · Inspect lint config and contracts · ✓ · 0.6s
+├ ls -la | head -50; echo ===; cat .importlinter 2>/dev/null || cat setup.cfg
+│ 2>/dev/null || echo "no importlinter file"; echo ===; cat
+│ contracts/alert-ingestion.json | head -100; echo ===; ls
+│ fixtures/scenarios/alert-ingestion/ fixtures/scenarios/intel-sync/ 2>&1
+├ exit 0
+└ total 116
+  drwxr-xr-x 20 rixon rixon 4096 Oct 29 20:56 .
+  drwxr-x--- 16 rixon rixon 4096 Oct 29 21:38 ..
+  drwxr-xr-x  2 rixon rixon 4096 Oct 29 17:48 .agents
+  -rw-------  1 rixon rixon   63 Oct 29 19:04 .env
+  drwxr-xr-x  8 rixon rixon 4096 Oct 29 21:42 .git
+  -rw-r--r--  1 rixon rixon   19 Oct 29 00:58 .gitattributes
+  drwxr-xr-x  3 rixon rixon 4096 Oct 29 01:34 .github
+  … 76 lines omitted
+  stall.yaml
+
+  fixtures/scenarios/intel-sync/:
+  clean.yaml
+  hollow-success.yaml
+  job-error.yaml
+  job-stall.yaml
+  recovery.yaml
+
+◆ Ran command · Inspect scenario fixtures · ✓ · 0.6s
+├ cat fixtures/scenarios/alert-ingestion/stall.yaml
+│ fixtures/scenarios/alert-ingestion/green-liar.yaml
+│ fixtures/scenarios/alert-ingestion/severity-drift.yaml
+│ fixtures/scenarios/alert-ingestion/flap-severe.yaml; echo ===; cat
+│ fixtures/scenarios/intel-sync/hollow-success.yaml; echo ===; ls tests/unit
+│ 2>&1; ls fleetsre/sre fleetsre/harness 2>&1; cat fleetsre/harness/scenario.py
+│ | head -80
+├ exit 0
+└ # Timing: faults land at :30 offsets so they never tie with a run or a canary…
+  # withinSeconds counts from the fault "at" for trips and from "clearAt" for r…
+  # F1: last run ~1800, dead-connector due at +180 s (3 x 60). The canary is no…
+  # either: next plant 2400, deadline 2580 (~750 s after the fault).
+  id: stall
+  service: alert-ingestion
+  seed: 102
+  durationSeconds: 7200
+  … 160 lines omitted
+      holdout: bool = False
+
+
+  def load_scenario(path: str | Path) -> Scenario:
+      """Load and validate a scenario YAML file."""
+      with open(path, encoding="utf-8") as fh:
+          data = yaml.safe_load(fh)
+      return Scenario.model_validate(data)
+
+◆ Ran command · Inspect sample log shapes · ✓ · 0.6s
+├ ls fixtures/logs/samples/ fixtures/golden/ | head -30; echo ===; head -5
+│ fixtures/logs/samples/*.jsonl | head -40; echo ===; cat
+│ docs/decisions/logging-resource.md 2>&1 | head -40
+├ exit 0
+└ fixtures/golden/:
+  cadence-stall.expected.json
+  cadence-stall.jsonl
+  canary-miss.expected.json
+  canary-miss.jsonl
+  error-burst.expected.json
+  error-burst.jsonl
+  schema-break.expected.json
+  … 38 lines omitted
+  Entry was queryable within seconds via `resource.labels.namespace_name="chron…
+  Resource type and all six resource labels were preserved. All four entry labe…
+  No fallback needed.
+
+  ## Constraint
+  `resource.labels.project_id` must equal the real GCP project ID. The mock rea…
+  from configuration (env `PROJECT`); `fleet-sre-demo` appears only inside mock
+  Chronicle resource names.
+
+◆ Ran command · Check spike fixture resource shapes · ✓ · 0.6s
+├ ls fixtures/spike/green_liar/; cat fixtures/spike/green_liar/resources.json |
+│ head -200; echo ===; cat fixtures/spike/green_liar/incident.json
+├ exit 0
+└ incident.json
+  logs.jsonl
+  resources.json
+  scripted.json
+  scripted_refusals.json
+  {
+    "connectorInstances": [
+      {
+  … 207 lines omitted
+      "gl-000534",
+      "gl-000542",
+      "gl-000550",
+      "gl-000558",
+      "gl-000566"
+    ],
+    "now": "2026-10-29T15:15:00Z"
+  }
+
+◆ Ran command · Inspect spike resource keys · ✓ · 0.6s
+├ python3 -c "import json;
+│ d=json.load(open('fixtures/spike/green_liar/resources.json'));
+│ print(list(d.keys())); print('integrationInstances:',
+│ len(d.get('integrationInstances',[])));
+│ print(d['integrationInstances'][0].keys() if d.get('integrationInstances')
+│ else 'none'); print('connectorLogs keys:',
+│ list(d.get('connectorLogs',{}).keys())[:3]); import pprint;
+│ pprint.pprint(d['integrationInstances'][0]); print('--- executeTest:',
+│ d.get('executeTest')); print('--- jobInstances?', 'jobInstances' in d)"
+├ exit 0
+└ ['connectorInstances', 'integrationInstances', 'connectorLogs', 'executeTest']
+  integrationInstances: 3
+  dict_keys(['name', 'environment', 'displayName', 'parameters', 'integrationId…
+  connectorLogs keys: ['alpha-sentinel', 'bravo-sentinel', 'charlie-sentinel']
+  {'agent': '',
+   'configured': True,
+   'description': 'MockSentinel integration (synthetic fixture)',
+   'displayName': 'Alpha Corp MockSentinel',
+  … 28 lines omitted
+                   'mandatory': True,
+                   'propertyName': 'workspace',
+                   'type': 'STRING',
+                   'value': 'law-alpha'}],
+   'remote': False,
+   'systemDefault': False}
+  --- executeTest: {'alpha': {'success': True, 'message': 'Token endpoint reach…
+  --- jobInstances? False
+
+◆ Ran command · Check connector log shape · ✓ · 0.6s
+├ python3 -c "import json;
+│ d=json.load(open('fixtures/spike/green_liar/resources.json')); import pprint;
+│ pprint.pprint(d['connectorLogs']['bravo-sentinel'][0]); print('count bravo',
+│ len(d['connectorLogs']['bravo-sentinel']));
+│ pprint.pprint(d['connectorInstances'][0].keys())"
+├ exit 0
+└ {'connectorInstanceId': 'bravo-sentinel',
+   'logLevel': 'INFO',
+   'message': 'Run bravo-run-0120 completed: 0 alerts fetched',
+   'name': 'projects/fleet-sre-demo/locations/us/instances/mock-soar/integratio…
+   'time': '1793289562000'}
+  count bravo 180
+  dict_keys(['name', 'agent', 'environment', 'displayName', 'description', 'int…
+
+◆ I have the full picture — now building the stubs and 29 tests.
+
+◆ Wrote fleetsre/clock.py (+27)
+   1 +"""Clock port: SimClock for tests, WallClock for production (D3 stub)."""
+   2 +
+   3 +from datetime import datetime
+   4 +from typing import Protocol
+   5 +
+   6 +
+   7 +class Clock(Protocol):
+   8 +    def now(self) -> datetime: ...
+   9 +
+  10 +
+  11 +class SimClock(Clock):
+  12 +    def __init__(self, start: datetime) -> None:
+  13 +        raise NotImplementedError
+  14 +
+  15 +    def now(self) -> datetime:
+  16 +        raise NotImplementedError
+  17 +
+  18 +    def advance(self, seconds: float) -> None:
+  19 +        raise NotImplementedError
+  20 +
+  21 +    def set(self, t: datetime) -> None:
+  22 +        raise NotImplementedError
+  23 +
+  24 +
+  25 +class WallClock(Clock):
+  26 +    def now(self) -> datetime:
+  27 +        raise NotImplementedError
+
+◆ Wrote fleetsre/ports.py (+19)
+   1 +"""Ports: LogSink and MemorySink (D3 stub)."""
+   2 +
+   3 +from typing import Protocol
+   4 +
+   5 +from fleetsre.logmodel import LogEntry
+   6 +
+   7 +
+   8 +class LogSink(Protocol):
+   9 +    def write(self, entry: LogEntry) -> None: ...
+  10 +
+  11 +
+  12 +class MemorySink(LogSink):
+  13 +    entries: list[LogEntry]
+  14 +
+  15 +    def __init__(self) -> None:
+  16 +        raise NotImplementedError
+  17 +
+  18 +    def write(self, entry: LogEntry) -> None:
+  19 +        raise NotImplementedError
+
+◆ Wrote fleetsre/adapters/jsonl.py (+14)
+   1 +"""JSONL sink adapter (D3 stub)."""
+   2 +
+   3 +from pathlib import Path
+   4 +
+   5 +from fleetsre.logmodel import LogEntry
+   6 +from fleetsre.ports import LogSink
+   7 +
+   8 +
+   9 +class JsonlSink(LogSink):
+  10 +    def __init__(self, path: str | Path) -> None:
+  11 +        raise NotImplementedError
+  12 +
+  13 +    def write(self, entry: LogEntry) -> None:
+  14 +        raise NotImplementedError
+
+◆ Wrote fleetsre/mock/world.py (+39)
+   1 +"""Mock world (D3 stub)."""
+   2 +
+   3 +from datetime import datetime
+   4 +from typing import Any
+   5 +
+   6 +from pydantic import BaseModel
+   7 +
+   8 +from fleetsre.clock import Clock
+   9 +from fleetsre.mock.fleet import FleetConfig
+  10 +from fleetsre.ports import LogSink
+  11 +
+  12 +
+  13 +class FaultSpec(BaseModel):
+  14 +    type: str
+  15 +    environment: str
+  16 +    target: str | None = None
+  17 +    params: dict[str, Any] = {}
+  18 +
+  19 +
+  20 +class World:
+  21 +    def __init__(
+  22 +        self, fleet: FleetConfig, seed: int, clock: Clock, sink: LogSink
+  23 +    ) -> None:
+  24 +        raise NotImplementedError
+  25 +
+  26 +    def step_until(self, t: datetime) -> None:
+  27 +        raise NotImplementedError
+  28 +
+  29 +    def inject(self, fault: FaultSpec) -> str:
+  30 +        raise NotImplementedError
+  31 +
+  32 +    def clear(self, fault_id: str) -> None:
+  33 +        raise NotImplementedError
+  34 +
+  35 +    def plant_canary(self, environment: str) -> str:
+  36 +        raise NotImplementedError
+  37 +
+  38 +    def snapshot(self) -> dict[str, Any]:
+  39 +        raise NotImplementedError
+
+◆ Wrote fleetsre/mock/connector.py (+5)
+  1 +"""Connector runtime (D3 stub)."""
+  2 +
+  3 +
+  4 +def map_priority(severity: str, unknown_severity_priority: str) -> int | st
+     r:
+  5 +    raise NotImplementedError
+
+◆ Wrote fleetsre/mock/chronicle_api.py (+11)
+   1 +"""Mock Chronicle API (D3 stub)."""
+   2 +
+   3 +from fastapi import FastAPI
+   4 +
+   5 +from fleetsre.mock.world import World
+   6 +
+   7 +
+   8 +def create_app(
+   9 +    world: World, *, chaos: bool = False, dev_auth: bool = False
+  10 +) -> FastAPI:
+  11 +    raise NotImplementedError
+
+◆ Wrote tests/acceptance/d3/test_d3.py (+271)
+    1 +"""D3 acceptance tests: mock SecOps (local)."""
+    2 +
+    3 +import json
+    4 +import re
+    5 +import subprocess
+    6 +import sys
+    7 +from datetime import datetime, timedelta, timezone
+    8 +from pathlib import Path
+    9 +
+   10 +import pytest
+   11 +import yaml
+   12 +from fastapi.testclient import TestClient
+   13 +
+   14 +from fleetsre.adapters.jsonl import JsonlSink
+   15 +from fleetsre.clock import SimClock
+   16 +from fleetsre.logmodel import LogEntry, read_jsonl
+   17 +from fleetsre.mock.chronicle_api import create_app
+   18 +from fleetsre.mock.connector import map_priority
+   19 +from fleetsre.mock.fleet import load_fleet
+   20 +from fleetsre.mock.world import FaultSpec, World
+   21 +from fleetsre.ports import MemorySink
+   22 +
+   23 +ROOT = Path(__file__).resolve().parents[3]
+   24 +PREFIX = "projects/fleet-sre-demo/locations/us/instances/mock-soar"
+   25 +T0 = datetime(2026, 10, 29, 14, 0, 0, tzinfo=timezone.utc)
+   26 +PROJECT = "fleet-sre-test"
+   27 +
+   28 +_DEPLOYER = {"X-Fleetsre-Identity": "deployer"}
+   29 +_READER = {"X-Fleetsre-Identity": "obs-reader"}
+   30 +
+   31 +_CONNECTOR_PARENT = (
+   32 +    f"{PREFIX}/integrations/MockSentinel/connectors/mock-sentinel-inciden
+       ts"
+   33 +)
+   34 +_JOB_PARENT = f"{PREFIX}/integrations/MockThreatIntel/jobs/sync-indicator
+       s"
+   35 +
+   36 +
+   37 +def _spec(resource: str) -> dict:
+   38 +    path = ROOT / "specs" / "chronicle" / f"{resource}.yaml"
+   39 +    return yaml.safe_load(path.read_text())
+   40 +
+   41 +
+   42 +def _fields(resource: str) -> list:
+   43 +    return list(_spec(resource)["fields"])
+   44 +
+   45 +
+   46 +def _make_world(monkeypatch, seed: int, start: datetime = T0):
+   47 +    monkeypatch.setenv("PROJECT", PROJECT)
+   48 +    fleet = load_fleet(ROOT / "fixtures" / "fleet.yaml")
+   49 +    clock = SimClock(start)
+   50 +    sink = MemorySink()
+   51 +    world = World(fleet, seed, clock, sink)
+   52 +    return world, clock, sink, fleet
+   53 +
+   54 +
+   55 +def _client(world: World, chaos: bool = False) -> TestClient:
+   56 +    app = create_app(world, chaos=chaos, dev_auth=True)
+   57 +    return TestClient(app)
+   58 +
+   59 +
+   60 +def _items(data: dict, *preferred: str) -> list:
+   61 +    for key in preferred:
+   62 +        if isinstance(data.get(key), list):
+   63 +            return data[key]
+   64 +    for value in data.values():
+   65 +        if isinstance(value, list) and all(
+   66 +            isinstance(v, dict) for v in value
+   67 +        ):
+   68 +            return value
+   69 +    raise AssertionError(f"no list found in {sorted(data)}")
+   70 +
+   71 +
+   72 +def _connector_name(instance_id: str) -> str:
+   73 +    return f"{_CONNECTOR_PARENT}/connectorInstances/{instance_id}"
+   74 +
+   75 +
+   76 +def _job_name(instance_id: str) -> str:
+   77 +    return f"{_JOB_PARENT}/jobInstances/{instance_id}"
+   78 +
+   79 +
+   80 +def _env_name(env: str) -> str:
+   81 +    return f"{PREFIX}/environments/{env}"
+   82 +
+   83 +
+   84 +def _integration_name(integration: str, instance: str) -> str:
+   85 +    return f"{PREFIX}/integrations/{integration}/integrationInstances/{in
+       stance}"
+   86 +
+   87 +
+   88 +def _completed(entries, env: str) -> list:
+   89 +    return [
+   90 +        e
+   91 +        for e in entries
+   92 +        if e.jsonPayload.get("event") == "connector.run.completed"
+   93 +        and e.jsonPayload.get("environment") == env
+   94 +    ]
+   95 +
+   96 +
+   97 +def test_d3_t1_connector_shape(monkeypatch):
+   98 +    """D3-T1: GET and list return exactly the doc field set for connector
+       Instances."""
+   99 +    fields = _fields("connectorInstances")
+  100 +    world, clock, sink, fleet = _make_world(monkeypatch, seed=101)
+  101 +    client = _client(world)
+  102 +    resp = client.get(
+  103 +        f"/v1/{_CONNECTOR_PARENT}/connectorInstances", headers=_DEPLOYER
+  104 +    )
+  105 +    assert resp.status_code == 200
+  106 +    items = _items(resp.json(), "connectorInstances")
+  107 +    assert len(items) == 4
+  108 +    for item in items:
+  109 +        assert set(item.keys()) == set(fields)
+  110 +    for item in items:
+  111 +        got = client.get(f"/v1/{item['name']}", headers=_DEPLOYER)
+  112 +        assert got.status_code == 200
+  113 +        assert set(got.json().keys()) == set(fields)
+  114 +
+  115 +
+  116 +def test_d3_t2_resource_names(monkeypatch):
+  117 +    """D3-T2: Every name uses the fixed prefix even with $PROJECT set."""
+  118 +    world, clock, sink, fleet = _make_world(monkeypatch, seed=102)
+  119 +    client = _client(world)
+  120 +    alpha = _connector_name("alpha-sentinel")
+  121 +    resp = client.post(
+  122 +        f"/v1/{alpha}:setLogsCollection",
+  123 +        json={"enabled": True},
+  124 +        headers=_DEPLOYER,
+  125 +    )
+  126 +    assert resp.status_code == 200
+  127 +    world.step_until(T0 + timedelta(seconds=360))
+  128 +    pats = {
+  129 +        "env": re.compile(rf"^{re.escape(PREFIX)}/environments/[^/]+$"),
+  130 +        "integration": re.compile(
+  131 +            rf"^{re.escape(PREFIX)}/integrations/[^/]+"
+  132 +            r"/integrationInstances/[^/]+$"
+  133 +        ),
+  134 +        "connector": re.compile(
+  135 +            rf"^{re.escape(PREFIX)}/integrations/[^/]+/connectors/[^/]+"
+  136 +            r"/connectorInstances/[^/]+$"
+  137 +        ),
+  138 +        "clog": re.compile(
+  139 +            rf"^{re.escape(PREFIX)}/integrations/[^/]+/connectors/[^/]+"
+  140 +            r"/connectorInstances/[^/]+/logs/[^/]+$"
+  141 +        ),
+  142 +        "job": re.compile(
+  143 +            rf"^{re.escape(PREFIX)}/integrations/[^/]+/jobs/[^/]+"
+  144 +            r"/jobInstances/[^/]+$"
+  145 +        ),
+  146 +        "jlog": re.compile(
+  147 +            rf"^{re.escape(PREFIX)}/integrations/[^/]+/jobs/[^/]+"
+  148 +            r"/jobInstances/[^/]+/logs/[^/]+$"
+  149 +        ),
+  150 +    }
+  151 +    envs = _items(
+  152 +        client.get(f"/v1/{PREFIX}/environments", headers=_DEPLOYER).json(
+       ),
+  153 +        "environments",
+  154 +    )
+  155 +    assert len(envs) == 4
+  156 +    for item in envs:
+  157 +        assert pats["env"].match(item["name"])
+  158 +    for integ in ("MockSentinel", "MockThreatIntel"):
+  159 +        resp = client.get(
+  160 +            f"/v1/{PREFIX}/integrations/{integ}/integrationInstances",
+  161 +            headers=_DEPLOYER,
+  162 +        )
+  163 +        assert resp.status_code == 200
+  164 +        for item in _items(resp.json(), "integrationInstances"):
+  165 +            assert pats["integration"].match(item["name"])
+  166 +    conns = _items(
+  167 +        client.get(
+  168 +            f"/v1/{_CONNECTOR_PARENT}/connectorInstances",
+  169 +            headers=_DEPLOYER,
+  170 +        ).json(),
+  171 +        "connectorInstances",
+  172 +    )
+  173 +    for item in conns:
+  174 +        assert pats["connector"].match(item["name"])
+  175 +    jobs = _items(
+  176 +        client.get(f"/v1/{_JOB_PARENT}/jobInstances", headers=_DEPLOYER).
+       json(),
+  177 +        "jobInstances",
+  178 +    )
+  179 +    for item in jobs:
+  180 +        assert pats["job"].match(item["name"])
+  181 +    clogs = _items(
+  182 +        client.get(f"/v1/{alpha}/logs", headers=_DEPLOYER).json(), "logs"
+  183 +    )
+  184 +    assert len(clogs) > 0
+  185 +    for rec in clogs:
+  186 +        assert pats["clog"].match(rec["name"])
+  187 +    jlogs = _items(
+  188 +        client.get(
+  189 +            f"/v1/{_job_name('alpha-intel')}/logs", headers=_DEPLOYER
+  190 +        ).json(),
+  191 +        "logs",
+  192 +    )
+  193 +    assert len(jlogs) > 0
+  194 +    for rec in jlogs:
+  195 +        assert pats["jlog"].match(rec["name"])
+  196 +
+  197 +
+  198 +def test_d3_t3_enums_redaction(monkeypatch):
+  199 +    """D3-T3: Status and ParamType enums and PASSWORD redaction."""
+  200 +    spec = _spec("connectorInstances")
+  201 +    status_enum = spec["enums"]["status"]
+  202 +    param_enum = spec["enums"]["paramType"]
+  203 +    integ_param_enum = _spec("integrationInstances")["enums"]["paramType"
+       ]
+  204 +    world, clock, sink, fleet = _make_world(monkeypatch, seed=103)
+  205 +    client = _client(world)
+  206 +    resp = client.get(
+  207 +        f"/v1/{_CONNECTOR_PARENT}/connectorInstances", headers=_DEPLOYER
+  208 +    )
+  209 +    items = _items(resp.json(), "connectorInstances")
+  210 +    assert len(items) == 4
+  211 +    for item in items:
+  212 +        assert item["status"] in status_enum
+  213 +        for param in item["parameters"]:
+  214 +            assert param["type"] in param_enum
+  215 +            if param["type"] == "PASSWORD":
+  216 +                assert param["value"] == "********"
+  217 +    for integ in ("MockSentinel", "MockThreatIntel"):
+  218 +        resp = client.get(
+  219 +            f"/v1/{PREFIX}/integrations/{integ}/integrationInstances",
+  220 +            headers=_DEPLOYER,
+  221 +        )
+  222 +        assert resp.status_code == 200
+  223 +        for item in _items(resp.json(), "integrationInstances"):
+  224 +            for param in item["parameters"]:
+  225 +                assert param["type"] in integ_param_enum
+  226 +                if param["type"] == "PASSWORD":
+  227 +                    assert param["value"] == "********"
+  228 +
+  229 +
+  230 +def test_d3_t4_patch_semantics(monkeypatch):
+  231 +    """D3-T4: PATCH changes only enabled, needs integrationVersion, bumps
+        version."""
+  232 +    world, clock, sink, fleet = _make_world(monkeypatch, seed=104)
+  233 +    client = _client(world)
+  234 +    name = _connector_name("alpha-sentinel")
+  235 +    before = client.get(f"/v1/{name}", headers=_DEPLOYER).json()
+  236 +    old_version = int(before["version"])
+  237 +    old_enabled = before["enabled"]
+  238 +    good = {"enabled": (not old_enabled), "integrationVersion": "1.0"}
+  239 +    # integrationVersion value comes from the GET body.
+  240 +    good["integrationVersion"] = before["integrationVersion"]
+  241 +    resp = client.patch(
+  242 +        f"/v1/{name}?updateMask=enabled", json=good, headers=_DEPLOYER
+  243 +    )
+  244 +    assert resp.status_code == 200
+  245 +    after = resp.json()
+  246 +    assert after["enabled"] == (not old_enabled)
+  247 +    assert int(after["version"]) == old_version + 1
+  248 +    for key in before:
+  249 +        if key in ("enabled", "version"):
+  250 +            continue
+  251 +        assert after[key] == before[key]
+  252 +    bad = client.patch(
+  253 +        f"/v1/{name}?updateMask=enabled",
+  254 +        json={"enabled": old_enabled},
+  255 +        headers=_DEPLOYER,
+  256 +    )
+  257 +    assert bad.status_code == 400
+  258 +    err = bad.json()["error"]
+  259 +    assert err["code"] == 400
+  260 +    assert err["status"] == "INVALID_ARGUMENT"
+  261 +    assert isinstance(err["message"], str) and err["message"]
+  262 +    second = client.patch(
+  263 +        f"/v1/{name}?updateMask=enabled",
+  264 +        json={
+  265 +            "enabled": old_enabled,
+  266 +            "integrationVersion": before["integrationVersion"],
+  267 +        },
+  268 +        headers=_DEPLOYER,
+  269 +    )
+  270 +    assert second.status_code == 200
+  271 +    assert int(second.json()["version"]) == old_version + 2
+
+◆ Edited tests/acceptance/d3/test_d3.py (+219 −0)
+  271      assert int(second.json()["version"]) == old_version + 2
+  272 +
+  273 +
+  274 +def test_d3_t5_run_on_demand(monkeypatch):
+  275 +    """D3-T5: runOnDemand adds one run and new ConnectorLogs, schedule ke
+       pt."""
+  276 +    # Request {"connectorInstance": ...} and response
+  277 +    # {"debugOutput", "success", "sampleCases"} are from mocks.md §4.1:
+  278 +    # https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/
+       projects.locations.instances.integrations.connectors.connectorInstances/r
+       unOnDemand
+  279 +    world, clock, sink, fleet = _make_world(monkeypatch, seed=105)
+  280 +    client = _client(world)
+  281 +    target = _connector_name("alpha-sentinel")
+  282 +    resp = client.post(
+  283 +        f"/v1/{target}:setLogsCollection",
+  284 +        json={"enabled": True},
+  285 +        headers=_DEPLOYER,
+  286 +    )
+  287 +    assert resp.status_code == 200
+  288 +    world.step_until(T0 + timedelta(seconds=150))
+  289 +    alpha_before = len(_completed(sink.entries, "alpha"))
+  290 +    bravo_before = len(_completed(sink.entries, "bravo"))
+  291 +    assert alpha_before == bravo_before
+  292 +    logs_before = _items(
+  293 +        client.get(f"/v1/{target}/logs", headers=_DEPLOYER).json(), "logs
+       "
+  294 +    )
+  295 +    get_body = client.get(f"/v1/{target}", headers=_DEPLOYER).json()
+  296 +    on_demand_at = clock.now()
+  297 +    resp = client.post(
+  298 +        f"/v1/{target}:runOnDemand",
+  299 +        json={"connectorInstance": get_body},
+  300 +        headers=_DEPLOYER,
+  301 +    )
+  302 +    assert resp.status_code == 200
+  303 +    assert set(resp.json().keys()) == {
+  304 +        "debugOutput",
+  305 +        "success",
+  306 +        "sampleCases",
+  307 +    }
+  308 +    assert len(_completed(sink.entries, "alpha")) == alpha_before + 1
+  309 +    assert len(_completed(sink.entries, "bravo")) == bravo_before
+  310 +    logs_mid = _items(
+  311 +        client.get(f"/v1/{target}/logs", headers=_DEPLOYER).json(), "logs
+       "
+  312 +    )
+  313 +    assert len(logs_mid) > len(logs_before)
+  314 +    world.step_until(T0 + timedelta(seconds=300))
+  315 +    alpha_all = sorted(
+  316 +        _completed(sink.entries, "alpha"), key=lambda e: e.timestamp
+  317 +    )
+  318 +    bravo_all = sorted(
+  319 +        _completed(sink.entries, "bravo"), key=lambda e: e.timestamp
+  320 +    )
+  321 +    assert len(alpha_all) == len(bravo_all) + 1
+  322 +    extra = [e for e in alpha_all if e.timestamp == on_demand_at]
+  323 +    assert len(extra) == 1
+  324 +    regular = [e for e in alpha_all if e.timestamp != on_demand_at]
+  325 +    assert len(regular) == len(bravo_all)
+  326 +    for first, second in zip(regular, regular[1:]):
+  327 +        delta = (second.timestamp - first.timestamp).total_seconds()
+  328 +        assert delta == 60
+  329 +
+  330 +
+  331 +def test_d3_t6_set_logs_collection(monkeypatch):
+  332 +    """D3-T6: Collection off by default, 3h period, clear and disable."""
+  333 +    # Request {"enabled": bool} and response {"logEnableExpirationTime":
+       ...}
+  334 +    # are from mocks.md §4.1:
+  335 +    # https://docs.cloud.google.com/chronicle/docs/reference/rest/v1/proj
+       ects.locations.instances.integrations.connectors.connectorInstances/setLo
+       gsCollection
+  336 +    # The 3-hour period is from:
+  337 +    # https://docs.cloud.google.com/chronicle/docs/soar/ingest/connectors
+       /view-connector-logs
+  338 +    world, clock, sink, fleet = _make_world(monkeypatch, seed=106)
+  339 +    client = _client(world)
+  340 +    alpha = _connector_name("alpha-sentinel")
+  341 +    bravo = _connector_name("bravo-sentinel")
+  342 +    world.step_until(T0 + timedelta(seconds=180))
+  343 +    empty = _items(
+  344 +        client.get(f"/v1/{alpha}/logs", headers=_DEPLOYER).json(), "logs"
+  345 +    )
+  346 +    assert empty == []
+  347 +    enable_at = clock.now()
+  348 +    resp = client.post(
+  349 +        f"/v1/{alpha}:setLogsCollection",
+  350 +        json={"enabled": True},
+  351 +        headers=_DEPLOYER,
+  352 +    )
+  353 +    assert resp.status_code == 200
+  354 +    expected_ms = int(enable_at.timestamp() * 1000) + 3 * 3600 * 1000
+  355 +    assert int(resp.json()["logEnableExpirationTime"]) == expected_ms
+  356 +    got = client.get(f"/v1/{alpha}", headers=_DEPLOYER).json()
+  357 +    assert str(got["loggingEnabledUntilUnixMs"]) == str(
+  358 +        resp.json()["logEnableExpirationTime"]
+  359 +    )
+  360 +    world.step_until(T0 + timedelta(seconds=480))
+  361 +    inside = _items(
+  362 +        client.get(f"/v1/{alpha}/logs", headers=_DEPLOYER).json(), "logs"
+  363 +    )
+  364 +    assert len(inside) > 0
+  365 +    assert any(rec["logLevel"] == "DEBUG" for rec in inside)
+  366 +    names_before = {rec["name"] for rec in inside}
+  367 +    enable2_at = clock.now()
+  368 +    resp2 = client.post(
+  369 +        f"/v1/{alpha}:setLogsCollection",
+  370 +        json={"enabled": True},
+  371 +        headers=_DEPLOYER,
+  372 +    )
+  373 +    assert resp2.status_code == 200
+  374 +    cleared = _items(
+  375 +        client.get(f"/v1/{alpha}/logs", headers=_DEPLOYER).json(), "logs"
+  376 +    )
+  377 +    assert cleared == []
+  378 +    world.step_until(enable2_at + timedelta(seconds=120))
+  379 +    after_second = _items(
+  380 +        client.get(f"/v1/{alpha}/logs", headers=_DEPLOYER).json(), "logs"
+  381 +    )
+  382 +    assert len(after_second) > 0
+  383 +    assert names_before.isdisjoint({rec["name"] for rec in after_second})
+  384 +    end2 = enable2_at + timedelta(hours=3)
+  385 +    world.step_until(end2 - timedelta(seconds=60))
+  386 +    pre_end = _items(
+  387 +        client.get(f"/v1/{alpha}/logs", headers=_DEPLOYER).json(), "logs"
+  388 +    )
+  389 +    assert len(pre_end) > 0
+  390 +    world.step_until(end2 + timedelta(seconds=120))
+  391 +    post_end = _items(
+  392 +        client.get(f"/v1/{alpha}/logs", headers=_DEPLOYER).json(), "logs"
+  393 +    )
+  394 +    assert len(post_end) == len(pre_end)
+  395 +    client.post(
+  396 +        f"/v1/{bravo}:setLogsCollection",
+  397 +        json={"enabled": True},
+  398 +        headers=_DEPLOYER,
+  399 +    )
+  400 +    world.step_until(clock.now() + timedelta(seconds=120))
+  401 +    active = _items(
+  402 +        client.get(f"/v1/{bravo}/logs", headers=_DEPLOYER).json(), "logs"
+  403 +    )
+  404 +    assert len(active) > 0
+  405 +    off = client.post(
+  406 +        f"/v1/{bravo}:setLogsCollection",
+  407 +        json={"enabled": False},
+  408 +        headers=_DEPLOYER,
+  409 +    )
+  410 +    assert off.status_code == 200
+  411 +    world.step_until(clock.now() + timedelta(seconds=120))
+  412 +    stopped = _items(
+  413 +        client.get(f"/v1/{bravo}/logs", headers=_DEPLOYER).json(), "logs"
+  414 +    )
+  415 +    assert len(stopped) == len(active)
+  416 +
+  417 +
+  418 +def test_d3_t7_connector_logs_list(monkeypatch):
+  419 +    """D3-T7: ConnectorLog fields, newest first and pagination."""
+  420 +    fields = _fields("connectorInstanceLogs")
+  421 +    levels = _spec("connectorInstanceLogs")["enums"]["logLevel"]
+  422 +    world, clock, sink, fleet = _make_world(monkeypatch, seed=107)
+  423 +    client = _client(world)
+  424 +    target = _connector_name("alpha-sentinel")
+  425 +    resp = client.post(
+  426 +        f"/v1/{target}:setLogsCollection",
+  427 +        json={"enabled": True},
+  428 +        headers=_DEPLOYER,
+  429 +    )
+  430 +    assert resp.status_code == 200
+  431 +    world.step_until(T0 + timedelta(seconds=600))
+  432 +    full = _items(
+  433 +        client.get(f"/v1/{target}/logs?pageSize=1000", headers=_DEPLOYER)
+       .json(),
+  434 +        "logs",
+  435 +    )
+  436 +    assert len(full) >= 5
+  437 +    for rec in full:
+  438 +        assert set(rec.keys()) == set(fields)
+  439 +        assert rec["logLevel"] in levels
+  440 +    times = [int(rec["time"]) for rec in full]
+  441 +    assert times == sorted(times, reverse=True)
+  442 +    seen: list = []
+  443 +    token = [REDACTED]
+  444 +    while True:
+  445 +        url = f"/v1/{target}/logs?pageSize=3"
+  446 +        if token:[REDACTED]
+  447 +            url += f"&pageToken={token}"
+  448 +        page_resp = client.get(url, headers=_DEPLOYER)
+  449 +        assert page_resp.status_code == 200
+  450 +        data = page_resp.json()
+  451 +        page = _items(data, "logs")
+  452 +        assert len(page) <= 3
+  453 +        seen.extend(page)
+  454 +        token = [REDACTED]
+  455 +        if not token:[REDACTED]
+  456 +            break
+  457 +    assert [rec["name"] for rec in seen] == [rec["name"] for rec in full]
+  458 +    assert len({rec["name"] for rec in seen}) == len(seen)
+  459 +
+  460 +
+  461 +def test_d3_t8_execute_test(monkeypatch):
+  462 +    """D3-T8: executeTest successful flag and unchanged snapshot."""
+  463 +    # Empty request and {"successful", "message"} response are from §4.1:
+  464 +    # https://docs.cloud.google.com/chronicle/docs/reference/rest/v1/proj
+       ects.locations.instances.integrations.integrationInstances/executeTest
+  465 +    world, clock, sink, fleet = _make_world(monkeypatch, seed=108)
+  466 +    client = _client(world)
+  467 +    bravo = _integration_name("MockSentinel", "bravo")
+  468 +    alpha = _integration_name("MockSentinel", "alpha")
+  469 +    before = world.snapshot()
+  470 +    resp = client.post(f"/v1/{bravo}:executeTest", json={}, headers=_DEPL
+       OYER)
+  471 +    assert resp.status_code == 200
+  472 +    assert "successful" in resp.json()
+  473 +    assert "success" not in resp.json()
+  474 +    assert resp.json()["successful"] is True
+  475 +    assert isinstance(resp.json()["message"], str)
+  476 +    assert world.snapshot() == before
+  477 +    world.inject(FaultSpec(type="credential_expiry", environment="bravo")
+       )
+  478 +    before_fault = world.snapshot()
+  479 +    failed = client.post(
+  480 +        f"/v1/{bravo}:executeTest", json={}, headers=_DEPLOYER
+  481 +    )
+  482 +    assert failed.status_code == 200
+  483 +    assert failed.json()["successful"] is False
+  484 +    assert isinstance(failed.json()["message"], str)
+  485 +    assert failed.json()["message"]
+  486 +    assert world.snapshot() == before_fault
+  487 +    sibling = client.post(
+  488 +        f"/v1/{alpha}:executeTest", json={}, headers=_DEPLOYER
+  489 +    )
+  490 +    assert sibling.json()["successful"] is True
+
+◆ Core API tests drafted — now covering runs, volumes, and determinism.
+
+◆ Edited tests/acceptance/d3/test_d3.py (+157 −0)
+  490      assert sibling.json()["successful"] is True
+  491 +
+  492 +
+  493 +def test_d3_t9_job_instances(monkeypatch):
+  494 +    """D3-T9: Job shape, patch, runOnDemand and log status."""
+  495 +    # runOnDemand request {"parameters": [...]} and response {"success":
+       bool}
+  496 +    # are from mocks.md §4.1:
+  497 +    # https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/
+       projects.locations.instances.integrations.jobs.jobInstances/runOnDemand
+  498 +    fields = _fields("jobInstances")
+  499 +    log_fields = _fields("jobInstanceLogs")
+  500 +    log_status = _spec("jobInstanceLogs")["enums"]["status"]
+  501 +    world, clock, sink, fleet = _make_world(monkeypatch, seed=109)
+  502 +    client = _client(world)
+  503 +    listed = _items(
+  504 +        client.get(f"/v1/{_JOB_PARENT}/jobInstances", headers=_DEPLOYER).
+       json(),
+  505 +        "jobInstances",
+  506 +    )
+  507 +    assert len(listed) == 2
+  508 +    for item in listed:
+  509 +        assert set(item.keys()) == set(fields)
+  510 +    name = _job_name("alpha-intel")
+  511 +    before = client.get(f"/v1/{name}", headers=_DEPLOYER).json()
+  512 +    assert set(before.keys()) == set(fields)
+  513 +    off = client.patch(
+  514 +        f"/v1/{name}?updateMask=enabled",
+  515 +        json={"enabled": False},
+  516 +        headers=_DEPLOYER,
+  517 +    )
+  518 +    assert off.status_code == 200
+  519 +    assert off.json()["enabled"] is False
+  520 +    on = client.patch(
+  521 +        f"/v1/{name}?updateMask=enabled",
+  522 +        json={"enabled": True},
+  523 +        headers=_DEPLOYER,
+  524 +    )
+  525 +    assert on.status_code == 200
+  526 +    bad = client.patch(
+  527 +        f"/v1/{name}?updateMask=intervalSeconds",
+  528 +        json={"intervalSeconds": 30},
+  529 +        headers=_DEPLOYER,
+  530 +    )
+  531 +    assert bad.status_code == 400
+  532 +    world.step_until(T0 + timedelta(seconds=300))
+  533 +
+  534 +    def _jobs(env: str) -> list:
+  535 +        return [
+  536 +            e
+  537 +            for e in sink.entries
+  538 +            if e.jsonPayload.get("event") == "job.run.completed"
+  539 +            and e.jsonPayload.get("environment") == env
+  540 +        ]
+  541 +
+  542 +    alpha_before = len(_jobs("alpha"))
+  543 +    bravo_before = len(_jobs("bravo"))
+  544 +    run = client.post(
+  545 +        f"/v1/{name}:runOnDemand", json={}, headers=_DEPLOYER
+  546 +    )
+  547 +    assert run.status_code == 200
+  548 +    assert run.json()["success"] is True
+  549 +    assert len(_jobs("alpha")) == alpha_before + 1
+  550 +    assert len(_jobs("bravo")) == bravo_before
+  551 +    world.step_until(T0 + timedelta(seconds=600))
+  552 +    logs = _items(
+  553 +        client.get(f"/v1/{name}/logs", headers=_DEPLOYER).json(), "logs"
+  554 +    )
+  555 +    assert len(logs) > 0
+  556 +    for rec in logs:
+  557 +        assert set(rec.keys()) == set(log_fields)
+  558 +        assert rec["status"] in log_status
+  559 +
+  560 +
+  561 +def test_d3_t10_environments(monkeypatch):
+  562 +    """D3-T10: Environments list has the four tenants with doc fields."""
+  563 +    fields = _fields("environments")
+  564 +    world, clock, sink, fleet = _make_world(monkeypatch, seed=110)
+  565 +    client = _client(world)
+  566 +    resp = client.get(f"/v1/{PREFIX}/environments", headers=_DEPLOYER)
+  567 +    assert resp.status_code == 200
+  568 +    items = _items(resp.json(), "environments")
+  569 +    assert len(items) == 4
+  570 +    ids = set()
+  571 +    for item in items:
+  572 +        assert set(item.keys()) == set(fields)
+  573 +        assert item["name"].startswith(PREFIX + "/environments/")
+  574 +        ids.add(item["name"].rsplit("/", 1)[-1])
+  575 +    assert ids == {"alpha", "bravo", "charlie", "canary"}
+  576 +
+  577 +
+  578 +def test_d3_t11_errors(monkeypatch):
+  579 +    """D3-T11: Unknown resource returns 404 NOT_FOUND."""
+  580 +    world, clock, sink, fleet = _make_world(monkeypatch, seed=111)
+  581 +    client = _client(world)
+  582 +    resp = client.get(
+  583 +        f"/v1/{PREFIX}/environments/no-such-env", headers=_DEPLOYER
+  584 +    )
+  585 +    assert resp.status_code == 404
+  586 +    body = resp.json()
+  587 +    assert set(body.keys()) == {"error"}
+  588 +    assert set(body["error"].keys()) == {"code", "message", "status"}
+  589 +    assert body["error"]["code"] == 404
+  590 +    assert body["error"]["status"] == "NOT_FOUND"
+  591 +    assert isinstance(body["error"]["message"], str)
+  592 +    assert body["error"]["message"]
+  593 +
+  594 +
+  595 +def test_d3_t12_run_cadence(monkeypatch):
+  596 +    """D3-T12: Hourly connector and job cadence within tolerance."""
+  597 +    world, clock, sink, fleet = _make_world(monkeypatch, seed=112)
+  598 +    world.step_until(T0 + timedelta(seconds=3600))
+  599 +    for inst in (
+  600 +        "alpha-sentinel",
+  601 +        "bravo-sentinel",
+  602 +        "charlie-sentinel",
+  603 +        "canary-sentinel",
+  604 +    ):
+  605 +        count = sum(
+  606 +            1
+  607 +            for e in sink.entries
+  608 +            if e.jsonPayload.get("event") == "connector.run.completed"
+  609 +            and e.labels.get("connector_instance") == inst
+  610 +        )
+  611 +        assert 59 <= count <= 61
+  612 +    for env in ("alpha", "bravo"):
+  613 +        count = sum(
+  614 +            1
+  615 +            for e in sink.entries
+  616 +            if e.jsonPayload.get("event") == "job.run.completed"
+  617 +            and e.jsonPayload.get("environment") == env
+  618 +        )
+  619 +        assert 11 <= count <= 13
+  620 +
+  621 +
+  622 +def test_d3_t13_alert_volume(monkeypatch):
+  623 +    """D3-T13: Six-hour alert volume and uneven hourly spread."""
+  624 +    world, clock, sink, fleet = _make_world(monkeypatch, seed=113)
+  625 +    world.step_until(T0 + timedelta(seconds=6 * 3600))
+  626 +
+  627 +    def _count(env: str) -> int:
+  628 +        return sum(
+  629 +            1
+  630 +            for e in sink.entries
+  631 +            if e.jsonPayload.get("event") == "alert.ingested"
+  632 +            and e.jsonPayload.get("environment") == env
+  633 +        )
+  634 +
+  635 +    assert 504 <= _count("alpha") <= 936
+  636 +    assert 126 <= _count("bravo") <= 234
+  637 +    assert 2 <= _count("charlie") <= 30
+  638 +    buckets = [0] * 6
+  639 +    for entry in sink.entries:
+  640 +        if (
+  641 +            entry.jsonPayload.get("event") == "alert.ingested"
+  642 +            and entry.jsonPayload.get("environment") == "alpha"
+  643 +        ):
+  644 +            hour = int((entry.timestamp - T0).total_seconds() // 3600)
+  645 +            if 0 <= hour < 6:
+  646 +                buckets[hour] += 1
+  647 +    assert len(set(buckets)) > 1
+
+◆ Edited tests/acceptance/d3/test_d3.py (+275 −0)
+  647      assert len(set(buckets)) > 1
+  648 +
+  649 +
+  650 +def test_d3_t14_ingestion_records(monkeypatch):
+  651 +    """D3-T14: Unique correlation ids and integer priorities."""
+  652 +    world, clock, sink, fleet = _make_world(monkeypatch, seed=114)
+  653 +    world.step_until(T0 + timedelta(seconds=3600))
+  654 +    etl = [
+  655 +        e
+  656 +        for e in sink.entries
+  657 +        if e.jsonPayload.get("event") == "alert.ingested"
+  658 +    ]
+  659 +    assert len(etl) > 0
+  660 +    corr = [entry.labels["correlation_id"] for entry in etl]
+  661 +    assert len(set(corr)) == len(corr)
+  662 +    for entry in etl:
+  663 +        priority = entry.jsonPayload["alert"]["priority"]
+  664 +        assert isinstance(priority, int)
+  665 +        assert priority in {-1, 40, 60, 80, 100}
+  666 +
+  667 +
+  668 +def test_d3_t15_severity_map(monkeypatch):
+  669 +    """D3-T15: map_priority units and F3 end to end with patch."""
+  670 +    assert map_priority("High", "") == 80
+  671 +    assert map_priority("Medium", "") == 60
+  672 +    assert map_priority("Low", "") == 40
+  673 +    assert map_priority("Informational", "") == -1
+  674 +    assert map_priority("Critical", "") == "Critical"
+  675 +    patched_value = map_priority("Critical", "100")
+  676 +    assert patched_value == 100
+  677 +    assert isinstance(patched_value, int)
+  678 +    world, clock, sink, fleet = _make_world(monkeypatch, seed=115)
+  679 +    client = _client(world)
+  680 +    world.inject(
+  681 +        FaultSpec(
+  682 +            type="severity_drift", environment="alpha", params={"rate": 0
+       .5}
+  683 +        )
+  684 +    )
+  685 +    world.step_until(T0 + timedelta(seconds=600))
+  686 +
+  687 +    def _alpha_alerts():
+  688 +        return [
+  689 +            e
+  690 +            for e in sink.entries
+  691 +            if e.jsonPayload.get("event") == "alert.ingested"
+  692 +            and e.jsonPayload.get("environment") == "alpha"
+  693 +        ]
+  694 +
+  695 +    before = _alpha_alerts()
+  696 +    assert len(before) > 0
+  697 +    assert any(
+  698 +        isinstance(entry.jsonPayload["alert"]["priority"], str)
+  699 +        for entry in before
+  700 +    )
+  701 +    name = _connector_name("alpha-sentinel")
+  702 +    body = client.get(f"/v1/{name}", headers=_DEPLOYER).json()
+  703 +    params = [dict(p) for p in body["parameters"]]
+  704 +    for param in params:
+  705 +        if param["displayName"] == "Unknown Severity Priority":
+  706 +            param["value"] = "100"
+  707 +    patched = client.patch(
+  708 +        f"/v1/{name}?updateMask=parameters",
+  709 +        json={
+  710 +            "parameters": params,
+  711 +            "integrationVersion": body["integrationVersion"],
+  712 +        },
+  713 +        headers=_DEPLOYER,
+  714 +    )
+  715 +    assert patched.status_code == 200
+  716 +    patch_at = clock.now()
+  717 +    world.step_until(patch_at + timedelta(seconds=600))
+  718 +    new = [e for e in _alpha_alerts() if e.timestamp > patch_at]
+  719 +    assert len(new) > 0
+  720 +    for entry in new:
+  721 +        assert isinstance(entry.jsonPayload["alert"]["priority"], int)
+  722 +
+  723 +
+  724 +def test_d3_t16_determinism(monkeypatch, tmp_path):
+  725 +    """D3-T16: Same seed is byte-identical, different seed differs."""
+  726 +    monkeypatch.setenv("PROJECT", PROJECT)
+  727 +    fleet_path = ROOT / "fixtures" / "fleet.yaml"
+  728 +    first = tmp_path / "first.jsonl"
+  729 +    fleet = load_fleet(fleet_path)
+  730 +    clock = SimClock(T0)
+  731 +    sink = JsonlSink(str(first))
+  732 +    world = World(fleet, 42, clock, sink)
+  733 +    world.inject(
+  734 +        FaultSpec(
+  735 +            type="severity_drift", environment="alpha", params={"rate": 0
+       .5}
+  736 +        )
+  737 +    )
+  738 +    world.step_until(T0 + timedelta(seconds=7200))
+  739 +    second = tmp_path / "second.jsonl"
+  740 +    script = (
+  741 +        "import sys;"
+  742 +        "from datetime import datetime, timedelta, timezone;"
+  743 +        "fleet_path, out_path, seed_s = sys.argv[1:4];"
+  744 +        "from fleetsre.adapters.jsonl import JsonlSink;"
+  745 +        "from fleetsre.clock import SimClock;"
+  746 +        "from fleetsre.mock.fleet import load_fleet;"
+  747 +        "from fleetsre.mock.world import FaultSpec, World;"
+  748 +        "start = datetime(2026, 10, 29, 14, 0, 0, tzinfo=timezone.utc);"
+  749 +        "fleet = load_fleet(fleet_path);"
+  750 +        "clock = SimClock(start);"
+  751 +        "sink = JsonlSink(out_path);"
+  752 +        "world = World(fleet, int(seed_s), clock, sink);"
+  753 +        "world.inject(FaultSpec(type='severity_drift',"
+  754 +        " environment='alpha', params={'rate': 0.5}));"
+  755 +        "world.step_until(start + timedelta(seconds=7200))"
+  756 +    )
+  757 +    proc = subprocess.run(
+  758 +        [
+  759 +            "env",
+  760 +            f"PROJECT={PROJECT}",
+  761 +            "PYTHONHASHSEED=4242",
+  762 +            sys.executable,
+  763 +            "-c",
+  764 +            script,
+  765 +            str(fleet_path),
+  766 +            str(second),
+  767 +            "42",
+  768 +        ],
+  769 +        cwd=ROOT,
+  770 +        capture_output=True,
+  771 +        text=True,
+  772 +        timeout=120,
+  773 +    )
+  774 +    assert proc.returncode == 0, proc.stderr
+  775 +    assert first.read_bytes() == second.read_bytes()
+  776 +    third = tmp_path / "third.jsonl"
+  777 +    clock3 = SimClock(T0)
+  778 +    sink3 = JsonlSink(str(third))
+  779 +    world3 = World(load_fleet(fleet_path), 43, clock3, sink3)
+  780 +    world3.inject(
+  781 +        FaultSpec(
+  782 +            type="severity_drift", environment="alpha", params={"rate": 0
+       .5}
+  783 +        )
+  784 +    )
+  785 +    world3.step_until(T0 + timedelta(seconds=7200))
+  786 +    assert third.read_bytes() != first.read_bytes()
+  787 +
+  788 +
+  789 +def test_d3_t17_f1_stall(monkeypatch):
+  790 +    """D3-T17: Connector stall silences python and logs until restart."""
+  791 +    world, clock, sink, fleet = _make_world(monkeypatch, seed=117)
+  792 +    client = _client(world)
+  793 +    target = _connector_name("alpha-sentinel")
+  794 +    resp = client.post(
+  795 +        f"/v1/{target}:setLogsCollection",
+  796 +        json={"enabled": True},
+  797 +        headers=_DEPLOYER,
+  798 +    )
+  799 +    assert resp.status_code == 200
+  800 +    world.step_until(T0 + timedelta(seconds=180))
+  801 +
+  802 +    def _python(env: str):
+  803 +        return [
+  804 +            e
+  805 +            for e in sink.entries
+  806 +            if e.jsonPayload.get("environment") == env
+  807 +            and e.resource.labels.get("container_name") == "python"
+  808 +            and str(e.jsonPayload.get("event", "")).startswith("connector
+       .")
+  809 +        ]
+  810 +
+  811 +    logs_before = _items(
+  812 +        client.get(f"/v1/{target}/logs", headers=_DEPLOYER).json(), "logs
+       "
+  813 +    )
+  814 +    world.inject(FaultSpec(type="connector_stall", environment="alpha"))
+  815 +    fault_at = clock.now()
+  816 +    world.step_until(fault_at + timedelta(seconds=300))
+  817 +    stalled = [e for e in _python("alpha") if e.timestamp > fault_at]
+  818 +    assert stalled == []
+  819 +    logs_stalled = _items(
+  820 +        client.get(f"/v1/{target}/logs", headers=_DEPLOYER).json(), "logs
+       "
+  821 +    )
+  822 +    assert len(logs_stalled) == len(logs_before)
+  823 +    status = client.get(f"/v1/{target}", headers=_DEPLOYER).json()
+  824 +    assert status["status"] == "LIVE"
+  825 +    sibling = [
+  826 +        e
+  827 +        for e in _completed(sink.entries, "bravo")
+  828 +        if e.timestamp > fault_at
+  829 +    ]
+  830 +    assert 4 <= len(sibling) <= 6
+  831 +    body = client.get(f"/v1/{target}", headers=_DEPLOYER).json()
+  832 +    off = client.patch(
+  833 +        f"/v1/{target}?updateMask=enabled",
+  834 +        json={
+  835 +            "enabled": False,
+  836 +            "integrationVersion": body["integrationVersion"],
+  837 +        },
+  838 +        headers=_DEPLOYER,
+  839 +    )
+  840 +    assert off.status_code == 200
+  841 +    on = client.patch(
+  842 +        f"/v1/{target}?updateMask=enabled",
+  843 +        json={
+  844 +            "enabled": True,
+  845 +            "integrationVersion": body["integrationVersion"],
+  846 +        },
+  847 +        headers=_DEPLOYER,
+  848 +    )
+  849 +    assert on.status_code == 200
+  850 +    clear_at = clock.now()
+  851 +    world.step_until(clear_at + timedelta(seconds=120))
+  852 +    resumed = [e for e in _python("alpha") if e.timestamp > clear_at]
+  853 +    assert len(resumed) >= 2
+  854 +    logs_after = _items(
+  855 +        client.get(f"/v1/{target}/logs", headers=_DEPLOYER).json(), "logs
+       "
+  856 +    )
+  857 +    assert len(logs_after) > len(logs_stalled)
+  858 +
+  859 +
+  860 +def test_d3_t18_f2_credential(monkeypatch):
+  861 +    """D3-T18: Credential expiry warns every run and stops ingestion."""
+  862 +    world, clock, sink, fleet = _make_world(monkeypatch, seed=118)
+  863 +    client = _client(world)
+  864 +    target = _connector_name("bravo-sentinel")
+  865 +    resp = client.post(
+  866 +        f"/v1/{target}:setLogsCollection",
+  867 +        json={"enabled": True},
+  868 +        headers=_DEPLOYER,
+  869 +    )
+  870 +    assert resp.status_code == 200
+  871 +    world.step_until(T0 + timedelta(seconds=120))
+  872 +    world.inject(FaultSpec(type="credential_expiry", environment="bravo")
+       )
+  873 +    fault_at = clock.now()
+  874 +    world.step_until(fault_at + timedelta(seconds=300))
+  875 +    runs = [e for e in _completed(sink.entries, "bravo") if e.timestamp >
+        fault_at]
+  876 +    assert 4 <= len(runs) <= 6
+  877 +    run_ids = {e.jsonPayload["runId"] for e in runs}
+  878 +    warnings = [
+  879 +        e
+  880 +        for e in sink.entries
+  881 +        if e.timestamp > fault_at
+  882 +        and e.jsonPayload.get("environment") == "bravo"
+  883 +        and e.jsonPayload.get("event") == "connector.run.warning"
+  884 +    ]
+  885 +    assert {e.jsonPayload["runId"] for e in warnings} == run_ids
+  886 +    assert all(e.severity == "WARNING" for e in warnings)
+  887 +    etl = [
+  888 +        e
+  889 +        for e in sink.entries
+  890 +        if e.timestamp > fault_at
+  891 +        and e.jsonPayload.get("event") == "alert.ingested"
+  892 +        and e.jsonPayload.get("environment") == "bravo"
+  893 +    ]
+  894 +    assert etl == []
+  895 +    status = client.get(f"/v1/{target}", headers=_DEPLOYER).json()
+  896 +    assert status["status"] == "LIVE"
+  897 +    logs = _items(
+  898 +        client.get(f"/v1/{target}/logs", headers=_DEPLOYER).json(), "logs
+       "
+  899 +    )
+  900 +    fault_ms = int(fault_at.timestamp() * 1000)
+  901 +    warned = [
+  902 +        rec
+  903 +        for rec in logs
+  904 +        if int(rec["time"]) > fault_ms and rec["logLevel"] == "WARNING"
+  905 +    ]
+  906 +    assert len(warned) >= len(runs)
+  907 +    alpha_etl = [
+  908 +        e
+  909 +        for e in sink.entries
+  910 +        if e.timestamp > fault_at
+  911 +        and e.jsonPayload.get("event") == "alert.ingested"
+  912 +        and e.jsonPayload.get("environment") == "alpha"
+  913 +    ]
+  914 +    assert len(alpha_etl) > 0
+  915 +    alpha_warn = [
+  916 +        e
+  917 +        for e in sink.entries
+  918 +        if e.timestamp > fault_at
+  919 +        and e.jsonPayload.get("environment") == "alpha"
+  920 +        and e.severity in ("WARNING", "ERROR")
+  921 +    ]
+  922 +    assert alpha_warn == []
+
+◆ Edited tests/acceptance/d3/test_d3.py (+221 −0)
+   922      assert alpha_warn == []
+   923 +
+   924 +
+   925 +def test_d3_t19_f3_drift(monkeypatch):
+   926 +    """D3-T19: Severity drift keeps volume, patch restores int prioritie
+        s."""
+   927 +    world, clock, sink, fleet = _make_world(monkeypatch, seed=119)
+   928 +    client = _client(world)
+   929 +    world.inject(
+   930 +        FaultSpec(
+   931 +            type="severity_drift", environment="alpha", params={"rate":
+        0.5}
+   932 +        )
+   933 +    )
+   934 +    world.step_until(T0 + timedelta(seconds=3600))
+   935 +
+   936 +    def _alpha():
+   937 +        return [
+   938 +            e
+   939 +            for e in sink.entries
+   940 +            if e.jsonPayload.get("event") == "alert.ingested"
+   941 +            and e.jsonPayload.get("environment") == "alpha"
+   942 +        ]
+   943 +
+   944 +    drifted = _alpha()
+   945 +    assert 84 <= len(drifted) <= 156
+   946 +    assert any(
+   947 +        isinstance(entry.jsonPayload["alert"]["priority"], str)
+   948 +        for entry in drifted
+   949 +    )
+   950 +    name = _connector_name("alpha-sentinel")
+   951 +    body = client.get(f"/v1/{name}", headers=_DEPLOYER).json()
+   952 +    params = [dict(p) for p in body["parameters"]]
+   953 +    for param in params:
+   954 +        if param["displayName"] == "Unknown Severity Priority":
+   955 +            param["value"] = "100"
+   956 +    resp = client.patch(
+   957 +        f"/v1/{name}?updateMask=parameters",
+   958 +        json={
+   959 +            "parameters": params,
+   960 +            "integrationVersion": body["integrationVersion"],
+   961 +        },
+   962 +        headers=_DEPLOYER,
+   963 +    )
+   964 +    assert resp.status_code == 200
+   965 +    patch_at = clock.now()
+   966 +    world.step_until(patch_at + timedelta(seconds=600))
+   967 +    new = [e for e in _alpha() if e.timestamp > patch_at]
+   968 +    assert len(new) > 0
+   969 +    for entry in new:
+   970 +        assert isinstance(entry.jsonPayload["alert"]["priority"], int)
+   971 +
+   972 +
+   973 +def test_d3_t20_f4_hollow(monkeypatch):
+   974 +    """D3-T20: Hollow success zeroes syncs until Lookback Hours is fixed
+        ."""
+   975 +    world, clock, sink, fleet = _make_world(monkeypatch, seed=120)
+   976 +    client = _client(world)
+   977 +    world.inject(FaultSpec(type="job_hollow_success", environment="bravo
+        "))
+   978 +    name = _job_name("bravo-intel")
+   979 +    body = client.get(f"/v1/{name}", headers=_DEPLOYER).json()
+   980 +    lookback = [
+   981 +        p for p in body["parameters"] if p["displayName"] == "Lookback H
+        ours"
+   982 +    ][0]["value"]
+   983 +    assert lookback == "0"
+   984 +    world.step_until(T0 + timedelta(seconds=900))
+   985 +
+   986 +    def _bravo_jobs():
+   987 +        return [
+   988 +            e
+   989 +            for e in sink.entries
+   990 +            if e.jsonPayload.get("event") == "job.run.completed"
+   991 +            and e.jsonPayload.get("environment") == "bravo"
+   992 +        ]
+   993 +
+   994 +    hollow = _bravo_jobs()
+   995 +    assert len(hollow) >= 2
+   996 +    for entry in hollow:
+   997 +        assert entry.jsonPayload["status"] == "SUCCESS"
+   998 +        assert entry.jsonPayload["indicatorsSynced"] == 0
+   999 +    patched_params = [dict(p) for p in body["parameters"]]
+  1000 +    for param in patched_params:
+  1001 +        if param["displayName"] == "Lookback Hours":
+  1002 +            param["value"] = "24"
+  1003 +    resp = client.patch(
+  1004 +        f"/v1/{name}?updateMask=parameters",
+  1005 +        json={"parameters": patched_params},
+  1006 +        headers=_DEPLOYER,
+  1007 +    )
+  1008 +    assert resp.status_code == 200
+  1009 +    patch_at = clock.now()
+  1010 +    world.step_until(patch_at + timedelta(seconds=600))
+  1011 +    new = [e for e in _bravo_jobs() if e.timestamp > patch_at]
+  1012 +    assert any(
+  1013 +        entry.jsonPayload["status"] == "SUCCESS"
+  1014 +        and entry.jsonPayload["indicatorsSynced"] > 0
+  1015 +        for entry in new
+  1016 +    )
+  1017 +
+  1018 +
+  1019 +def test_d3_t21_f5_error(monkeypatch):
+  1020 +    """D3-T21: Job error ends every run with ERROR still completed."""
+  1021 +    world, clock, sink, fleet = _make_world(monkeypatch, seed=121)
+  1022 +    client = _client(world)
+  1023 +    world.inject(FaultSpec(type="job_error", environment="alpha"))
+  1024 +    fault_at = clock.now()
+  1025 +    world.step_until(T0 + timedelta(seconds=900))
+  1026 +    completed = [
+  1027 +        e
+  1028 +        for e in sink.entries
+  1029 +        if e.timestamp > fault_at
+  1030 +        and e.jsonPayload.get("event") == "job.run.completed"
+  1031 +        and e.jsonPayload.get("environment") == "alpha"
+  1032 +    ]
+  1033 +    assert len(completed) >= 2
+  1034 +    for entry in completed:
+  1035 +        assert entry.jsonPayload["status"] == "ERROR"
+  1036 +        assert entry.jsonPayload["indicatorsSynced"] == 0
+  1037 +        assert entry.severity == "ERROR"
+  1038 +    errors = [
+  1039 +        e
+  1040 +        for e in sink.entries
+  1041 +        if e.timestamp > fault_at
+  1042 +        and e.jsonPayload.get("event") == "job.run.error"
+  1043 +        and e.jsonPayload.get("environment") == "alpha"
+  1044 +    ]
+  1045 +    assert {e.jsonPayload["runId"] for e in errors} == {
+  1046 +        e.jsonPayload["runId"] for e in completed
+  1047 +    }
+  1048 +    status = client.get(
+  1049 +        f"/v1/{_job_name('alpha-intel')}", headers=_DEPLOYER
+  1050 +    ).json()
+  1051 +    assert status["lastRunStatus"] == "ERROR"
+  1052 +    logs = _items(
+  1053 +        client.get(
+  1054 +            f"/v1/{_job_name('alpha-intel')}/logs", headers=_DEPLOYER
+  1055 +        ).json(),
+  1056 +        "logs",
+  1057 +    )
+  1058 +    assert len(logs) > 0
+  1059 +    assert all(rec["status"] == "ERROR" for rec in logs[: len(completed)
+        ])
+  1060 +
+  1061 +
+  1062 +@pytest.mark.parametrize("rate", [0.2, 0.7])
+  1063 +def test_d3_t22_f6_flap(monkeypatch, rate):
+  1064 +    """D3-T22: Flap error fraction matches rate and still ingests."""
+  1065 +    world, clock, sink, fleet = _make_world(monkeypatch, seed=122)
+  1066 +    world.inject(
+  1067 +        FaultSpec(
+  1068 +            type="connector_flap",
+  1069 +            environment="alpha",
+  1070 +            params={"rate": rate},
+  1071 +        )
+  1072 +    )
+  1073 +    world.step_until(T0 + timedelta(seconds=100 * 60))
+  1074 +    completed = _completed(sink.entries, "alpha")
+  1075 +    assert 99 <= len(completed) <= 101
+  1076 +    run_ids = {e.jsonPayload["runId"] for e in completed}
+  1077 +    error_ids = {
+  1078 +        e.jsonPayload["runId"]
+  1079 +        for e in sink.entries
+  1080 +        if e.jsonPayload.get("event") == "connector.run.error"
+  1081 +        and e.jsonPayload.get("environment") == "alpha"
+  1082 +    }
+  1083 +    assert error_ids <= run_ids
+  1084 +    fraction = len(error_ids) / len(run_ids)
+  1085 +    assert (rate - 0.1) <= fraction <= (rate + 0.1)
+  1086 +    etl = sum(
+  1087 +        1
+  1088 +        for e in sink.entries
+  1089 +        if e.jsonPayload.get("event") == "alert.ingested"
+  1090 +        and e.jsonPayload.get("environment") == "alpha"
+  1091 +    )
+  1092 +    expected = 120 * (100 / 60)
+  1093 +    assert int(expected * 0.7) <= etl <= int(expected * 1.3)
+  1094 +
+  1095 +
+  1096 +def test_d3_t23_f7_stall(monkeypatch):
+  1097 +    """D3-T23: Job stall stops runs and goes stale until restart."""
+  1098 +    world, clock, sink, fleet = _make_world(monkeypatch, seed=123)
+  1099 +    client = _client(world)
+  1100 +    name = _job_name("alpha-intel")
+  1101 +    world.step_until(T0 + timedelta(seconds=300))
+  1102 +    scheduled_before = client.get(f"/v1/{name}", headers=_DEPLOYER).json
+        ()[
+  1103 +        "nextScheduledRunTime"
+  1104 +    ]
+  1105 +    world.inject(FaultSpec(type="job_stall", environment="alpha"))
+  1106 +    fault_at = clock.now()
+  1107 +    world.step_until(fault_at + timedelta(seconds=900))
+  1108 +    stalled = [
+  1109 +        e
+  1110 +        for e in sink.entries
+  1111 +        if e.timestamp > fault_at
+  1112 +        and e.jsonPayload.get("event") == "job.run.completed"
+  1113 +        and e.jsonPayload.get("environment") == "alpha"
+  1114 +    ]
+  1115 +    assert stalled == []
+  1116 +    scheduled = client.get(f"/v1/{name}", headers=_DEPLOYER).json()[
+  1117 +        "nextScheduledRunTime"
+  1118 +    ]
+  1119 +    assert scheduled == scheduled_before
+  1120 +    body = client.get(f"/v1/{name}", headers=_DEPLOYER).json()
+  1121 +    off = client.patch(
+  1122 +        f"/v1/{name}?updateMask=enabled",
+  1123 +        json={"enabled": False},
+  1124 +        headers=_DEPLOYER,
+  1125 +    )
+  1126 +    assert off.status_code == 200
+  1127 +    on = client.patch(
+  1128 +        f"/v1/{name}?updateMask=enabled",
+  1129 +        json={"enabled": True},
+  1130 +        headers=_DEPLOYER,
+  1131 +    )
+  1132 +    assert on.status_code == 200
+  1133 +    assert body["enabled"] is True
+  1134 +    clear_at = clock.now()
+  1135 +    world.step_until(clear_at + timedelta(seconds=600))
+  1136 +    resumed = [
+  1137 +        e
+  1138 +        for e in sink.entries
+  1139 +        if e.timestamp > clear_at
+  1140 +        and e.jsonPayload.get("event") == "job.run.completed"
+  1141 +        and e.jsonPayload.get("environment") == "alpha"
+  1142 +    ]
+  1143 +    assert len(resumed) >= 1
+
+◆ Edited tests/acceptance/d3/test_d3.py (+430 −0)
+  1143      assert len(resumed) >= 1
+  1144 +
+  1145 +
+  1146 +@pytest.mark.parametrize(
+  1147 +    "fault_type,params,is_job",
+  1148 +    [
+  1149 +        ("connector_stall", {}, False),
+  1150 +        ("credential_expiry", {}, False),
+  1151 +        ("severity_drift", {"rate": 0.5}, False),
+  1152 +        ("job_hollow_success", {}, True),
+  1153 +        ("job_error", {}, True),
+  1154 +        ("connector_flap", {"rate": 0.7}, False),
+  1155 +        ("job_stall", {}, True),
+  1156 +    ],
+  1157 +)
+  1158 +def test_d3_t24_clearing(monkeypatch, fault_type, params, is_job):
+  1159 +    """D3-T24: clear() restores normal behaviour within 2 intervals."""
+  1160 +    world, clock, sink, fleet = _make_world(monkeypatch, seed=124)
+  1161 +    client = _client(world)
+  1162 +    fid = world.inject(
+  1163 +        FaultSpec(type=fault_type, environment="alpha", params=dict(para
+        ms))
+  1164 +    )
+  1165 +    if not is_job:
+  1166 +        world.step_until(T0 + timedelta(seconds=300))
+  1167 +    else:
+  1168 +        world.step_until(T0 + timedelta(seconds=600))
+  1169 +    world.clear(fid)
+  1170 +    clear_at = clock.now()
+  1171 +    if fault_type == "job_hollow_success":
+  1172 +        body = client.get(
+  1173 +            f"/v1/{_job_name('alpha-intel')}", headers=_DEPLOYER
+  1174 +        ).json()
+  1175 +        lookback = [
+  1176 +            p
+  1177 +            for p in body["parameters"]
+  1178 +            if p["displayName"] == "Lookback Hours"
+  1179 +        ][0]["value"]
+  1180 +        assert lookback == "24"
+  1181 +    if not is_job:
+  1182 +        world.step_until(clear_at + timedelta(seconds=300))
+  1183 +    else:
+  1184 +        world.step_until(clear_at + timedelta(seconds=600))
+  1185 +    if fault_type == "connector_stall":
+  1186 +        resumed = [
+  1187 +            e
+  1188 +            for e in _completed(sink.entries, "alpha")
+  1189 +            if e.timestamp > clear_at
+  1190 +        ]
+  1191 +        assert len(resumed) >= 2
+  1192 +    elif fault_type == "credential_expiry":
+  1193 +        warns = [
+  1194 +            e
+  1195 +            for e in sink.entries
+  1196 +            if e.timestamp > clear_at
+  1197 +            and e.jsonPayload.get("environment") == "alpha"
+  1198 +            and e.severity in ("WARNING", "ERROR")
+  1199 +        ]
+  1200 +        assert warns == []
+  1201 +        etl = [
+  1202 +            e
+  1203 +            for e in sink.entries
+  1204 +            if e.timestamp > clear_at
+  1205 +            and e.jsonPayload.get("event") == "alert.ingested"
+  1206 +            and e.jsonPayload.get("environment") == "alpha"
+  1207 +        ]
+  1208 +        assert len(etl) > 0
+  1209 +    elif fault_type == "severity_drift":
+  1210 +        cutoff = clear_at + timedelta(seconds=120)
+  1211 +        new = [
+  1212 +            e
+  1213 +            for e in sink.entries
+  1214 +            if e.timestamp > cutoff
+  1215 +            and e.jsonPayload.get("event") == "alert.ingested"
+  1216 +            and e.jsonPayload.get("environment") == "alpha"
+  1217 +        ]
+  1218 +        assert len(new) > 0
+  1219 +        for entry in new:
+  1220 +            assert isinstance(entry.jsonPayload["alert"]["priority"], in
+        t)
+  1221 +    elif fault_type == "job_hollow_success":
+  1222 +        new = [
+  1223 +            e
+  1224 +            for e in sink.entries
+  1225 +            if e.timestamp > clear_at
+  1226 +            and e.jsonPayload.get("event") == "job.run.completed"
+  1227 +            and e.jsonPayload.get("environment") == "alpha"
+  1228 +        ]
+  1229 +        assert any(
+  1230 +            entry.jsonPayload["status"] == "SUCCESS"
+  1231 +            and entry.jsonPayload["indicatorsSynced"] > 0
+  1232 +            for entry in new
+  1233 +        )
+  1234 +    elif fault_type == "job_error":
+  1235 +        new = [
+  1236 +            e
+  1237 +            for e in sink.entries
+  1238 +            if e.timestamp > clear_at
+  1239 +            and e.jsonPayload.get("event") == "job.run.completed"
+  1240 +            and e.jsonPayload.get("environment") == "alpha"
+  1241 +        ]
+  1242 +        assert len(new) >= 1
+  1243 +        assert all(
+  1244 +            entry.jsonPayload["status"] == "SUCCESS" for entry in new
+  1245 +        )
+  1246 +    elif fault_type == "connector_flap":
+  1247 +        errs = [
+  1248 +            e
+  1249 +            for e in sink.entries
+  1250 +            if e.timestamp > clear_at
+  1251 +            and e.jsonPayload.get("event") == "connector.run.error"
+  1252 +            and e.jsonPayload.get("environment") == "alpha"
+  1253 +        ]
+  1254 +        assert errs == []
+  1255 +        resumed = [
+  1256 +            e
+  1257 +            for e in _completed(sink.entries, "alpha")
+  1258 +            if e.timestamp > clear_at
+  1259 +        ]
+  1260 +        assert len(resumed) >= 2
+  1261 +    elif fault_type == "job_stall":
+  1262 +        resumed = [
+  1263 +            e
+  1264 +            for e in sink.entries
+  1265 +            if e.timestamp > clear_at
+  1266 +            and e.jsonPayload.get("event") == "job.run.completed"
+  1267 +            and e.jsonPayload.get("environment") == "alpha"
+  1268 +        ]
+  1269 +        assert len(resumed) >= 1
+  1270 +
+  1271 +
+  1272 +def test_d3_t25_canary(monkeypatch):
+  1273 +    """D3-T25: Canary appears quickly, never under credential fault."""
+  1274 +    world, clock, sink, fleet = _make_world(monkeypatch, seed=125)
+  1275 +    first_id = world.plant_canary("alpha")
+  1276 +    plant_at = clock.now()
+  1277 +    world.step_until(plant_at + timedelta(seconds=120))
+  1278 +    seen = [
+  1279 +        e
+  1280 +        for e in sink.entries
+  1281 +        if e.jsonPayload.get("event") == "alert.ingested"
+  1282 +        and e.jsonPayload.get("alert", {}).get("canary") is True
+  1283 +        and e.jsonPayload.get("alert", {}).get("ticket_id") == first_id
+  1284 +    ]
+  1285 +    assert len(seen) == 1
+  1286 +    assert seen[0].timestamp <= plant_at + timedelta(seconds=120)
+  1287 +    world.inject(FaultSpec(type="credential_expiry", environment="alpha"
+        ))
+  1288 +    second_id = world.plant_canary("alpha")
+  1289 +    fault_at = clock.now()
+  1290 +    world.step_until(fault_at + timedelta(seconds=600))
+  1291 +    missing = [
+  1292 +        e
+  1293 +        for e in sink.entries
+  1294 +        if e.jsonPayload.get("event") == "alert.ingested"
+  1295 +        and e.jsonPayload.get("alert", {}).get("ticket_id") == second_id
+  1296 +    ]
+  1297 +    assert missing == []
+  1298 +
+  1299 +
+  1300 +def test_d3_t26_chaos_gating(monkeypatch):
+  1301 +    """D3-T26: Chaos routes are 404 unless chaos is enabled."""
+  1302 +    world, clock, sink, fleet = _make_world(monkeypatch, seed=126)
+  1303 +    off = _client(world, chaos=False)
+  1304 +    assert (
+  1305 +        off.post(
+  1306 +            "/_chaos/faults",
+  1307 +            json={"type": "connector_stall", "environment": "alpha"},
+  1308 +            headers=_DEPLOYER,
+  1309 +        ).status_code
+  1310 +        == 404
+  1311 +    )
+  1312 +    assert off.get("/_chaos/faults", headers=_DEPLOYER).status_code == 4
+        04
+  1313 +    assert (
+  1314 +        off.delete("/_chaos/faults/abc", headers=_DEPLOYER).status_code
+        == 404
+  1315 +    )
+  1316 +    assert (
+  1317 +        off.post(
+  1318 +            "/_chaos/schedule", json=[], headers=_DEPLOYER
+  1319 +        ).status_code
+  1320 +        == 404
+  1321 +    )
+  1322 +    on = _client(world, chaos=True)
+  1323 +    created = on.post(
+  1324 +        "/_chaos/faults",
+  1325 +        json={
+  1326 +            "type": "severity_drift",
+  1327 +            "environment": "alpha",
+  1328 +            "params": {"rate": 0.5},
+  1329 +        },
+  1330 +        headers=_DEPLOYER,
+  1331 +    )
+  1332 +    assert created.status_code == 200
+  1333 +    fault_id = created.json()["id"]
+  1334 +    assert isinstance(fault_id, str) and fault_id
+  1335 +    listed = on.get("/_chaos/faults", headers=_DEPLOYER)
+  1336 +    assert listed.status_code == 200
+  1337 +    assert any(
+  1338 +        fault.get("id") == fault_id
+  1339 +        or (isinstance(fault, str) and fault == fault_id)
+  1340 +        for fault in listed.json().get("faults", listed.json())
+  1341 +        if isinstance(fault, (dict, str))
+  1342 +    ) or fault_id in str(listed.json())
+  1343 +    scheduled = on.post(
+  1344 +        "/_chaos/schedule",
+  1345 +        json=[{"at": 60, "type": "connector_stall", "environment": "alph
+        a"}],
+  1346 +        headers=_DEPLOYER,
+  1347 +    )
+  1348 +    assert scheduled.status_code == 200
+  1349 +    cleared = on.delete(f"/_chaos/faults/{fault_id}", headers=_DEPLOYER)
+  1350 +    assert cleared.status_code in (200, 204)
+  1351 +
+  1352 +
+  1353 +def test_d3_t27_authorization(monkeypatch):
+  1354 +    """D3-T27: Reader is denied writes, deployer succeeds, anon is 401."
+        ""
+  1355 +    world, clock, sink, fleet = _make_world(monkeypatch, seed=127)
+  1356 +    client = _client(world)
+  1357 +    conn = _connector_name("alpha-sentinel")
+  1358 +    job = _job_name("alpha-intel")
+  1359 +    conn_body = client.get(f"/v1/{conn}", headers=_DEPLOYER).json()
+  1360 +
+  1361 +    def _denied(resp):
+  1362 +        assert resp.status_code == 403
+  1363 +        err = resp.json()["error"]
+  1364 +        assert err["code"] == 403
+  1365 +        assert err["status"] == "PERMISSION_DENIED"
+  1366 +
+  1367 +    _denied(
+  1368 +        client.post(
+  1369 +            f"/v1/{PREFIX}/environments",
+  1370 +            json={"displayName": "Auth Test", "id": "auth-test"},
+  1371 +            headers=_READER,
+  1372 +        )
+  1373 +    )
+  1374 +    created_env = client.post(
+  1375 +        f"/v1/{PREFIX}/environments",
+  1376 +        json={"displayName": "Auth Test", "id": "auth-test"},
+  1377 +        headers=_DEPLOYER,
+  1378 +    )
+  1379 +    assert 200 <= created_env.status_code < 300
+  1380 +    _denied(
+  1381 +        client.post(
+  1382 +            f"/v1/{_CONNECTOR_PARENT}/connectorInstances",
+  1383 +            json={"displayName": "Auth Test", "id": "auth-conn"},
+  1384 +            headers=_READER,
+  1385 +        )
+  1386 +    )
+  1387 +    created_conn = client.post(
+  1388 +        f"/v1/{_CONNECTOR_PARENT}/connectorInstances",
+  1389 +        json={"displayName": "Auth Test", "id": "auth-conn"},
+  1390 +        headers=_DEPLOYER,
+  1391 +    )
+  1392 +    assert 200 <= created_conn.status_code < 300
+  1393 +    _denied(
+  1394 +        client.patch(
+  1395 +            f"/v1/{conn}?updateMask=enabled",
+  1396 +            json={
+  1397 +                "enabled": False,
+  1398 +                "integrationVersion": conn_body["integrationVersion"],
+  1399 +            },
+  1400 +            headers=_READER,
+  1401 +        )
+  1402 +    )
+  1403 +    patched = client.patch(
+  1404 +        f"/v1/{conn}?updateMask=enabled",
+  1405 +        json={
+  1406 +            "enabled": False,
+  1407 +            "integrationVersion": conn_body["integrationVersion"],
+  1408 +        },
+  1409 +        headers=_DEPLOYER,
+  1410 +    )
+  1411 +    assert patched.status_code == 200
+  1412 +    client.patch(
+  1413 +        f"/v1/{conn}?updateMask=enabled",
+  1414 +        json={
+  1415 +            "enabled": True,
+  1416 +            "integrationVersion": conn_body["integrationVersion"],
+  1417 +        },
+  1418 +        headers=_DEPLOYER,
+  1419 +    )
+  1420 +    _denied(
+  1421 +        client.post(
+  1422 +            f"/v1/{conn}:runOnDemand",
+  1423 +            json={"connectorInstance": conn_body},
+  1424 +            headers=_READER,
+  1425 +        )
+  1426 +    )
+  1427 +    assert (
+  1428 +        client.post(
+  1429 +            f"/v1/{conn}:runOnDemand",
+  1430 +            json={"connectorInstance": conn_body},
+  1431 +            headers=_DEPLOYER,
+  1432 +        ).status_code
+  1433 +        == 200
+  1434 +    )
+  1435 +    _denied(
+  1436 +        client.post(
+  1437 +            f"/v1/{conn}:setLogsCollection",
+  1438 +            json={"enabled": True},
+  1439 +            headers=_READER,
+  1440 +        )
+  1441 +    )
+  1442 +    assert (
+  1443 +        client.post(
+  1444 +            f"/v1/{conn}:setLogsCollection",
+  1445 +            json={"enabled": True},
+  1446 +            headers=_DEPLOYER,
+  1447 +        ).status_code
+  1448 +        == 200
+  1449 +    )
+  1450 +    _denied(
+  1451 +        client.patch(
+  1452 +            f"/v1/{job}?updateMask=enabled",
+  1453 +            json={"enabled": False},
+  1454 +            headers=_READER,
+  1455 +        )
+  1456 +    )
+  1457 +    assert (
+  1458 +        client.patch(
+  1459 +            f"/v1/{job}?updateMask=enabled",
+  1460 +            json={"enabled": False},
+  1461 +            headers=_DEPLOYER,
+  1462 +        ).status_code
+  1463 +        == 200
+  1464 +    )
+  1465 +    client.patch(
+  1466 +        f"/v1/{job}?updateMask=enabled",
+  1467 +        json={"enabled": True},
+  1468 +        headers=_DEPLOYER,
+  1469 +    )
+  1470 +    _denied(
+  1471 +        client.post(f"/v1/{job}:runOnDemand", json={}, headers=_READER)
+  1472 +    )
+  1473 +    assert (
+  1474 +        client.post(
+  1475 +            f"/v1/{job}:runOnDemand", json={}, headers=_DEPLOYER
+  1476 +        ).status_code
+  1477 +        == 200
+  1478 +    )
+  1479 +    anon = client.get(f"/v1/{PREFIX}/environments")
+  1480 +    assert anon.status_code == 401
+  1481 +    integ = _integration_name("MockSentinel", "alpha")
+  1482 +    assert (
+  1483 +        client.post(
+  1484 +            f"/v1/{integ}:executeTest", json={}, headers=_READER
+  1485 +        ).status_code
+  1486 +        == 200
+  1487 +    )
+  1488 +    assert (
+  1489 +        client.post(
+  1490 +            f"/v1/{integ}:executeTest", json={}, headers=_DEPLOYER
+  1491 +        ).status_code
+  1492 +        == 200
+  1493 +    )
+  1494 +
+  1495 +
+  1496 +def test_d3_t28_log_validity(monkeypatch):
+  1497 +    """D3-T28: Two-hour fault cycle keeps every entry valid and labelled
+        ."""
+  1498 +    world, clock, sink, fleet = _make_world(monkeypatch, seed=128)
+  1499 +    schedule = [
+  1500 +        FaultSpec(type="connector_stall", environment="alpha"),
+  1501 +        FaultSpec(type="credential_expiry", environment="bravo"),
+  1502 +        FaultSpec(
+  1503 +            type="severity_drift", environment="alpha", params={"rate":
+        0.5}
+  1504 +        ),
+  1505 +        FaultSpec(type="job_hollow_success", environment="bravo"),
+  1506 +        FaultSpec(type="job_error", environment="alpha"),
+  1507 +        FaultSpec(
+  1508 +            type="connector_flap", environment="alpha", params={"rate":
+        0.2}
+  1509 +        ),
+  1510 +        FaultSpec(type="job_stall", environment="bravo"),
+  1511 +    ]
+  1512 +    step = timedelta(seconds=7200 // (len(schedule) * 2))
+  1513 +    for fault in schedule:
+  1514 +        fid = world.inject(fault)
+  1515 +        world.step_until(clock.now() + step)
+  1516 +        world.clear(fid)
+  1517 +        world.step_until(clock.now() + step)
+  1518 +    assert len(sink.entries) > 0
+  1519 +    connector_labels = (
+  1520 +        "integration_name",
+  1521 +        "integration_version",
+  1522 +        "connector_name",
+  1523 +        "connector_instance",
+  1524 +    )
+  1525 +    job_labels = ("integration_name", "integration_version", "job_name")
+  1526 +    ids = [entry.insertId for entry in sink.entries]
+  1527 +    assert len(set(ids)) == len(ids)
+  1528 +    for entry in sink.entries:
+  1529 +        assert isinstance(entry, LogEntry)
+  1530 +        LogEntry.model_validate(entry.model_dump())
+  1531 +        assert entry.resource.type == "k8s_container"
+  1532 +        assert entry.resource.labels["namespace_name"] == "chronicle-soa
+        r"
+  1533 +        assert entry.resource.labels["container_name"] in {"python", "et
+        l"}
+  1534 +        assert entry.resource.labels["project_id"] == PROJECT
+  1535 +        assert entry.logName == f"projects/{PROJECT}/logs/chronicle-soar
+        "
+  1536 +        event = entry.jsonPayload.get("event", "")
+  1537 +        assert isinstance(event, str) and event
+  1538 +        if event.startswith("connector."):
+  1539 +            for label in connector_labels:
+  1540 +                assert label in entry.labels
+  1541 +        elif event.startswith("job."):
+  1542 +            for label in job_labels:
+  1543 +                assert label in entry.labels
+  1544 +        elif event.startswith("alert."):
+  1545 +            assert "correlation_id" in entry.labels
+  1546 +        else:
+  1547 +            raise AssertionError(f"unexpected event {event!r}")
+  1548 +
+  1549 +
+  1550 +def test_d3_t29_jsonl_sink(monkeypatch, tmp_path):
+  1551 +    """D3-T29: JsonlSink appends one entry per line re-readable as LogEn
+        try."""
+  1552 +    monkeypatch.setenv("PROJECT", PROJECT)
+  1553 +    path = tmp_path / "sink.jsonl"
+  1554 +    fleet = load_fleet(ROOT / "fixtures" / "fleet.yaml")
+  1555 +    clock = SimClock(T0)
+  1556 +    sink = JsonlSink(str(path))
+  1557 +    world = World(fleet, 129, clock, sink)
+  1558 +    world.step_until(T0 + timedelta(seconds=600))
+  1559 +    first = read_jsonl(path)
+  1560 +    assert len(first) > 0
+  1561 +    lines = [
+  1562 +        line for line in path.read_text().splitlines() if line.strip()
+  1563 +    ]
+  1564 +    assert len(lines) == len(first)
+  1565 +    for line, entry in zip(lines, first):
+  1566 +        assert isinstance(entry, LogEntry)
+  1567 +        assert json.loads(line)["insertId"] == entry.insertId
+  1568 +    world.step_until(T0 + timedelta(seconds=900))
+  1569 +    second = read_jsonl(path)
+  1570 +    assert len(second) > len(first)
+  1571 +    assert [e.insertId for e in second[: len(first)]] == [
+  1572 +        e.insertId for e in first
+  1573 +    ]
+
+  Read tests/acceptance/d3/test_d3.py
+
+◆ All 29 tests are written — now tightening them for lint.
+
+◆ Ran command · List makeworld usages · ✓ · 0.6s
+├ grep -n "_make_world" tests/acceptance/d3/test_d3.py
+├ exit 0
+└ 46:def _make_world(monkeypatch, seed: int, start: datetime = T0):
+  100:    world, clock, sink, fleet = _make_world(monkeypatch, seed=101)
+  118:    world, clock, sink, fleet = _make_world(monkeypatch, seed=102)
+  204:    world, clock, sink, fleet = _make_world(monkeypatch, seed=103)
+  232:    world, clock, sink, fleet = _make_world(monkeypatch, seed=104)
+  279:    world, clock, sink, fleet = _make_world(monkeypatch, seed=105)
+  338:    world, clock, sink, fleet = _make_world(monkeypatch, seed=106)
+  422:    world, clock, sink, fleet = _make_world(monkeypatch, seed=107)
+  … 12 lines omitted
+  1021:    world, clock, sink, fleet = _make_world(monkeypatch, seed=121)
+  1065:    world, clock, sink, fleet = _make_world(monkeypatch, seed=122)
+  1098:    world, clock, sink, fleet = _make_world(monkeypatch, seed=123)
+  1160:    world, clock, sink, fleet = _make_world(monkeypatch, seed=124)
+  1274:    world, clock, sink, fleet = _make_world(monkeypatch, seed=125)
+  1302:    world, clock, sink, fleet = _make_world(monkeypatch, seed=126)
+  1355:    world, clock, sink, fleet = _make_world(monkeypatch, seed=127)
+  1498:    world, clock, sink, fleet = _make_world(monkeypatch, seed=128)
+
+◆ Ran command · Fix unused unpack vars · ✓ · 0.6s
+├ python3 - <<'PY'
+│ from pathlib import Path
+│ p = Path("tests/acceptance/d3/test_d3.py")
+│ t = p.read_text()
+│ mapping = {
+│     101: "world, _clock, _sink, _fleet",
+│     102: "world, _clock, _sink, _fleet",
+│     103: "world, _clock, _sink, _fleet",
+│     104: "world, _clock, _sink, _fleet",
+│     105: "world, clock, sink, _fleet",
+│     106: "world, clock, _sink, _fleet",
+│     107: "world, _clock, _sink, _fleet",
+│     108: "world, _clock, _sink, _fleet",
+│     109: "world, _clock, sink, _fleet",
+│     110: "world, _clock, _sink, _fleet",
+│     111: "world, _clock, _sink, _fleet",
+│     112: "world, _clock, sink, _fleet",
+│     113: "world, _clock, sink, _fleet",
+│     114: "world, _clock, sink, _fleet",
+│     115: "world, clock, sink, _fleet",
+│     117: "world, clock, sink, _fleet",
+│     118: "world, clock, sink, _fleet",
+│     119: "world, clock, sink, _fleet",
+│     120: "world, clock, sink, _fleet",
+│     121: "world, clock, sink, _fleet",
+│     122: "world, _clock, sink, _fleet",
+│     123: "world, clock, sink, _fleet",
+│     124: "world, clock, sink, _fleet",
+│     125: "world, clock, sink, _fleet",
+│     126: "world, _clock, _sink, _fleet",
+│     127: "world, _clock, _sink, _fleet",
+│     128: "world, clock, sink, _fleet",
+│ }
+│ for seed, repl in mapping.items():
+│     old = f"    world, clock, sink, fleet = _make_world(monkeypatch,
+│ seed={seed})"
+│     new = f"    {repl} = _make_world(monkeypatch, seed={seed})"
+│     assert old in t, seed
+│     t = t.replace(old, new)
+│ p.write_text(t)
+│ print("patched")
+│ PY
+├ exit 0
+└ patched
+
+◆ Ran command · Install dev dependencies · ✓ · 1m
+├ pip install -e ".[dev]" 2>&1 | tail -5
+├ exit 0
+└ × pip subprocess to install build dependencies did not run successfully.
+  │ exit code: 1
+  ╰─> See above for output.
+
+  note: This error originates from a subprocess, and is likely not a problem wi…
+
+◆ Ran command · Show pip install error · ✓ · 1m
+├ pip install -e ".[dev]" 2>&1 | head -60
+├ exit 0
+└ WARNING: The directory '/home/rixon/.cache/pip' or its parent directory is no…
+  Obtaining file:///home/rixon/fleet-sre
+    Installing build dependencies: started
+    Installing build dependencies: still running...
+    Installing build dependencies: finished with status 'error'
+    error: subprocess-exited-with-error
+
+    × pip subprocess to install build dependencies did not run successfully.
+  … 12 lines omitted
+    note: This error originates from a subprocess, and is likely not a problem …
+  error: subprocess-exited-with-error
+
+  × pip subprocess to install build dependencies did not run successfully.
+  │ exit code: 1
+  ╰─> See above for output.
+
+  note: This error originates from a subprocess, and is likely not a problem wi…
+
+◆ Ran command · Check fastapi availability · ✓ · 1.1s
+├ python3 -c "import fastapi, httpx, fastapi.testclient; print('ok',
+│ fastapi.__version__)" 2>&1; .venv/bin/python -c "import fastapi; print('venv
+│ ok')" 2>&1 | head -5
+├ exit 0
+└ ok 0.162.0
+  venv ok
+
+◆ Dependencies confirmed — now verifying the red suite.
+
+◆ Ran command · Collect D3 tests · ✓ · 1.1s
+├ python3 -m pytest tests/acceptance/d3 --collect-only -q 2>&1 | tail -20
+├ exit 0
+└ tests/acceptance/d3/test_d3.py::test_d3_t19_f3_drift
+  tests/acceptance/d3/test_d3.py::test_d3_t20_f4_hollow
+  tests/acceptance/d3/test_d3.py::test_d3_t21_f5_error
+  tests/acceptance/d3/test_d3.py::test_d3_t22_f6_flap[0.2]
+  tests/acceptance/d3/test_d3.py::test_d3_t22_f6_flap[0.7]
+  tests/acceptance/d3/test_d3.py::test_d3_t23_f7_stall
+  tests/acceptance/d3/test_d3.py::test_d3_t24_clearing[connector_stall-params0-…
+  tests/acceptance/d3/test_d3.py::test_d3_t24_clearing[credential_expiry-params…
+  … 4 lines omitted
+  tests/acceptance/d3/test_d3.py::test_d3_t24_clearing[job_stall-params6-True]
+  tests/acceptance/d3/test_d3.py::test_d3_t25_canary
+  tests/acceptance/d3/test_d3.py::test_d3_t26_chaos_gating
+  tests/acceptance/d3/test_d3.py::test_d3_t27_authorization
+  tests/acceptance/d3/test_d3.py::test_d3_t28_log_validity
+  tests/acceptance/d3/test_d3.py::test_d3_t29_jsonl_sink
+
+  36 tests collected in 0.27s
+
+◆ Ran command · Count test functions · ✓ · 0.6s
+├ grep -c "^def test_d3_t" tests/acceptance/d3/test_d3.py; grep "^def test_d3_t"
+│  tests/acceptance/d3/test_d3.py
+├ exit 0
+└ 29
+  def test_d3_t1_connector_shape(monkeypatch):
+  def test_d3_t2_resource_names(monkeypatch):
+  def test_d3_t3_enums_redaction(monkeypatch):
+  def test_d3_t4_patch_semantics(monkeypatch):
+  def test_d3_t5_run_on_demand(monkeypatch):
+  def test_d3_t6_set_logs_collection(monkeypatch):
+  def test_d3_t7_connector_logs_list(monkeypatch):
+  … 14 lines omitted
+  def test_d3_t22_f6_flap(monkeypatch, rate):
+  def test_d3_t23_f7_stall(monkeypatch):
+  def test_d3_t24_clearing(monkeypatch, fault_type, params, is_job):
+  def test_d3_t25_canary(monkeypatch):
+  def test_d3_t26_chaos_gating(monkeypatch):
+  def test_d3_t27_authorization(monkeypatch):
+  def test_d3_t28_log_validity(monkeypatch):
+  def test_d3_t29_jsonl_sink(monkeypatch, tmp_path):
+
+◆ Ran command · Run D3 tests expecting failures · ✓ · 1.7s
+├ python3 -m pytest tests/acceptance/d3 -q 2>&1 | tail -40
+├ exit 0
+└
+  fleetsre/clock.py:13: NotImplementedError
+  =========================== short test summary info =========================…
+  FAILED tests/acceptance/d3/test_d3.py::test_d3_t1_connector_shape - NotImplem…
+  FAILED tests/acceptance/d3/test_d3.py::test_d3_t2_resource_names - NotImpleme…
+  FAILED tests/acceptance/d3/test_d3.py::test_d3_t3_enums_redaction - NotImplem…
+  FAILED tests/acceptance/d3/test_d3.py::test_d3_t4_patch_semantics - NotImplem…
+  FAILED tests/acceptance/d3/test_d3.py::test_d3_t5_run_on_demand - NotImplemen…
+  … 24 lines omitted
+  FAILED tests/acceptance/d3/test_d3.py::test_d3_t24_clearing[connector_flap-pa…
+  FAILED tests/acceptance/d3/test_d3.py::test_d3_t24_clearing[job_stall-params6…
+  FAILED tests/acceptance/d3/test_d3.py::test_d3_t25_canary - NotImplementedErr…
+  FAILED tests/acceptance/d3/test_d3.py::test_d3_t26_chaos_gating - NotImplemen…
+  FAILED tests/acceptance/d3/test_d3.py::test_d3_t27_authorization - NotImpleme…
+  FAILED tests/acceptance/d3/test_d3.py::test_d3_t28_log_validity - NotImplemen…
+  FAILED tests/acceptance/d3/test_d3.py::test_d3_t29_jsonl_sink - NotImplemente…
+  36 failed in 1.01s
+
+◆ Ran command · Check failure details · ✓ · 1.5s
+├ python3 -m pytest tests/acceptance/d3/test_d3.py::test_d3_t15_severity_map -q
+│ 2>&1 | tail -20; echo ===; python3 -m pytest
+│ tests/acceptance/d3/test_d3.py::test_d3_t29_jsonl_sink -q 2>&1 | tail -20
+├ exit 0
+└ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7531897d4c20>
+
+      def test_d3_t15_severity_map(monkeypatch):
+          """D3-T15: map_priority units and F3 end to end with patch."""
+  >       assert map_priority("High", "") == 80
+                 ^^^^^^^^^^^^^^^^^^^^^^^^
+
+  tests/acceptance/d3/test_d3.py:670:
+  … 25 lines omitted
+      def __init__(self, start: datetime) -> None:
+  >       raise NotImplementedError
+  E       NotImplementedError
+
+  fleetsre/clock.py:13: NotImplementedError
+  =========================== short test summary info =========================…
+  FAILED tests/acceptance/d3/test_d3.py::test_d3_t29_jsonl_sink - NotImplemente…
+  1 failed in 0.30s
+
+◆ Ran command · Check D1 D2 regression · ✓ · 1.2s
+├ python3 -m pytest tests/acceptance/d1 tests/acceptance/d2 -m "not live" -q
+│ 2>&1 | tail -10
+├ exit 0
+└ ..................                                                       [100…
+  18 passed, 2 deselected in 0.42s
+
+◆ Ran command · Check D0 suite · ✓ · 6s
+├ python3 -m pytest tests/acceptance/d0 -q 2>&1 | tail -15
+├ exit 0
+└ E         FAILED tests/acceptance/d3/test_d3.py::test_d3_t26_chaos_gating - N…
+  E         FAILED tests/acceptance/d3/test_d3.py::test_d3_t27_authorization - …
+  E         FAILED tests/acceptance/d3/test_d3.py::test_d3_t28_log_validity - N…
+  E         FAILED tests/acceptance/d3/test_d3.py::test_d3_t29_jsonl_sink - Not…
+  E         ============ 36 failed, 30 passed, 1 skipped, 2 deselected in 2.79s…
+  E
+  E         make: *** [Makefile:5: check] Error 1
+  E
+  E       assert 2 == 0
+  E        +  where 2 = CompletedProcess(args=['make', 'check'], returncode=2, …
+
+  tests/acceptance/d0/test_d0.py:58: AssertionError
+  =========================== short test summary info =========================…
+  FAILED tests/acceptance/d0/test_d0.py::test_d0_t1_make_check - AssertionError…
+  1 failed, 8 passed in 5.33s
+
+◆ Red suite and regressions look right — now checking lint.
+
+◆ Ran command · Run lint gate · ✓ · 0.8s
+├ make lint 2>&1 | tail -20
+├ exit 0
+└ ╔══╗─────────▶╔╗ ╔╗      ╔╗◀───┐
+  ╚╣╠╝◀─────┐  ╔╝╚╗║║────▶╔╝╚╗   │
+   ║║   ╔══╦══╦╩╗╔╝║║  ╔╦═╩╗╔╝╔═╦══╗
+   ║║╔══╣╔╗║╔╗║╔╣║ ║║ ╔╬╣╔╗║║ ║│║╔═╝
+  ╔╣╠╣║║║╚╝║╚╝║║║╚╗║╚═╝║║║║║╚╗║═╣║
+  ╚══╩╩╩╣╔═╩══╩╝╚═╝╚═══╩╩╝╚╩═╩╩═╩╝
+    └──▶║║                    ▲
+        ╚╝────────────────────┘
+  … 4 lines omitted
+  ---------
+
+  Analyzed 24 files, 33 dependencies.
+  -----------------------------------
+
+  SRE isolation KEPT
+
+  Contracts: 1 kept, 0 broken.
+
+◆ Ran command · Check lint head · ✓ · 2.6s
+├ make lint 2>&1 | head -30; echo EXIT:$?
+├ exit 0
+└ ruff check .
+  All checks passed!
+  mypy fleetsre scripts
+  Success: no issues found in 19 source files
+  lint-imports
+
+  ╔══╗─────────▶╔╗ ╔╗      ╔╗◀───┐
+  ╚╣╠╝◀─────┐  ╔╝╚╗║║────▶╔╝╚╗   │
+  … 11 lines omitted
+
+  Analyzed 24 files, 33 dependencies.
+  -----------------------------------
+
+  SRE isolation KEPT
+
+  Contracts: 1 kept, 0 broken.
+  EXIT:0
+
+◆ Ran command · Run trace check · ✓ · 1.8s
+├ python3 scripts/check_trace.py --doc docs/deliverables.md --tests
+│ tests/acceptance 2>&1; echo EXIT:$?
+├ exit 0
+└ EXIT:0
+
+◆ Ran command · Check working tree · ✓ · 0.5s
+├ git status --short 2>&1 | head -30
+├ exit 0
+└ ?? fleetsre/adapters/jsonl.py
+  ?? fleetsre/clock.py
+  ?? fleetsre/mock/chronicle_api.py
+  ?? fleetsre/mock/connector.py
+  ?? fleetsre/mock/world.py
+  ?? fleetsre/ports.py
+  ?? tests/acceptance/d3/
+
+◆ Ran command · Check forbidden patterns · ✓ · 0.5s
+├ grep -rn "sleep\|datetime.now\|WallClock\|os\.environ\|os\.getenv\|getenv"
+│ tests/acceptance/d3/ fleetsre/clock.py fleetsre/ports.py
+│ fleetsre/adapters/jsonl.py fleetsre/mock/world.py fleetsre/mock/connector.py
+│ fleetsre/mock/chronicle_api.py 2>&1 || echo "clean"
+├ exit 0
+└ fleetsre/clock.py:1:"""Clock port: SimClock for tests, WallClock for producti…
+  fleetsre/clock.py:25:class WallClock(Clock):
+
+◆ Static checks are clean — final review of test details.
+
+◆ Ran command · Verify docstrings · ✓ · 0.5s
+├ python3 - <<'PY'
+│ import re
+│ from pathlib import Path
+│ t = Path("tests/acceptance/d3/test_d3.py").read_text()
+│ funcs = re.findall(r'def (test_d3_t\d+_\w+)\([^)]*\):\s*"""([^"]+)"""', t)
+│ print(len(funcs))
+│ for name, doc in funcs:
+│     m = re.match(r'test_d3_t(\d+)_', name)
+│     num = m.group(1)
+│     expected = f"D3-T{num}:"
+│     ok = doc.startswith(expected)
+│     print(name, "OK" if ok else f"BAD doc={doc[:20]!r} expected {expected}")
+│ PY
+├ exit 0
+└ 29
+  test_d3_t1_connector_shape OK
+  test_d3_t2_resource_names OK
+  test_d3_t3_enums_redaction OK
+  test_d3_t4_patch_semantics OK
+  test_d3_t5_run_on_demand OK
+  test_d3_t6_set_logs_collection OK
+  test_d3_t7_connector_logs_list OK
+  … 14 lines omitted
+  test_d3_t22_f6_flap OK
+  test_d3_t23_f7_stall OK
+  test_d3_t24_clearing OK
+  test_d3_t25_canary OK
+  test_d3_t26_chaos_gating OK
+  test_d3_t27_authorization OK
+  test_d3_t28_log_validity OK
+  test_d3_t29_jsonl_sink OK
+
+  Read tests/acceptance/d3/test_d3.py
+
+◆ Edited tests/acceptance/d3/test_d3.py (+0 −4)
+  79
+  80 -def _env_name(env: str) -> str:
+  81 -    return f"{PREFIX}/environments/{env}"
+  82 -
+  83 -
+  80  def _integration_name(integration: str, instance: str) -> str:
+
+◆ Edited tests/acceptance/d3/test_d3.py (+2 −1)
+  390      assert len(post_end) == len(pre_end)
+  391 -    client.post(
+  391 +    bravo_on = client.post(
+  392          f"/v1/{bravo}:setLogsCollection",
+      ⋮
+  395      )
+  396 +    assert bravo_on.status_code == 200
+  397      world.step_until(clock.now() + timedelta(seconds=120))
+
+  Read tests/acceptance/d3/test_d3.py
+
+◆ Edited tests/acceptance/d3/test_d3.py (+1 −6)
+  1333      assert listed.status_code == 200
+  1334 -    assert any(
+  1335 -        fault.get("id") == fault_id
+  1336 -        or (isinstance(fault, str) and fault == fault_id)
+  1337 -        for fault in listed.json().get("faults", listed.json())
+  1338 -        if isinstance(fault, (dict, str))
+  1339 -    ) or fault_id in str(listed.json())
+  1334 +    assert fault_id in json.dumps(listed.json())
+
+  Read tests/acceptance/d3/test_d3.py
+  Read tests/acceptance/d3/test_d3.py
+
+◆ Edited tests/acceptance/d3/test_d3.py (+5 −0)
+  1346      """D3-T27: Reader is denied writes, deployer succeeds, anon is 401."
+        ""
+  1347 +    # Method bodies from mocks.md §4.1 (not in specs/):
+  1348 +    # runOnDemand: https://docs.cloud.google.com/chronicle/docs/referenc
+        e/rest/v1beta/projects.locations.instances.integrations.connectors.conne
+        ctorInstances/runOnDemand
+  1349 +    # setLogsCollection: https://docs.cloud.google.com/chronicle/docs/re
+        ference/rest/v1/projects.locations.instances.integrations.connectors.con
+        nectorInstances/setLogsCollection
+  1350 +    # job runOnDemand: https://docs.cloud.google.com/chronicle/docs/refe
+        rence/rest/v1beta/projects.locations.instances.integrations.jobs.jobInst
+        ances/runOnDemand
+  1351 +    # executeTest: https://docs.cloud.google.com/chronicle/docs/referenc
+        e/rest/v1/projects.locations.instances.integrations.integrationInstances
+        /executeTest
+  1352      world, _clock, _sink, _fleet = _make_world(monkeypatch, seed=127)
+
+◆ Refinements done — running one last full verification.
+
+◆ Ran command · Re-verify lint and tests · ✓ · 3.7s
+├ make lint 2>&1 | head -5; python3 -m pytest tests/acceptance/d3 -q 2>&1 | tail
+│  -3; python3 scripts/check_trace.py --doc docs/deliverables.md --tests
+│ tests/acceptance; echo TRACE:$?
+├ exit 0
+└ ruff check .
+  All checks passed!
+  mypy fleetsre scripts
+  Success: no issues found in 19 source files
+  lint-imports
+  FAILED tests/acceptance/d3/test_d3.py::test_d3_t28_log_validity - NotImplemen…
+  FAILED tests/acceptance/d3/test_d3.py::test_d3_t29_jsonl_sink - NotImplemente…
+  36 failed in 0.98s
+  TRACE:0
+
+◆ Ran command · Get failure lines · ✓ · 1.2s
+├ python3 -m pytest tests/acceptance/d3 -q --tb=line 2>&1 | grep -E
+│ "FAILED|NotImplemented|/fleetsre" | head -80
+├ exit 0
+└ E   NotImplementedError
+  /home/rixon/fleet-sre/fleetsre/clock.py:13: NotImplementedError
+  E   NotImplementedError
+  /home/rixon/fleet-sre/fleetsre/clock.py:13: NotImplementedError
+  E   NotImplementedError
+  /home/rixon/fleet-sre/fleetsre/clock.py:13: NotImplementedError
+  E   NotImplementedError
+  /home/rixon/fleet-sre/fleetsre/clock.py:13: NotImplementedError
+  … 64 lines omitted
+  FAILED tests/acceptance/d3/test_d3.py::test_d3_t1_connector_shape - NotImplem…
+  FAILED tests/acceptance/d3/test_d3.py::test_d3_t2_resource_names - NotImpleme…
+  FAILED tests/acceptance/d3/test_d3.py::test_d3_t3_enums_redaction - NotImplem…
+  FAILED tests/acceptance/d3/test_d3.py::test_d3_t4_patch_semantics - NotImplem…
+  FAILED tests/acceptance/d3/test_d3.py::test_d3_t5_run_on_demand - NotImplemen…
+  FAILED tests/acceptance/d3/test_d3.py::test_d3_t6_set_logs_collection - NotIm…
+  FAILED tests/acceptance/d3/test_d3.py::test_d3_t7_connector_logs_list - NotIm…
+  FAILED tests/acceptance/d3/test_d3.py::test_d3_t8_execute_test - NotImplement…
+
+◆ Ran command · Verify stub signatures · ✓ · 0.8s
+├ python3 - <<'PY'
+│ import inspect
+│ from fleetsre.clock import Clock, SimClock, WallClock
+│ from fleetsre.ports import LogSink, MemorySink
+│ from fleetsre.adapters.jsonl import JsonlSink
+│ from fleetsre.mock.world import FaultSpec, World
+│ from fleetsre.mock.connector import map_priority
+│ from fleetsre.mock.chronicle_api import create_app
+│ print("SimClock", inspect.signature(SimClock.__init__))
+│ print("SimClock.now", inspect.signature(SimClock.now))
+│ print("SimClock.advance", inspect.signature(SimClock.advance))
+│ print("SimClock.set", inspect.signature(SimClock.set))
+│ print("WallClock.now", inspect.signature(WallClock.now))
+│ print("MemorySink", inspect.signature(MemorySink.__init__))
+│ print("JsonlSink", inspect.signature(JsonlSink.__init__))
+│ print("World", inspect.signature(World.__init__))
+│ print("World.step_until", inspect.signature(World.step_until))
+│ print("World.inject", inspect.signature(World.inject))
+│ print("World.clear", inspect.signature(World.clear))
+│ print("World.plant_canary", inspect.signature(World.plant_canary))
+│ print("World.snapshot", inspect.signature(World.snapshot))
+│ print("map_priority", inspect.signature(map_priority))
+│ print("create_app", inspect.signature(create_app))
+│ print("FaultSpec fields", list(FaultSpec.model_fields))
+│ PY
+├ exit 0
+└ SimClock (self, start: datetime.datetime) -> None
+  SimClock.now (self) -> datetime.datetime
+  SimClock.advance (self, seconds: float) -> None
+  SimClock.set (self, t: datetime.datetime) -> None
+  WallClock.now (self) -> datetime.datetime
+  MemorySink (self) -> None
+  JsonlSink (self, path: str | pathlib.Path) -> None
+  World (self, fleet: fleetsre.mock.fleet.FleetConfig, seed: int, clock: fleets…
+  World.step_until (self, t: datetime.datetime) -> None
+  World.inject (self, fault: fleetsre.mock.world.FaultSpec) -> str
+  World.clear (self, fault_id: str) -> None
+  World.plant_canary (self, environment: str) -> str
+  World.snapshot (self) -> dict[str, typing.Any]
+  map_priority (severity: str, unknown_severity_priority: str) -> int | str
+  create_app (world: fleetsre.mock.world.World, *, chaos: bool = False, dev_aut…
+  FaultSpec fields ['type', 'environment', 'target', 'params']
+
+◆ Done. D3 tests are written red with stubs only.
+
+  Acceptance observed in this session:
+
+  • pytest tests/acceptance/d3: 29 functions (36 items with T22×2 and T24×7),
+    all fail with NotImplementedError
+  • pytest tests/acceptance/d1 tests/acceptance/d2 -m "not live": 18 passed
+  • pytest tests/acceptance/d0: 8 passed, D0-T1 fails only because make check
+    runs the red D3 suite
+  • make lint: ruff, mypy, import-linter all pass; trace check passes
+  • pyproject.toml already had fastapi and httpx; pip install -e ".[dev]" fails
+    here on proxy timeout but both imports already work
+
+  Table (ID -> function -> failure):
+
+  ┌────────┬────────────────────────────────┬──────────────────────────────────┐
+  │ ID     │ Function                       │ Failure                          │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T1  │ test_d3_t1_connector_shape     │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T2  │ test_d3_t2_resource_names      │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T3  │ test_d3_t3_enums_redaction     │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T4  │ test_d3_t4_patch_semantics     │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T5  │ test_d3_t5_run_on_demand       │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T6  │ test_d3_t6_set_logs_collection │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T7  │ test_d3_t7_connector_logs_list │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T8  │ test_d3_t8_execute_test        │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T9  │ test_d3_t9_job_instances       │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T10 │ test_d3_t10_environments       │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T11 │ test_d3_t11_errors             │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T12 │ test_d3_t12_run_cadence        │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T13 │ test_d3_t13_alert_volume       │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T14 │ test_d3_t14_ingestion_records  │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T15 │ test_d3_t15_severity_map       │ map_priority NotImplementedError │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T16 │ test_d3_t16_determinism        │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T17 │ test_d3_t17_f1_stall           │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T18 │ test_d3_t18_f2_credential      │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T19 │ test_d3_t19_f3_drift           │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T20 │ test_d3_t20_f4_hollow          │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T21 │ test_d3_t21_f5_error           │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T22 │ test_d3_t22_f6_flap            │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T23 │ test_d3_t23_f7_stall           │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T24 │ test_d3_t24_clearing           │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T25 │ test_d3_t25_canary             │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T26 │ test_d3_t26_chaos_gating       │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T27 │ test_d3_t27_authorization      │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T28 │ test_d3_t28_log_validity       │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  ├────────┼────────────────────────────────┼──────────────────────────────────┤
+  │ D3-T29 │ test_d3_t29_jsonl_sink         │ SimClock.init                    │
+  │        │                                │ NotImplementedError              │
+  └────────┴────────────────────────────────┴──────────────────────────────────┘
+
+  Tests: tests/acceptance/d3/test_d3.py
+
+  Stubs added (all raise NotImplementedError except real FaultSpec fields):
+
+  • fleetsre/clock.py
+  • fleetsre/ports.py
+  • fleetsre/adapters/jsonl.py
+  • fleetsre/mock/world.py
+  • fleetsre/mock/connector.py
+  • fleetsre/mock/chronicle_api.py
+
+◆ Worked for 14m 39s · 9:57 PM · 29/Oct
+
