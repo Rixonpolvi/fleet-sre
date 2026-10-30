@@ -1,4 +1,4 @@
-"""Ports: LogSink and MemorySink (D3 stub)."""
+"""Ports: LogSink and the in-memory implementation."""
 
 from typing import Protocol
 
@@ -13,7 +13,7 @@ class MemorySink(LogSink):
     entries: list[LogEntry]
 
     def __init__(self) -> None:
-        raise NotImplementedError
+        self.entries = []
 
     def write(self, entry: LogEntry) -> None:
-        raise NotImplementedError
+        self.entries.append(entry)
