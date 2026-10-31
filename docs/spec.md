@@ -12,6 +12,8 @@ Revised 2026-10-29 (evening) after D2: every tool result reaches the model with 
 
 Revised 2026-10-29 (night) before D3: Chronicle method bodies, permissions and connector log collection checked against Google's docs (`mocks.md` §4); `setLogsCollection` leaves the action allowlist (§6.4).
 
+Revised 2026-10-31 after D4: boundary and recovery rules for each tripwire type, settled by the evaluator (§5).
+
 ---
 
 ## 1. Summary
@@ -144,9 +146,11 @@ Values were settled in D1; `contracts/*.json` is authoritative and this example 
 
 - `logs.deploymentBy` names the entry field that identifies the deployment: `labels.connector_instance` for connectors, and the invented `jsonPayload.environment` for jobs and ETL. Google's documented job label (`job_name`) names the job definition, which is the same on every tenant, and ETL entries carry only `correlation_id`.
 - Cadence specs name their interval explicitly (`"intervalSeconds": "${intervalSeconds}"`).
-- Schema tripwires take `event` (only entries with that `jsonPayload.event` are checked), `where` (equality filters on other fields), `consecutive` (violations in a row to trip; default 1) and `recoverAfter` (valid entries in a row to recover; default `consecutive`).
-- For `errorSignature`, a run is one `runId`, and its severity is the worst entry in it.
+- Schema tripwires take `event` (only entries with that `jsonPayload.event` are checked), `where` (equality filters on other fields), `consecutive` (violations in a row to trip; default 1) and `recoverAfter` (valid entries in a row to recover; default `consecutive`). Entries the filters exclude neither count nor reset either run.
+- For `errorSignature`, a run is one `runId`, its severity is the worst entry in it, and it is judged when it completes (the component's cadence heartbeat). It trips when at least `threshold` of the last `windowRuns` runs are at or above `minSeverity`, and recovers after `windowRuns − threshold + 1` clean runs in a row.
 - Entering a change point re-arms cadence from that moment: a heartbeat from before the change point never counts.
+- Cadence goes by the latest heartbeat timestamp seen, not the last entry to arrive, and trips when the silence is strictly longer than `maxSilentIntervals × intervalSeconds`. It recovers on the first heartbeat that clears that condition.
+- A canary seen exactly at its deadline is in time. A late canary does not recover the tripwire; the next canary seen in time does.
 - `load_contract` rejects a bad contract with a `ContractError` code (table in `deliverables.md` §D1).
 
 | Tripwire type | Checks | Trips when | Failure it catches |
