@@ -220,3 +220,29 @@ def load_contract(path: str | Path) -> Contract:
             )
 
     return contract
+
+
+class SchemaSpec(BaseModel):
+    """D4: resolved schema tripwire spec (no ${param} strings). Data model only."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    event: str | None = None
+    field: str
+    type: str
+    enum: list[Any] | None = None
+    minimum: int | float | None = None
+    required: bool
+    consecutive: int = 1
+    recoverAfter: int | None = None
+    where: dict[str, Any] | None = None
+
+
+class ErrorSigSpec(BaseModel):
+    """D4: resolved errorSignature spec (no ${param} strings). Data model only."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    minSeverity: str
+    windowRuns: int
+    threshold: int
