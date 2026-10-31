@@ -501,12 +501,16 @@ def test_d5_t6_evidence_gate():
         "source": {"insertId": past[-2].insertId},
         "why": "fourth", "rationale": "probe",
     }, session), "evidence.limit")
+    ok(_read(tools, session, "query_logs", {
+        "deployment": sib, "window": {"lastMinutes": 60},
+        "filter": {},
+    }))
     saved_now = setup["clock"].now()
     setup["world"].step_until(
         saved_now + timedelta(seconds=600)
     )
     future = [
-        e for e in entries_for(setup, env) if e.timestamp > saved_now
+        e for e in entries_for(setup, sib_env) if e.timestamp > saved_now
     ]
     assert future
     setup["clock"].set(saved_now)
@@ -657,7 +661,7 @@ def test_d5_t7_diagnosis_gate():
     }, session))
     assert session.evidence[fresh["id"]].recordedAtTurn == 6
     after_resume = copy.deepcopy(base)
-    after_resume["evidence"] = [fresh["id"]]
+    after_resume["evidence"] = ["E1", fresh["id"]]
     ok(_submit(tools, session, after_resume))
     bad_unknown = copy.deepcopy(base)
     bad_unknown["category"] = "unknown"
@@ -679,11 +683,12 @@ def test_d5_t7_diagnosis_gate():
         case = setup_from_fixture(fault)
         if fault == "F4":
             f4_env = case["trip"].deployment.split("/", 1)[1]
-            hollow_src = next(
-                e for e in entries_for(case, f4_env)
-                if e.jsonPayload.get("event") == "job.run.completed"
-                and e.jsonPayload.get("status") == "SUCCESS"
-                and e.jsonPayload.get("indicatorsSynced") == 0
+            hollow_src = max(
+                (e for e in entries_for(case, f4_env)
+                 if e.jsonPayload.get("event") == "job.run.completed"
+                 and e.jsonPayload.get("status") == "SUCCESS"
+                 and e.jsonPayload.get("indicatorsSynced") == 0),
+                key=lambda e: e.timestamp,
             )
             payload = copy.deepcopy(hollow_src.jsonPayload)
             payload["status"] = "ERROR"
