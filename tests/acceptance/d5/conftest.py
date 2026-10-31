@@ -372,7 +372,10 @@ def sibling_of(setup: dict[str, Any], deployment: str) -> str:
 
 
 def entries_for(setup: dict[str, Any], env: str) -> list[Any]:
+    """Sink entries that route to <service>/<env>, as the gates route them."""
+    registry = build_registry([setup["contract"]], setup["deployments"])
+    want = f"{setup['contract'].service}/{env}"
     return [
         e for e in setup["sink"].entries
-        if e.jsonPayload.get("environment") == env
+        if any(dep == want for dep, _component in registry.route(e))
     ]
