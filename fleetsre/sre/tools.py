@@ -75,6 +75,7 @@ _DIAGNOSIS_SCHEMA = {
                     "hypothesis": {"type": "string"},
                     "why": {"type": "string"},
                 },
+                "required": ["hypothesis", "why"],
                 "additionalProperties": False,
             },
         },
@@ -93,15 +94,19 @@ _DIAGNOSIS_SCHEMA = {
                 "patch": {"type": "object"},
                 "escalationSummary": {"type": "string"},
             },
+            "required": ["type"],
             "additionalProperties": False,
         },
         "expectedVerification": {
             "type": "object",
             "properties": {
                 "tripwire": {"type": "string"},
-                "condition": {"type": "string"},
+                "condition": {
+                    "type": "string", "enum": ["recovers_within"],
+                },
                 "seconds": {"type": "integer"},
             },
+            "required": ["tripwire", "condition", "seconds"],
             "additionalProperties": False,
         },
         "rollback": {"type": "string"},
@@ -109,6 +114,10 @@ _DIAGNOSIS_SCHEMA = {
             "type": "string", "enum": ["low", "medium", "high"],
         },
     },
+    "required": [
+        "incidentId", "deployment", "component", "category", "hypothesis",
+        "summary", "evidence", "action", "confidence",
+    ],
     "additionalProperties": False,
 }
 
@@ -335,7 +344,7 @@ class ToolSet:
         except Exception as exc:
             result = {"error": f"{name} failed: {exc}"}
             verdict = "refused"
-            problems = [f"tool.unknown: internal error in {name}: {exc}"]
+            problems = [f"tool.error: internal error in {name}: {exc}"]
             result["problems"] = problems
         session.calls[call_id] = CallRecord(
             tool=name,
@@ -367,12 +376,29 @@ class ToolSet:
             problems = ["args.schema: arguments must be an object"]
             return {"error": f"{name} refused", "problems": problems}, \
                 "refused", problems
+        if (
+            name == "submit_diagnosis"
+            and self.verification
+            and not getattr(session, "hypotheses", None)
+        ):
+            # With gates on, a submission before any hypotheses reports
+            # the order violation first, ahead of argument validation.
+            problems = [
+                "order: set_hypotheses must be accepted before "
+                "submit_diagnosis"
+            ]
+            return {"error": f"{name} refused", "problems": problems}, \
+                "refused", problems
         try:
             jsonschema.Draft202012Validator(
                 spec["parameters"]
             ).validate(args)
         except jsonschema.ValidationError as exc:
-            problems = [f"args.schema: {exc.message}"]
+            path = list(exc.absolute_path)
+            if name == "submit_diagnosis" and path[:1] == ["diagnosis"]:
+                problems = [f"diagnosis.schema: {exc.message}"]
+            else:
+                problems = [f"args.schema: {exc.message}"]
             return {"error": f"{name} refused", "problems": problems}, \
                 "refused", problems
         handler = getattr(self, f"_tool_{name}", None)

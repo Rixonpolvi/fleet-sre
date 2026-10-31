@@ -398,6 +398,11 @@ def resume(
 ) -> InvestigationResult:
     """Resume a paused investigation with a new segment (d5-pins.md pin 9)."""
     session = store.load(incident.id)
+    if session.status != "needs_input":
+        raise ValueError(
+            f"cannot resume incident {incident.id} with status "
+            f"{session.status}; only needs_input sessions resume"
+        )
     session.segment_start_turn = session.turn
     session.turn_limit = session.turn + extra_turns
     session.read_limit = extra_reads

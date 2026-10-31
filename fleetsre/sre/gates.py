@@ -238,11 +238,28 @@ def _schema_spec(tripwire: Any, params: dict[str, Any]) -> SchemaSpec:
     )
 
 
-def _resource_belongs(resource: Any, incident: Any) -> bool:
-    """True when the resource is the incident deployment's full name."""
-    if not isinstance(resource, str):
-        return False
-    return resource in set(getattr(incident, "resources", {}).values())
+def _expected_resource(
+    method: Any, incident: Any, contract: Any
+) -> str | None:
+    """Full resource name a propose method requires, by exact match.
+
+    connectorInstances.* needs the deployment's connector instance
+    name, jobInstances.* its job instance name; anything else (the
+    integration instance included) has no valid resource.
+    """
+    if not isinstance(method, str):
+        return None
+    if method.startswith("connectorInstances."):
+        want_kind = "connectorInstance"
+    elif method.startswith("jobInstances."):
+        want_kind = "jobInstance"
+    else:
+        return None
+    resources = getattr(incident, "resources", {})
+    for component in getattr(contract, "components", []):
+        if component.kind == want_kind and component.id in resources:
+            return str(resources[component.id])
+    return None
 
 
 def _log_entries(
@@ -281,18 +298,25 @@ def _category_problems(
     cited = list(diag.evidence)
     logged = _log_entries(cited, session, log_query)
     if category in ("connector_stalled", "job_stalled"):
+        want_kind = (
+            "connectorInstance" if category == "connector_stalled"
+            else "jobInstance"
+        )
+        kinds = {
+            c.id: c.kind for c in getattr(contract, "components", [])
+        }
         heartbeat: str | None = None
         for tripwire in getattr(contract, "tripwires", []):
             if (
                 tripwire.type == "cadence"
-                and tripwire.component == incident.component
+                and kinds.get(tripwire.component) == want_kind
             ):
                 heartbeat = str(tripwire.spec.get("event", ""))
                 break
         if not heartbeat:
             return [
-                f"diagnosis.category: no cadence heartbeat for component "
-                f"{incident.component}"
+                f"diagnosis.category: no cadence heartbeat for a "
+                f"{want_kind} component"
             ]
         trip_at = _trip_at(incident)
         if trip_at is None:
@@ -310,8 +334,12 @@ def _category_problems(
             return [
                 "diagnosis.category: no heartbeat found for the deployment"
             ]
-        latest = max(e.timestamp for e in candidates)
-        if not any(e.timestamp == latest for _eid, e in logged):
+        latest_ts = max(e.timestamp for e in candidates)
+        latest_ids = {
+            e.insertId for e in candidates if e.timestamp == latest_ts
+        }
+        cited_ids = {e.insertId for _eid, e in logged}
+        if not (cited_ids & latest_ids):
             return [
                 "diagnosis.category: cited evidence lacks the deployment's "
                 f"latest {heartbeat} at or before the trip"
@@ -374,12 +402,19 @@ def _category_problems(
             if t.type == "schema"
         ]
         for _eid, entry in logged:
+            # schema_violation already applies the tripwire's event and
+            # where filters (it returns None for non-matching entries);
+            # the gate adds the deployment route check.
+            if not any(
+                dep == deployment for dep, _c in registry.route(entry)
+            ):
+                continue
             for spec in schemas:
                 if schema_violation(entry, spec) is not None:
                     return []
         return [
-            "diagnosis.category: cited evidence lacks an entry violating "
-            "a schema tripwire"
+            "diagnosis.category: cited evidence lacks an entry of the "
+            "incident's deployment violating a schema tripwire"
         ]
     if category == "job_hollow_success":
         for _eid, entry in logged:
@@ -426,11 +461,12 @@ def check_diagnosis(
     log_query: Any,
     registry: Any,
 ) -> list[str]:
-    """Check a submit_diagnosis payload (spec.md §6.5, d5-pins.md pin 28-29)."""
-    if not getattr(session, "hypotheses", {}):
-        return [
-            "order: set_hypotheses must be accepted before submit_diagnosis"
-        ]
+    """Check a submit_diagnosis payload (spec.md §6.5, d5-pins.md pin 28-29).
+
+    The schema validates first: schema problems return before any other
+    rule, so diagnosis.schema refuses even with verification=False and
+    no hypotheses (pin 30).
+    """
     problems: list[str] = []
     if not isinstance(d, dict):
         return ["diagnosis.schema: diagnosis must be an object"]
@@ -441,6 +477,10 @@ def check_diagnosis(
             loc = ".".join(str(x) for x in err["loc"]) or "(root)"
             problems.append(f"diagnosis.schema: {loc}: {err['msg']}")
         return problems
+    if not getattr(session, "hypotheses", {}):
+        return [
+            "order: set_hypotheses must be accepted before submit_diagnosis"
+        ]
     evidence = getattr(session, "evidence", {})
     for eid in diag.evidence:
         if eid not in evidence:
@@ -522,10 +562,11 @@ def check_diagnosis(
                         f"diagnosis.update_mask: patch key outside "
                         f"updateMask: {key!r}"
                     )
-        if not _resource_belongs(action.resource, incident):
+        expected = _expected_resource(action.method, incident, contract)
+        if action.resource != expected:
             problems.append(
-                f"diagnosis.resource: resource is not the incident "
-                f"deployment's: {action.resource!r}"
+                f"diagnosis.resource: resource is not the deployment's "
+                f"{action.method} name: {action.resource!r}"
             )
     elif action.type == "escalate":
         summary = action.escalationSummary or ""
