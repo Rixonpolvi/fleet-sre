@@ -1772,22 +1772,19 @@ def test_d4_t10_out_of_order():
         rng = random.Random(2024)
         arrivals: list[tuple[datetime, int, LogEntry]] = []
         for index, entry in enumerate(entries):
-            delay = rng.random() * displacement
+            delay = tick_seconds * rng.randint(0, displacement // tick_seconds)
             arrivals.append(
                 (entry.timestamp + timedelta(seconds=delay), index, entry)
             )
         arrivals.sort(key=lambda item: (item[0], item[1]))
-        arrival_entries = [entry for _at, _idx, entry in arrivals]
-        stamp_order = sorted(arrival_entries, key=lambda e: e.timestamp)
-        assert arrival_entries != stamp_order
-        inverted = any(
-            arrival_entries[i].timestamp > arrival_entries[i + 1].timestamp
-            for i in range(len(arrival_entries) - 1)
-        )
-        assert inverted
+        # The world writes on a fixed 60 s grid. Each entry is delayed by a whole
+        # number of ticks from 0 to `displacement`, so one tick's batch can hold
+        # entries up to `displacement` apart; the batch is delivered in a seeded
+        # shuffled order (delivery order is not guaranteed).
         clock = SimClock(T0)
         evaluator = Evaluator([contract], deployments, clock)
         collected: list[TripEvent] = []
+        ingested: list[LogEntry] = []
         position = 0
         end = T0 + timedelta(seconds=duration + displacement)
         steps = int((duration + displacement) // tick_seconds) + 1
@@ -1796,16 +1793,26 @@ def test_d4_t10_out_of_order():
             if tick_at > end:
                 break
             clock.set(tick_at)
+            batch: list[LogEntry] = []
             while position < len(arrivals) and arrivals[position][0] <= tick_at:
-                _arrival, _index, entry = arrivals[position]
-                collected.extend(evaluator.ingest(entry))
+                batch.append(arrivals[position][2])
                 position += 1
+            rng.shuffle(batch)
+            for entry in batch:
+                assert entry.timestamp <= tick_at
+                ingested.append(entry)
+                collected.extend(evaluator.ingest(entry))
             collected.extend(evaluator.tick())
-        while position < len(arrivals):
-            _arrival, _index, entry = arrivals[position]
-            collected.extend(evaluator.ingest(entry))
-            position += 1
-        collected.extend(evaluator.tick())
+        assert position == len(arrivals)
+        newest = ingested[0].timestamp
+        max_inversion = 0.0
+        for entry in ingested:
+            if entry.timestamp < newest:
+                gap = (newest - entry.timestamp).total_seconds()
+                max_inversion = max(max_inversion, gap)
+            newest = max(newest, entry.timestamp)
+        assert max_inversion > 0
+        assert max_inversion <= displacement
         assert collected == []
 
 
@@ -1907,13 +1914,37 @@ def test_d4_t13_mutants_fail(
     """D4-T13: every weakened mutant contract fails its scorecard."""
     assert len(_mutant_cases) >= 1
     assert len(_mutant_scorecards) == len(_mutant_cases)
-    for (name, _contract, _scenarios), (_seen, board) in zip(
+    for (name, mutant, _scenarios), (_seen, board) in zip(
         _mutant_cases, _mutant_scorecards
     ):
         assert name == _seen
         assert isinstance(board, Scorecard)
         assert board.passed is False, name
-        assert board.expected_hit_rate < 1.0, name
+        # It must fail because of what was mutated: some missing item or
+        # unexpected event names a tripwire that differs from the reference.
+        reference = _contract(mutant.service)
+        ref_tw = {t.id: t.model_dump() for t in reference.tripwires}
+        mut_tw = {t.id: t.model_dump() for t in mutant.tripwires}
+        changed = {
+            tw_id
+            for tw_id in set(ref_tw) | set(mut_tw)
+            if ref_tw.get(tw_id) != mut_tw.get(tw_id)
+        }
+        ref_cp = reference.changePoint.model_dump()
+        mut_cp = mutant.changePoint.model_dump()
+        if ref_cp != mut_cp:
+            changed |= set(ref_cp.get("overrides", {})) | set(
+                mut_cp.get("overrides", {})
+            )
+        assert changed, f"{name}: no tripwire differs from the reference"
+        culprits = {
+            tripwire
+            for result in board.results
+            for _kind, _dep, tripwire in result.missing
+        } | {
+            event.tripwire for result in board.results for event in result.unexpected
+        }
+        assert culprits & changed, (name, sorted(culprits), sorted(changed))
 
 
 def test_d4_t14_latency_reporting(
