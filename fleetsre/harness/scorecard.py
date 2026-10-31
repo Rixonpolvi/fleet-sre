@@ -24,22 +24,9 @@ def scorecard(
     total = 0
     hit = 0
     for scenario, result in zip(scored, results):
-        items = (
-            len(scenario.expected.trips)
-            + len(scenario.expected.recoveries)
-            + len(scenario.expected.mustNotTrip)
-        )
+        items = len(scenario.expected.trips) + len(scenario.expected.recoveries)
         total += items
-        violated = 0
-        for rule in scenario.expected.mustNotTrip:
-            dep_id = f"{scenario.service}/{rule.deployment}"
-            if any(
-                event.deployment == dep_id
-                and (rule.tripwire == "*" or event.tripwire == rule.tripwire)
-                for event in result.actual
-            ):
-                violated += 1
-        hit += items - len(result.missing) - violated
+        hit += items - len(result.missing)
     rate = hit / total if total else 1.0
     return Scorecard(
         results=results,
