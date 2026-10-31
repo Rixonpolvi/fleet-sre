@@ -10,6 +10,8 @@ Revised 2026-10-29 (evening) after D2: the spike interface, fixture files and ou
 
 Revised 2026-10-29 (night) before D3: §D3 matches the Chronicle method bodies, permissions and connector log collection checked against Google's docs (`mocks.md` §4); `map_priority` added to the D3 interfaces (D3-T5–T8, T15, T17–T20).
 
+Revised 2026-10-31 after D4: §D4 matches what was built (PRs #17–#19): interfaces, the wording of D4-T1, T3, T5, T7, T10, T11, T13 and T17, and the rules the evaluator settled ("Semantics settled in D4").
+
 Nine deliverables, D0–D8. Each one is **two merges**: a tests PR, then an implementation PR. The acceptance tests below are the definition of done. The coding agent translates them into code; it does not decide them.
 
 ---
@@ -384,6 +386,8 @@ class Evaluator:
     def canary_planted(self, deployment: str, provider_incident_id: str, at: datetime) -> None
     def enter_change_point(self, deployment: str, component: str, *, duration_s: int, overrides: dict) -> None
     def status(self) -> dict[str, dict[str, Literal["ok", "tripped"]]]
+    @property
+    def deployments(self) -> tuple[Deployment, ...]    # the armed deployments
 
 # fleetsre/evaluator/canary.py
 class CanaryScheduler: def __init__(self, world_or_planter, evaluator, contracts, clock); def tick(self) -> None
@@ -393,29 +397,51 @@ def run_scenario(contract: Contract, scenario: Scenario, *, tick_seconds: int = 
 def scorecard(contract: Contract, scenarios: list[Scenario]) -> Scorecard
 @dataclass class ScenarioResult: scenario_id; expected; actual; latencies; missing; unexpected; passed: bool
 @dataclass class Scorecard: results: list[ScenarioResult]; passed: bool; expected_hit_rate: float; false_positives: int
+
+# fleetsre/registry.py
+@dataclass class Deployment: ...   # id "<service>/<environment>", service, environment, parameters, resources
+def deployments_from_fleet(fleet, contract, environments) -> list[Deployment]
+
+# fleetsre/contracts.py
+class SchemaSpec(BaseModel): ...;  class ErrorSigSpec(BaseModel): ...   # typed tripwire specs
 ```
-Deployment IDs are `<service>/<environment>`.
+Deployment IDs are `<service>/<environment>`. The harness starts every scenario at t0 `2026-10-29T14:00:00Z`.
 
 | ID | Test | Pass condition |
 | --- | --- | --- |
-| D4-T1 | Cadence boundaries | `cadence_due` is False at `max_silent × interval − 1 s` after the last event and True at `+1 s`; with no events yet, the window counts from `armed_at` |
+| D4-T1 | Cadence boundaries | `cadence_due` is False at `max_silent × interval − 1 s` after the latest heartbeat timestamp seen and True at `+1 s` (strict `>`); with no events yet, the window counts from `armed_at` |
 | D4-T2 | Quiet tenant | The `quiet-tenant` scenario (charlie, 2 alerts/h, 6 h) produces zero trips with the reference contract |
-| D4-T3 | Canary boundaries | `canary_missed` is False when seen at `deadline − 1 s`, True at `deadline + 1 s` unseen |
+| D4-T3 | Canary boundaries | `canary_missed` is False when seen at `deadline − 1 s`, True at `deadline + 1 s` unseen; a canary seen exactly at its deadline is in time (strict `>`) |
 | D4-T4 | Schema detection | `schema_violation` returns a reason for a missing field, a wrong type and an out-of-enum value, and None for a valid entry; with `consecutive: K`, the evaluator trips only on the K-th consecutive violation |
-| D4-T5 | Error signature | Trips when WARNING-or-worse runs in the last `windowRuns` ≥ `threshold`; a single warning does not trip |
+| D4-T5 | Error signature | Trips when at least `threshold` of the last `windowRuns` runs are at or above `minSeverity`; a single warning does not trip. A run is one `runId`, its severity is the worst entry in it, and it is judged when it completes (the component's cadence heartbeat); the window is the last `windowRuns` completed runs in first-seen order |
 | D4-T6 | Dedupe | A tripped (deployment, tripwire) emits no further trip events until it has recovered |
-| D4-T7 | Recovery | Cadence recovers on the next heartbeat; canary on the next successful canary; schema after `recoverAfter` consecutive valid entries (default `consecutive`); errorSignature when the window drops below threshold, where a run is one `runId` and its severity is the worst entry in it |
+| D4-T7 | Recovery | Cadence recovers on the first heartbeat that clears due-ness (a stale or pre-change-point heartbeat does not); canary on the next canary seen by its deadline (a late canary does not recover); schema after `recoverAfter` consecutive valid entries (default `consecutive`), where entries outside the `event`/`where` filters neither count nor reset; errorSignature after `windowRuns − threshold + 1` consecutive clean runs (3 for `connector-errors`, 2 for `job-errors`) |
 | D4-T8 | Isolation | Property test: a fault on one environment, placed at random times across 50 seeded runs, never trips another environment's tripwires |
 | D4-T9 | Purity and replay | Tripwire functions perform no I/O (checked by import-linter rule and a monkeypatched `open`/socket); replaying the same stream and tick times twice yields identical event lists |
-| D4-T10 | Out-of-order tolerance | Entries arriving up to 60 s out of timestamp order cause no false trips |
-| D4-T11 | Golden fixtures | For each `fixtures/golden/X.jsonl`, replayed with the `deployments`, `t0`, `durationSeconds`, `tickSeconds` and `canariesPlanted` that `X.expected.json` declares (a canary is seen when an `alert.ingested` entry has `alert.canary: true` and `alert.ticket_id` equal to its `providerIncidentId`), the evaluator's events equal its `events` exactly (kind, deployment, tripwire, offset ± tick) |
+| D4-T10 | Out-of-order tolerance | Entries delayed by whole ticks (0–60 s), with each tick's batch delivered in a seeded shuffled order, cause no false trips (the world writes on a fixed 60 s grid, so sub-60 s delays alone never reorder entries) |
+| D4-T11 | Golden fixtures | For each `fixtures/golden/X.jsonl`, replayed with the `deployments`, `t0`, `durationSeconds`, `tickSeconds` and `canariesPlanted` that `X.expected.json` declares (a canary is seen when an `alert.ingested` entry has `alert.canary: true` and `alert.ticket_id` equal to its `providerIncidentId`), the evaluator's events equal its `events` as a multiset (kind, deployment, tripwire, offset ± tick) |
 | D4-T12 | Reference scorecard | The reference contracts score `passed == True`, 100% expected hits, 0 false positives over their full scenario libraries |
-| D4-T13 | Mutants fail | Every contract in `fixtures/mutants/` scores `passed == False` |
+| D4-T13 | Mutants fail | Every contract in `fixtures/mutants/` scores `passed == False`, and at least one of its missing or unexpected events is on a tripwire whose definition differs from the reference contract |
 | D4-T14 | Latency reporting | Every expected trip in a passing scenario reports a latency ≤ its `withinSeconds` |
 | D4-T15 | Change-point mode | `enter_change_point` applies the overrides (e.g. `maxSilentIntervals: 2` trips after two silent intervals), re-arms cadence from the moment it is entered (a heartbeat from before the change point never counts) and reverts after `duration_s` |
 | D4-T16 | Canary scheduler | Plants one canary per `everyMinutes` per deployment with a synthetic tripwire and calls `canary_planted` for each |
-| D4-T17 | Trip evidence | Every trip event carries at least one `insertId` of a relevant entry (the last heartbeat, the violating entry, or the warning entries), except canary misses, which carry the planted incident ID in `reason` |
+| D4-T17 | Trip evidence | Every trip event carries at least one `insertId` of a relevant entry (cadence: the last heartbeat seen, even one from before a change point; schema: the violating entries; errorSignature: the entries at or above `minSeverity` in the window's runs), except canary misses, which carry the planted incident ID in `reason` and empty evidence |
 | D4-T18 | Speed | The full scenario library for both services replays in under 30 s on a laptop |
+
+**Semantics settled in D4.** Pinned by the D4 tests or decided in the implementation and accepted in review.
+
+1. **Replay loop.** One `SimClock` is shared by World and Evaluator; faults go through `world.schedule` with `at`/`clearAt` offsets from t0. At each tick instant, as built: `scheduler.tick()`, `world.step_until(t)`, ingest every new sink entry in write order, `evaluator.tick()`. A canary planted at a tick can be fetched by a run at the same instant.
+2. **Deployments.** Scenario `deployments` are environment names; deployment IDs are `<service>/<environment>`. A scorecard runs a contract against its own service's scenarios only, held-out ones included.
+3. **Matching and latency.** Actual events match expected ones on (deployment, tripwire). Trip latency counts from the latest fault `at` on that environment at or before the event; recovery latency from the latest `clearAt` (the fault `at` when there is none). An event after `withinSeconds`, or before the fault, is missing and also unexpected.
+4. **False positives** are strict: every unmatched actual trip or recovery is `unexpected`. `expected_hit_rate` = matched expected trips and recoveries / all of them (1.0 when there are none). `mustNotTrip` entries are asserted but are not expected items.
+5. **Routing.** Entries route to a deployment by the component's `container_name` and `match` labels, then `deploymentBy`; a connector label maps through `Deployment.resources`, with `jsonPayload.environment` as the fallback.
+6. **Arming.** `${param}` is resolved when a deployment is armed. Cadence and canary are evaluated in `tick()`, schema and errorSignature in `ingest()`. Every `TripEvent.at` is `clock.now()`. The evaluator keeps only the runs a window needs.
+7. **Cadence** uses the latest heartbeat timestamp seen, never the last entry to arrive.
+8. **Isolation** (T8) compares (kind, deployment, tripwire) only, never `runId` or `insertId`, which are global counters.
+9. **Canary scheduler** plants through `World.plant_canary`, first at arm + `everyMinutes`, then every `everyMinutes`, only for deployments whose contract has a synthetic tripwire.
+10. **Change point.** Overrides take the contract's `changePoint.overrides` shape; cadence re-arms at entry; overrides revert after `duration_s`. The executor calls `enter_change_point(deployment, component, duration_s=..., overrides=contract.changePoint.overrides)` after an approved change (D6).
+11. **Cost.** The scenario-library tests share module-scoped scorecards.
+12. **Known weakness.** With errorSignature recovery after `windowRuns − threshold + 1` clean runs, `flap-severe` (rate 0.7) passes on its seed partly by luck: about 2 seeds in 3 would see a 3-clean streak and a recovery. A symmetric rule (recover when at least `threshold` of the last `windowRuns` runs are clean) is more robust; deferred until after the hackathon.
 
 **Out of scope:** incidents, model calls, GCP.
 
