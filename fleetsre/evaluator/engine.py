@@ -365,7 +365,7 @@ class Evaluator:
         entry: LogEntry,
         events: list[TripEvent],
     ) -> None:
-        event, _interval, _max = self._eff_cadence(dep_id, tripwire)
+        event, interval, max_silent = self._eff_cadence(dep_id, tripwire)
         if entry.jsonPayload.get("event") != event:
             return
         state = self._cad[(dep_id, tripwire.id)]
@@ -378,6 +378,14 @@ class Evaluator:
         ):
             state.post_ts = ts
         if self._status[dep_id][tripwire.id] == "tripped":
+            if cadence_due(
+                state.post_ts,
+                state.armed_at,
+                self._clock.now(),
+                interval,
+                max_silent,
+            ):
+                return
             self._status[dep_id][tripwire.id] = "ok"
             events.append(
                 TripEvent(
