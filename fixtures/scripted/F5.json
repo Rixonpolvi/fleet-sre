@@ -1,0 +1,245 @@
+{
+  "fault": "F5",
+  "seed": 204,
+  "t0": "2026-10-29T14:00:00Z",
+  "faults": [
+    {
+      "at": 1830,
+      "type": "job_error",
+      "environment": "bravo",
+      "params": {}
+    }
+  ],
+  "incident": {
+    "id": "inc-intel-sync-bravo-job-errors-20261029T144000Z",
+    "deployment": "intel-sync/bravo",
+    "tripwire": "job-errors"
+  },
+  "responses": [
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_001",
+          "encrypted_content": "enc-placeholder-1"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_001",
+          "name": "set_hypotheses",
+          "arguments": "{\"items\": [{\"id\": \"H1\", \"statement\": \"The bravo job fails on an upstream feed outage.\", \"wouldConfirm\": \"incident signals point at this tenant\", \"alternative\": false}, {\"id\": \"H2\", \"statement\": \"A fleet-wide upstream outage hit every tenant alike.\", \"wouldConfirm\": \"siblings show the same failure\", \"alternative\": true}], \"rationale\": \"State the tenant fault and a fleet-wide alternative.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 8500,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 5200
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_002",
+          "encrypted_content": "enc-placeholder-2"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_002",
+          "name": "query_logs",
+          "arguments": "{\"deployment\": \"intel-sync/bravo\", \"window\": {\"lastMinutes\": 120}, \"filter\": {\"component\": \"job\", \"minSeverity\": \"ERROR\"}, \"rationale\": \"Read the incident deployment around the trip.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 9000,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 5400
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_003",
+          "encrypted_content": "enc-placeholder-3"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_003",
+          "name": "record_evidence",
+          "arguments": "{\"hypothesis\": \"H1\", \"stance\": \"supports\", \"source\": {\"insertId\": \"82b33e4b-000001a8\"}, \"why\": \"key trip signal from the incident deployment\", \"rationale\": \"Pin the trip signal to the tenant hypothesis.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 9500,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 5600
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_004",
+          "encrypted_content": "enc-placeholder-4"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_004",
+          "name": "compare_siblings",
+          "arguments": "{\"service\": \"intel-sync\", \"component\": \"job\", \"window\": {\"lastMinutes\": 120}, \"rationale\": \"Check whether siblings fail the same way.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 10000,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 5800
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_005",
+          "encrypted_content": "enc-placeholder-5"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_005",
+          "name": "query_logs",
+          "arguments": "{\"deployment\": \"intel-sync/alpha\", \"window\": {\"lastMinutes\": 120}, \"filter\": {\"component\": \"job\", \"event\": \"job.run.completed\"}, \"rationale\": \"Read a sibling to test the fleet-wide idea.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 10500,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 6000
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_006",
+          "encrypted_content": "enc-placeholder-6"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_006",
+          "name": "record_evidence",
+          "arguments": "{\"hypothesis\": \"H2\", \"stance\": \"refutes\", \"source\": {\"insertId\": \"024e4e20-000001a6\"}, \"why\": \"sibling runs healthy on schedule\", \"rationale\": \"Healthy sibling refutes the fleet-wide hypothesis.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 11000,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 6200
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_007",
+          "encrypted_content": "enc-placeholder-7"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_007",
+          "name": "get_resource",
+          "arguments": "{\"name\": \"projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockThreatIntel/jobs/sync-indicators/jobInstances/bravo-intel\", \"rationale\": \"Read the incident resource state directly.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 11500,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 6400
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_008",
+          "encrypted_content": "enc-placeholder-8"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_008",
+          "name": "record_evidence",
+          "arguments": "{\"hypothesis\": \"H1\", \"stance\": \"supports\", \"source\": {\"callId\": \"call_007\", \"field\": \"lastRunStatus\", \"value\": \"ERROR\"}, \"why\": \"resource state backs the tenant hypothesis\", \"rationale\": \"Pin the resource signal to the tenant hypothesis.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 12000,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 6600
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_009",
+          "encrypted_content": "enc-placeholder-9"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_009",
+          "name": "submit_diagnosis",
+          "arguments": "{\"diagnosis\": {\"incidentId\": \"inc-intel-sync-bravo-job-errors-20261029T144000Z\", \"deployment\": \"intel-sync/bravo\", \"component\": \"job\", \"category\": \"job_failing\", \"hypothesis\": \"H1\", \"summary\": \"The bravo job fails on an upstream feed outage.\", \"evidence\": [\"E1\", \"E3\"], \"openQuestions\": [], \"action\": {\"type\": \"escalate\", \"escalationSummary\": \"Fix is outside the allowlist; needs a human.\"}, \"confidence\": \"high\"}, \"rationale\": \"Submit the right-answer diagnosis.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 12500,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 6800
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    }
+  ]
+}

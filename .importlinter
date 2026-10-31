@@ -1,6 +1,7 @@
 [importlinter]
 root_package = fleetsre
 include_external_packages = True
+exclude_type_checking_imports = True
 
 [importlinter:contract:1]
 name = SRE isolation

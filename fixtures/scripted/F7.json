@@ -1,0 +1,245 @@
+{
+  "fault": "F7",
+  "seed": 202,
+  "t0": "2026-10-29T14:00:00Z",
+  "faults": [
+    {
+      "at": 1830,
+      "type": "job_stall",
+      "environment": "alpha",
+      "params": {}
+    }
+  ],
+  "incident": {
+    "id": "inc-intel-sync-alpha-dead-job-20261029T144515Z",
+    "deployment": "intel-sync/alpha",
+    "tripwire": "dead-job"
+  },
+  "responses": [
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_001",
+          "encrypted_content": "enc-placeholder-1"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_001",
+          "name": "set_hypotheses",
+          "arguments": "{\"items\": [{\"id\": \"H1\", \"statement\": \"The alpha job stalled and stopped running.\", \"wouldConfirm\": \"incident signals point at this tenant\", \"alternative\": false}, {\"id\": \"H2\", \"statement\": \"A fleet-wide upstream outage hit every tenant alike.\", \"wouldConfirm\": \"siblings show the same failure\", \"alternative\": true}], \"rationale\": \"State the tenant fault and a fleet-wide alternative.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 8500,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 5200
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_002",
+          "encrypted_content": "enc-placeholder-2"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_002",
+          "name": "query_logs",
+          "arguments": "{\"deployment\": \"intel-sync/alpha\", \"window\": {\"lastMinutes\": 120}, \"filter\": {\"component\": \"job\", \"event\": \"job.run.completed\"}, \"rationale\": \"Read the incident deployment around the trip.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 9000,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 5400
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_003",
+          "encrypted_content": "enc-placeholder-3"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_003",
+          "name": "record_evidence",
+          "arguments": "{\"hypothesis\": \"H1\", \"stance\": \"supports\", \"source\": {\"insertId\": \"ec097825-00000144\"}, \"why\": \"key trip signal from the incident deployment\", \"rationale\": \"Pin the trip signal to the tenant hypothesis.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 9500,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 5600
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_004",
+          "encrypted_content": "enc-placeholder-4"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_004",
+          "name": "compare_siblings",
+          "arguments": "{\"service\": \"intel-sync\", \"component\": \"job\", \"window\": {\"lastMinutes\": 120}, \"rationale\": \"Check whether siblings fail the same way.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 10000,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 5800
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_005",
+          "encrypted_content": "enc-placeholder-5"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_005",
+          "name": "query_logs",
+          "arguments": "{\"deployment\": \"intel-sync/bravo\", \"window\": {\"lastMinutes\": 120}, \"filter\": {\"component\": \"job\", \"event\": \"job.run.completed\"}, \"rationale\": \"Read a sibling to test the fleet-wide idea.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 10500,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 6000
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_006",
+          "encrypted_content": "enc-placeholder-6"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_006",
+          "name": "record_evidence",
+          "arguments": "{\"hypothesis\": \"H2\", \"stance\": \"refutes\", \"source\": {\"insertId\": \"9da35ccf-000001e6\"}, \"why\": \"sibling runs healthy on schedule\", \"rationale\": \"Healthy sibling refutes the fleet-wide hypothesis.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 11000,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 6200
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_007",
+          "encrypted_content": "enc-placeholder-7"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_007",
+          "name": "get_resource",
+          "arguments": "{\"name\": \"projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockThreatIntel/jobs/sync-indicators/jobInstances/alpha-intel\", \"rationale\": \"Read the incident resource state directly.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 11500,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 6400
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_008",
+          "encrypted_content": "enc-placeholder-8"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_008",
+          "name": "record_evidence",
+          "arguments": "{\"hypothesis\": \"H1\", \"stance\": \"supports\", \"source\": {\"callId\": \"call_007\", \"field\": \"enabled\", \"value\": true}, \"why\": \"resource state backs the tenant hypothesis\", \"rationale\": \"Pin the resource signal to the tenant hypothesis.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 12000,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 6600
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_009",
+          "encrypted_content": "enc-placeholder-9"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_009",
+          "name": "submit_diagnosis",
+          "arguments": "{\"diagnosis\": {\"incidentId\": \"inc-intel-sync-alpha-dead-job-20261029T144515Z\", \"deployment\": \"intel-sync/alpha\", \"component\": \"job\", \"category\": \"job_stalled\", \"hypothesis\": \"H1\", \"summary\": \"The alpha job stalled and stopped running.\", \"evidence\": [\"E1\", \"E3\"], \"openQuestions\": [], \"action\": {\"type\": \"propose\", \"method\": \"jobInstances.restart\", \"resource\": \"projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockThreatIntel/jobs/sync-indicators/jobInstances/alpha-intel\", \"updateMask\": [], \"patch\": {}}, \"expectedVerification\": {\"tripwire\": \"dead-job\", \"condition\": \"recovers_within\", \"seconds\": 900}, \"confidence\": \"high\"}, \"rationale\": \"Submit the right-answer diagnosis.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 12500,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 6800
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    }
+  ]
+}
