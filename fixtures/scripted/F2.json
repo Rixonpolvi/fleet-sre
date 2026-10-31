@@ -1,0 +1,245 @@
+{
+  "fault": "F2",
+  "seed": 103,
+  "t0": "2026-10-29T14:00:00Z",
+  "faults": [
+    {
+      "at": 1830,
+      "type": "credential_expiry",
+      "environment": "bravo",
+      "params": {}
+    }
+  ],
+  "incident": {
+    "id": "inc-alert-ingestion-bravo-connector-errors-20261029T143800Z",
+    "deployment": "alert-ingestion/bravo",
+    "tripwire": "connector-errors"
+  },
+  "responses": [
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_001",
+          "encrypted_content": "enc-placeholder-1"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_001",
+          "name": "set_hypotheses",
+          "arguments": "{\"items\": [{\"id\": \"H1\", \"statement\": \"The bravo connector credential expired; upstream 401s.\", \"wouldConfirm\": \"incident signals point at this tenant\", \"alternative\": false}, {\"id\": \"H2\", \"statement\": \"A fleet-wide upstream outage hit every tenant alike.\", \"wouldConfirm\": \"siblings show the same failure\", \"alternative\": true}], \"rationale\": \"State the tenant fault and a fleet-wide alternative.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 8500,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 5200
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_002",
+          "encrypted_content": "enc-placeholder-2"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_002",
+          "name": "query_logs",
+          "arguments": "{\"deployment\": \"alert-ingestion/bravo\", \"window\": {\"lastMinutes\": 120}, \"filter\": {\"component\": \"connector\", \"minSeverity\": \"WARNING\"}, \"rationale\": \"Read the incident deployment around the trip.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 9000,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 5400
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_003",
+          "encrypted_content": "enc-placeholder-3"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_003",
+          "name": "record_evidence",
+          "arguments": "{\"hypothesis\": \"H1\", \"stance\": \"supports\", \"source\": {\"insertId\": \"cd8e93b5-00000194\"}, \"why\": \"key trip signal from the incident deployment\", \"rationale\": \"Pin the trip signal to the tenant hypothesis.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 9500,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 5600
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_004",
+          "encrypted_content": "enc-placeholder-4"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_004",
+          "name": "compare_siblings",
+          "arguments": "{\"service\": \"alert-ingestion\", \"component\": \"connector\", \"window\": {\"lastMinutes\": 120}, \"rationale\": \"Check whether siblings fail the same way.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 10000,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 5800
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_005",
+          "encrypted_content": "enc-placeholder-5"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_005",
+          "name": "query_logs",
+          "arguments": "{\"deployment\": \"alert-ingestion/alpha\", \"window\": {\"lastMinutes\": 120}, \"filter\": {\"component\": \"connector\", \"event\": \"connector.run.completed\"}, \"rationale\": \"Read a sibling to test the fleet-wide idea.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 10500,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 6000
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_006",
+          "encrypted_content": "enc-placeholder-6"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_006",
+          "name": "record_evidence",
+          "arguments": "{\"hypothesis\": \"H2\", \"stance\": \"refutes\", \"source\": {\"insertId\": \"10d17cb5-00000192\"}, \"why\": \"sibling runs healthy on schedule\", \"rationale\": \"Healthy sibling refutes the fleet-wide hypothesis.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 11000,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 6200
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_007",
+          "encrypted_content": "enc-placeholder-7"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_007",
+          "name": "test_integration_instance",
+          "arguments": "{\"name\": \"projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/integrationInstances/bravo\", \"rationale\": \"Test the incident tenant connectivity directly.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 11500,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 6400
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_008",
+          "encrypted_content": "enc-placeholder-8"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_008",
+          "name": "record_evidence",
+          "arguments": "{\"hypothesis\": \"H1\", \"stance\": \"supports\", \"source\": {\"callId\": \"call_007\", \"field\": \"successful\", \"value\": false}, \"why\": \"resource state backs the tenant hypothesis\", \"rationale\": \"Pin the resource signal to the tenant hypothesis.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 12000,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 6600
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_009",
+          "encrypted_content": "enc-placeholder-9"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_009",
+          "name": "submit_diagnosis",
+          "arguments": "{\"diagnosis\": {\"incidentId\": \"inc-alert-ingestion-bravo-connector-errors-20261029T143800Z\", \"deployment\": \"alert-ingestion/bravo\", \"component\": \"connector\", \"category\": \"credential_failure\", \"hypothesis\": \"H1\", \"summary\": \"The bravo connector credential expired; upstream 401s.\", \"evidence\": [\"E1\", \"E3\"], \"openQuestions\": [], \"action\": {\"type\": \"escalate\", \"escalationSummary\": \"Fix is outside the allowlist; needs a human.\"}, \"confidence\": \"high\"}, \"rationale\": \"Submit the right-answer diagnosis.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 12500,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 6800
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    }
+  ]
+}

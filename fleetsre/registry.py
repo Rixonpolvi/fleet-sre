@@ -3,6 +3,8 @@
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Mapping, Sequence
 
+from fleetsre.logmodel import LogEntry
+
 if TYPE_CHECKING:
     from fleetsre.contracts import Contract
     from fleetsre.mock.fleet import FleetConfig
@@ -62,3 +64,30 @@ def deployments_from_fleet(
             )
         )
     return deployments
+
+
+class Registry:
+    """D5 stub: contracts + deployments + scorecards with log routing."""
+
+    def __init__(
+        self,
+        contracts: list["Contract"],
+        deployments: list[Deployment],
+        scorecards: dict[str, Any] | None = None,
+    ) -> None:
+        raise NotImplementedError
+
+    def contract(self, service: str) -> "Contract":
+        raise NotImplementedError
+
+    def deployments(self, service: str) -> list[Deployment]:
+        raise NotImplementedError
+
+    def deployment(self, id: str) -> Deployment:
+        raise NotImplementedError
+
+    def scorecard(self, service: str) -> Any:
+        raise NotImplementedError
+
+    def route(self, entry: LogEntry) -> list[tuple[str, str]]:
+        raise NotImplementedError

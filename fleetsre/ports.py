@@ -1,6 +1,7 @@
-"""Ports: LogSink and the in-memory implementation."""
+"""Ports: LogSink, LogQuery, ChronicleClient, StateStore and in-memory fakes."""
 
-from typing import Protocol
+from datetime import datetime
+from typing import Any, Protocol
 
 from fleetsre.logmodel import LogEntry
 
@@ -17,3 +18,92 @@ class MemorySink(LogSink):
 
     def write(self, entry: LogEntry) -> None:
         self.entries.append(entry)
+
+
+class LogQuery(Protocol):
+    """Read log entries by time range or by insertId (spec.md §4.2)."""
+
+    def entries(self, start: datetime, end: datetime) -> list[LogEntry]: ...
+
+    def get(self, insert_id: str) -> LogEntry | None: ...
+
+
+class MemoryLogQuery(LogQuery):
+    """D5 stub: in-memory LogQuery over a MemorySink."""
+
+    def __init__(self, sink: MemorySink) -> None:
+        raise NotImplementedError
+
+    def entries(self, start: datetime, end: datetime) -> list[LogEntry]:
+        raise NotImplementedError
+
+    def get(self, insert_id: str) -> LogEntry | None:
+        raise NotImplementedError
+
+
+class ChronicleError(Exception):
+    """Chronicle API failure carrying the Google error body."""
+
+    def __init__(self, status: int, body: dict[str, Any]) -> None:
+        self.status = status
+        self.body = body
+        super().__init__(f"Chronicle error {status}: {body}")
+
+
+class ChronicleClient(Protocol):
+    """Read/write Chronicle surface used by tools (read) and executor (write)."""
+
+    @property
+    def identity(self) -> str: ...
+
+    def get(self, name: str) -> dict[str, Any]: ...
+
+    def list_connector_logs(
+        self, name: str, page_size: int
+    ) -> dict[str, Any]: ...
+
+    def list_job_logs(self, name: str, page_size: int) -> dict[str, Any]: ...
+
+    def execute_test(self, name: str) -> dict[str, Any]: ...
+
+    def patch(
+        self, name: str, body: dict[str, Any], update_mask: list[str]
+    ) -> dict[str, Any]: ...
+
+    def run_on_demand(
+        self, name: str, body: dict[str, Any]
+    ) -> dict[str, Any]: ...
+
+    def set_logs_collection(
+        self, name: str, enabled: bool
+    ) -> dict[str, Any]: ...
+
+
+class StateStore(Protocol):
+    """Trip history and approved-change records per deployment."""
+
+    def record_trip(self, event: Any) -> None: ...
+
+    def record_change(
+        self, deployment: str, record: dict[str, Any]
+    ) -> None: ...
+
+    def trip_history(self, deployment: str) -> list[dict[str, Any]]: ...
+
+
+class MemoryStateStore(StateStore):
+    """D5 stub: in-memory StateStore."""
+
+    def __init__(self) -> None:
+        raise NotImplementedError
+
+    def record_trip(self, event: Any) -> None:
+        raise NotImplementedError
+
+    def record_change(
+        self, deployment: str, record: dict[str, Any]
+    ) -> None:
+        raise NotImplementedError
+
+    def trip_history(self, deployment: str) -> list[dict[str, Any]]:
+        raise NotImplementedError
