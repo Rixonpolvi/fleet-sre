@@ -11,3 +11,16 @@ forbidden_modules =
     google
     fleetsre.adapters
     fleetsre.mock
+
+[importlinter:contract:2]
+name = Tripwire purity
+type = forbidden
+source_modules =
+    fleetsre.evaluator.tripwires
+forbidden_modules =
+    fleetsre.adapters
+    fleetsre.mock
+    socket
+    httpx
+    urllib
+    google
