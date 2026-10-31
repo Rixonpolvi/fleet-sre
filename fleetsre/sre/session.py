@@ -13,6 +13,7 @@ class CallRecord(BaseModel):
     result: dict[str, Any] = {}
     verdict: str = ""
     problems: list[str] = []
+    turn: int = 0
 
 
 class Session(BaseModel):
@@ -34,6 +35,9 @@ class Session(BaseModel):
     segment_tokens: int = 0
     refused_submissions: int = 0
     transcript_id: str = ""
+    read_limit: int = 12
+    token_limit: int = 400_000
+    plan: list[Any] = []
 
 
 class SessionStore(Protocol):
@@ -49,21 +53,31 @@ class SessionStore(Protocol):
 
 
 class MemorySessionStore(SessionStore):
-    """D5 stub: in-memory SessionStore."""
+    """In-memory SessionStore."""
 
     def __init__(self) -> None:
-        raise NotImplementedError
+        self._sessions: dict[str, Session] = {}
+        self._transcripts: dict[str, list[dict[str, Any]]] = {}
 
     def save(self, session: Session) -> None:
-        raise NotImplementedError
+        self._sessions[session.incident_id] = session.model_copy(deep=True)
 
     def load(self, incident_id: str) -> Session:
-        raise NotImplementedError
+        try:
+            return self._sessions[incident_id].model_copy(deep=True)
+        except KeyError:
+            raise KeyError(
+                f"unknown incident: {incident_id}"
+            ) from None
 
     def append_transcript(
         self, transcript_id: str, record: dict[str, Any]
     ) -> None:
-        raise NotImplementedError
+        self._transcripts.setdefault(transcript_id, []).append(
+            dict(record)
+        )
 
     def transcript(self, transcript_id: str) -> list[dict[str, Any]]:
-        raise NotImplementedError
+        return [
+            dict(r) for r in self._transcripts.get(transcript_id, [])
+        ]

@@ -1,4 +1,4 @@
-.PHONY: check lint test test-live test-gcp demo
+.PHONY: check lint test test-live test-gcp demo record
 
 check: lint
 	python scripts/check_trace.py --doc docs/deliverables.md --tests tests/acceptance
@@ -20,3 +20,7 @@ test-gcp:
 
 demo:
 	@echo "not yet: D8"
+
+record:
+	if [ -z "$(FAULT)" ]; then echo "usage: make record FAULT=<F>" >&2; exit 2; fi
+	python scripts/record.py --fault $(FAULT)
