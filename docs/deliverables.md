@@ -14,6 +14,8 @@ Revised 2026-10-31 after D4: §D4 matches what was built (PRs #17–#19): interf
 
 Revised 2026-10-31 (night) after D5: §D5 points to `docs/d5-pins.md` for the interfaces and semantics as built (PRs #22–#27); D5-T7, T9 and T10 reworded; live results recorded.
 
+Revised 2026-11-01 before D6: re-plan (`spec.md` §9). D6 splits into D6a (fix loop) and D6b (authoring), both in `tests/acceptance/d6/`; the amendment row and the cut D7 and D8 rows move to §Cut at the end; the schedule moves (§3). D6a interfaces and semantics are in `docs/d6a-pins.md`.
+
 Nine deliverables, D0–D8. Each one is **two merges**: a tests PR, then an implementation PR. The acceptance tests below are the definition of done. The coding agent translates them into code; it does not decide them.
 
 ---
@@ -104,12 +106,11 @@ Stack: Python 3.12, FastAPI, pydantic v2, httpx, pytest, ruff, mypy, import-lint
 | --- | --- |
 | Wed Oct 28 | D0, D1, D2 |
 | Thu Oct 29 | D3, D4 |
-| Fri Oct 30 | D5 |
-| Sat Oct 31 | D6 |
-| Sun Nov 1 | D7 |
-| Mon Nov 2 | D8 |
-| Tue Nov 3 | Freeze: README, video, final evals |
-| Wed Nov 4 | Submit by 9:00 PM ET |
+| Fri Oct 30 – Sat Oct 31 | D5 |
+| Sun Nov 1 | D6a |
+| Mon Nov 2 | D6b; D7 (Cloud Logging and IAM only) |
+| Tue Nov 3 | D8 (minimal) |
+| Wed Nov 4 | Video, README, final evals; submit by 18:00 (deadline 9:00 PM ET) |
 
 ---
 
@@ -535,9 +536,11 @@ The interface block above is the original plan. [`docs/d5-pins.md`](d5-pins.md) 
 
 ## D6 — Fix loop, authoring and amendment
 
-**Target:** Sat Oct 31 · **Owner:** Muse; **you** write the authoring prompt (`prompts/author.md`, committed in the tests PR) · **Depends on:** D4, D5
+**Target:** Sun Nov 1 (D6a), Mon Nov 2 (D6b) · **Owner:** Muse; **you** write the authoring prompt (`prompts/author.md`, committed in the tests PR) · **Depends on:** D4, D5
 
 **Goal.** The full loop of `spec.md` §3: incident lifecycle with NEEDS_INPUT pauses, approval or rejection, journaled apply, verify, postmortem; contract authoring against the scorecard with held-out scenarios; amendments that apply fleet-wide.
+
+**Re-plan (2026-11-01).** D6 is split into two tests/implementation pairs, both in `tests/acceptance/d6/`. **D6a, fix loop:** rows T1–T10 and T16–T20; `docs/d6a-pins.md` holds its interfaces and semantics and wins over the interface block below. **D6b, authoring:** rows T11–T13, T15 and T21; until D6b's tests PR they are `pytest.skip` placeholders, so the trace check passes. The amendment row, `fleetsre/authoring/amend.py` and `Registry.apply_contract` are cut (`spec.md` §9; the row is in §Cut). The postmortem is built from the incident record; no model writes it.
 
 **Interfaces.**
 ```python
@@ -587,14 +590,13 @@ Concurrency: when a proposal is created, the platform records the target resourc
 | D6-T11 | Authoring loop | Scripted model: v1 fails the scorecard → the next prompt contains the scorecard's missing/unexpected list for visible scenarios → v2 passes → result `passed=True`, 2 scorecards recorded; with a model that never passes, stops after `max_revisions` with `passed=False` |
 | D6-T12 | Authoring hides the exam | The authoring prompts never contain scenario `expected` blocks (asserted on the prompt text); they contain scorecard results only |
 | D6-T13 | Authored output valid | Every authored contract validates via `load_contract` before scoring; invalid output counts as a failed revision |
-| D6-T14 | Amendment | From an incident whose detection latency exceeded `withinSeconds` (a scripted slow contract), `propose_amendment` returns a contract that scores higher; it is not applied until approved; once approved, `Registry.apply_contract` reloads every deployment of that service |
 | D6-T15 (live) | Live authoring eval | With the configured authoring model and the alert-ingestion brief and samples, at least 2 of 3 runs reach a passing scorecard, holdouts included, within 3 revisions. Results to `evals/d6-<date>.json` |
 | D6-T16 | Needs-input handling | `reply` resumes the session with the reply as the next message; `reply` with `extra_turns` resumes a `budget` pause; `close` moves the incident to ESCALATED with a postmortem; a resume attempt with nothing changed makes no model call |
 | D6-T17 | Reject with notes | `reject` returns the incident to INVESTIGATING with the notes as the next message; the revised proposal has a new hash; the earlier approval cannot apply it |
 | D6-T18 | Executor journal | For every apply the journal holds `intent` (approval ID, proposal hash, resource version) before the API call, then `started`, then `terminal`; no write call happens without a prior `intent` |
 | D6-T19 | Crash-safe apply | An executor stopped after `intent` and before `terminal`, then `recover()`: if the resource already shows the change, it is marked terminal without an API call; otherwise it is applied once. In both cases the patch lands exactly once |
 | D6-T20 | Gates always on | `IncidentManager` raises when given an investigator whose ToolSet has `verification=False` |
-| D6-T21 | Held-out scenarios | Authoring and amendment prompts never contain a holdout scenario's ID, fault schedule or result; `passed` requires the holdouts to pass; when only a holdout fails, the feedback says a held-out scenario failed and nothing more |
+| D6-T21 | Held-out scenarios | Authoring prompts never contain a holdout scenario's ID, fault schedule or result; `passed` requires the holdouts to pass; when only a holdout fails, the feedback says a held-out scenario failed and nothing more |
 
 **Out of scope:** UI, GCP.
 
@@ -602,26 +604,20 @@ Concurrency: when a proposal is created, the platform records the target resourc
 
 ## D7 — GCP adapters and IAM
 
-**Target:** Sun Nov 1 · **Owner:** Muse with you (your credentials, your approvals of every gcloud/Terraform step) · **Depends on:** D3–D6
+**Target:** Mon Nov 2 · **Owner:** Muse with you (your credentials, your approvals of every gcloud/Terraform step) · **Depends on:** D3–D6
 
 **Goal.** The same system runs on GCP: mock logs to Cloud Logging, sink to Pub/Sub, push to the evaluator, Firestore state, Cloud Run services, three-plus identities with tests that prove the air gap.
+
+**Re-plan (2026-11-01).** In scope: rows T1, T7, T8 and T10; the rest are in §Cut. There is no live instance, so T7 and T8 cover Cloud Logging and Pub/Sub only: a gcloud script in `infra/` creates the three service accounts, the log sink, topic and subscription, and their bindings. The mock API's permission checks are shown under dev auth by D3-T27 and D6-T3.
 
 **Interfaces / files.** `fleetsre/adapters/cloud_logging.py` (`CloudLoggingSink`, `CloudLoggingQuery`), `fleetsre/adapters/pubsub_push.py` (`create_push_app(evaluator, *, audience, allowed_sa)`), `fleetsre/adapters/firestore_state.py`, `fleetsre/adapters/chronicle_http.py` (ID-token client), `infra/` (Terraform or gcloud scripts), `infra/expected_permissions.yaml`, `make infra-up`, `make infra-down`.
 
 | ID | Test | Pass condition |
 | --- | --- | --- |
 | D7-T1 (gcp) | Cloud Logging write/read | Entries written by `CloudLoggingSink` are returned by `CloudLoggingQuery` with filter `resource.labels.namespace_name="chronicle-soar"`, with resource and entry labels intact (or the fallback resource from D1-T14) |
-| D7-T2 (gcp) | Sink filter | Of one matching and one non-matching entry, only the matching one arrives on the subscription |
-| D7-T3 | Push handler auth | Offline: the push app rejects requests without a valid OIDC token for the expected audience and service account (401/403), using a fake verifier |
-| D7-T4 | Push idempotency | Offline: redelivering the same message (same `insertId`) produces no duplicate evaluator events |
-| D7-T5 | Firestore state | Offline against the Firestore emulator (`make emulators`): deployments, tripwire state, incidents, investigation sessions, approvals, the executor journal and transcripts round-trip; a restarted evaluator resumes without re-emitting trips; a restarted executor reconciles open intents as in D6-T19 |
-| D7-T6 | Tick auth | Offline: the tick endpoint accepts only OIDC tokens from the scheduler service account |
 | D7-T7 (gcp) | IAM positive | Each identity completes its own path: mock-soar writes logs, obs-reader reads logs and pulls from the subscription and reads the mock API, deployer patches via the mock API |
 | D7-T8 (gcp) | IAM negative | obs-reader: mock write → 403, `logging.logEntries.create` → denied; deployer: subscription pull → denied; mock-soar: log read → denied; the SRE runtime has no credentials of its own |
-| D7-T9 (gcp) | Exact permissions | `testIamPermissions` for each identity on the project and on the subscription returns exactly the set in `infra/expected_permissions.yaml` |
 | D7-T10 (gcp) | No keys | No service account has user-managed keys |
-| D7-T11 (gcp) | Reproducible infra | `make infra-up` on a clean project creates everything; a second run changes nothing; `make infra-down` removes it |
-| D7-T12 (gcp) | Cloud parity | Scenario `stall` run through mock → Cloud Logging → Pub/Sub → evaluator produces the same trip as the local harness, with latency ≤ `withinSeconds` + 120 s |
 
 **Out of scope:** UI.
 
@@ -629,9 +625,11 @@ Concurrency: when a proposal is created, the platform records the target resourc
 
 ## D8 — UI, live chaos loop and deploy
 
-**Target:** Mon Nov 2 · **Owner:** Muse; keep the UI minimal · **Depends on:** D6, D7
+**Target:** Tue Nov 3 · **Owner:** Muse; keep the UI minimal · **Depends on:** D6, D7
 
 **Goal.** A judge can open a URL and watch faults trip, get investigated turn by turn and recover without touching anything; you can approve, reject and answer handoffs in admin mode; `make demo` reproduces it locally.
+
+**Re-plan (2026-11-01).** In scope: rows T1, T2, T3, T6, T8, T9 and T10; the rest are in §Cut. There is no live instance: `create_app` has admin mode only, T10's public-mode clause is dropped, and the README (T8) links the repo and the video only.
 
 **Interfaces.** `fleetsre/web/app.py` `create_app(mode: Literal["admin", "public"], ...)`; `fleetsre/live/chaos_loop.py` `ChaosLoop(world, schedule, clock).tick()`.
 
@@ -640,13 +638,43 @@ Concurrency: when a proposal is created, the platform records the target resourc
 | D8-T1 | Fleet grid | `GET /api/fleet` returns services × deployments × components with health from `Evaluator.status()`; the HTML grid renders every deployment |
 | D8-T2 | Incident view | `GET /incidents/{id}` shows hypotheses, recorded evidence (resolved from `insertId`s and call IDs), category, the patch diff, verification state and the postmortem |
 | D8-T3 | Approve and reject (admin) | In admin mode, approving creates an approval for the current proposal hash and moves the incident to APPLYING; rejecting with notes calls `ApprovalStore.reject`; requests without the admin credential get 403 |
-| D8-T4 | Public mode | In public mode: no `/_chaos` routes, no approve, reject or reply routes, a cap of N model calls per hour (beyond it, cached diagnoses are served). Proposals from the chaos loop are approved by a demo auto-approver, and when an F2 incident reaches NEEDS_INPUT the chaos loop clears the fault. Every such action is labelled ("demo auto-approval", "demo: credential rotated") on the page and in the incident record |
-| D8-T5 | Chaos loop | Over a simulated 2 hours, the loop cycles F1, F2, F3, F4 on schedule and clears each after its incident closes (F2: when it reaches NEEDS_INPUT, per D8-T4); no unhandled exceptions |
 | D8-T6 | Local demo | `make demo` from a clean clone starts mock, evaluator, SRE (scripted model unless a key is set) and UI; the grid shows a trip within 5 minutes |
-| D8-T7 (gcp) | Unattended hour | The public instance runs one hour unattended: at least 3 incidents opened and closed, no 5xx in logs, Meta spend within the configured cap |
 | D8-T8 | README | Contains: what it is, how to run locally, architecture, where each gate sits and what it refuses, "Built during the hackathon" (list of components with deliverable IDs), faithful-vs-invented table from `mocks.md` §9, and links to the live instance and video |
 | D8-T9 | Turn timeline | The incident page has one card per turn with Think (the call's `rationale`), Act (tool and arguments) and Observe (the result, or the gate's refusal and problems, coloured by outcome); expanding a card shows the exact input the model saw that turn; a header shows turns, read calls, tokens (reasoning and cached) and refusals by gate |
 | D8-T10 | Handoff card | A NEEDS_INPUT incident shows its reason, hypotheses, recorded evidence and last refusal. Admin mode offers reply, grant turns and close, wired to `IncidentManager.reply` and `close`; public mode shows the card without actions |
-| D8-T11 | Step mode (admin) | With step mode on, an investigation pauses before each turn until "Next turn" or "Run to end"; with it off, there is no pause |
 
 **Out of scope:** anything new. After D8, only fixes.
+
+---
+
+## Cut 2026-11-01
+
+Rows removed by the re-plan (`spec.md` §9), kept for the record. Their IDs drop the deliverable prefix so the trace check does not look for tests.
+
+**From §D6**
+
+| ID | Test | Pass condition |
+| --- | --- | --- |
+| T14 | Amendment | From an incident whose detection latency exceeded `withinSeconds` (a scripted slow contract), `propose_amendment` returns a contract that scores higher; it is not applied until approved; once approved, `Registry.apply_contract` reloads every deployment of that service |
+
+**From §D7**
+
+| ID | Test | Pass condition |
+| --- | --- | --- |
+| T2 (gcp) | Sink filter | Of one matching and one non-matching entry, only the matching one arrives on the subscription |
+| T3 | Push handler auth | Offline: the push app rejects requests without a valid OIDC token for the expected audience and service account (401/403), using a fake verifier |
+| T4 | Push idempotency | Offline: redelivering the same message (same `insertId`) produces no duplicate evaluator events |
+| T5 | Firestore state | Offline against the Firestore emulator (`make emulators`): deployments, tripwire state, incidents, investigation sessions, approvals, the executor journal and transcripts round-trip; a restarted evaluator resumes without re-emitting trips; a restarted executor reconciles open intents as in D6-T19 |
+| T6 | Tick auth | Offline: the tick endpoint accepts only OIDC tokens from the scheduler service account |
+| T9 (gcp) | Exact permissions | `testIamPermissions` for each identity on the project and on the subscription returns exactly the set in `infra/expected_permissions.yaml` |
+| T11 (gcp) | Reproducible infra | `make infra-up` on a clean project creates everything; a second run changes nothing; `make infra-down` removes it |
+| T12 (gcp) | Cloud parity | Scenario `stall` run through mock → Cloud Logging → Pub/Sub → evaluator produces the same trip as the local harness, with latency ≤ `withinSeconds` + 120 s |
+
+**From §D8**
+
+| ID | Test | Pass condition |
+| --- | --- | --- |
+| T4 | Public mode | In public mode: no `/_chaos` routes, no approve, reject or reply routes, a cap of N model calls per hour (beyond it, cached diagnoses are served). Proposals from the chaos loop are approved by a demo auto-approver, and when an F2 incident reaches NEEDS_INPUT the chaos loop clears the fault. Every such action is labelled ("demo auto-approval", "demo: credential rotated") on the page and in the incident record |
+| T5 | Chaos loop | Over a simulated 2 hours, the loop cycles F1, F2, F3, F4 on schedule and clears each after its incident closes (F2: when it reaches NEEDS_INPUT, per T4); no unhandled exceptions |
+| T7 (gcp) | Unattended hour | The public instance runs one hour unattended: at least 3 incidents opened and closed, no 5xx in logs, Meta spend within the configured cap |
+| T11 | Step mode (admin) | With step mode on, an investigation pauses before each turn until "Next turn" or "Run to end"; with it off, there is no pause |
