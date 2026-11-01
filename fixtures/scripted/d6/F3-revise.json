@@ -1,0 +1,82 @@
+{
+  "follows": "F3-reject",
+  "trigger": "rejection",
+  "note": "Reopen segment after the -1 proposal is rejected. Re-reads the resource and proposes 100; the new item lands on H1 as E4 (E1, E3 already there; cap is 3).",
+  "responses": [
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_010",
+          "encrypted_content": "enc-placeholder-10"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_010",
+          "name": "get_resource",
+          "arguments": "{\"name\": \"projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel\", \"rationale\": \"Re-read the resource before revising.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 9010,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 5200
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_011",
+          "encrypted_content": "enc-placeholder-11"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_011",
+          "name": "record_evidence",
+          "arguments": "{\"hypothesis\": \"H1\", \"stance\": \"supports\", \"source\": {\"callId\": \"call_010\", \"field\": \"parameters.5.value\", \"value\": \"\"}, \"why\": \"mapping still empty before the revised patch\", \"rationale\": \"Pin the resource signal to the hypothesis.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 9011,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 5200
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_012",
+          "encrypted_content": "enc-placeholder-12"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_012",
+          "name": "submit_diagnosis",
+          "arguments": "{\"diagnosis\": {\"incidentId\": \"inc-alert-ingestion-alpha-priority-shape-20261029T143200Z\", \"deployment\": \"alert-ingestion/alpha\", \"component\": \"ingestion\", \"category\": \"schema_drift\", \"hypothesis\": \"H1\", \"summary\": \"Upstream severity drift broke alpha priority types; map unknowns to 100.\", \"evidence\": [\"E1\", \"E4\"], \"openQuestions\": [], \"action\": {\"type\": \"propose\", \"method\": \"connectorInstances.patch\", \"resource\": \"projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel\", \"updateMask\": [\"parameters\"], \"patch\": {\"parameters\": [{\"value\": \"00000000-0000-4000-a000-0000000000a1\", \"displayName\": \"Tenant ID\", \"description\": \"\", \"mandatory\": true, \"advanced\": false, \"type\": \"STRING\"}, {\"value\": \"00000000-0000-4000-b000-0000000000a1\", \"displayName\": \"Client ID\", \"description\": \"\", \"mandatory\": true, \"advanced\": false, \"type\": \"STRING\"}, {\"value\": \"********\", \"displayName\": \"Client Secret\", \"description\": \"\", \"mandatory\": true, \"advanced\": false, \"type\": \"PASSWORD\"}, {\"value\": \"law-alpha\", \"displayName\": \"Workspace Name\", \"description\": \"\", \"mandatory\": true, \"advanced\": false, \"type\": \"STRING\"}, {\"value\": \"50\", \"displayName\": \"Max Incidents Per Cycle\", \"description\": \"\", \"mandatory\": false, \"advanced\": false, \"type\": \"INT\"}, {\"value\": \"100\", \"displayName\": \"Unknown Severity Priority\", \"description\": \"\", \"mandatory\": false, \"advanced\": false, \"type\": \"INT\"}]}}, \"expectedVerification\": {\"tripwire\": \"priority-shape\", \"condition\": \"recovers_within\", \"seconds\": 960}, \"confidence\": \"high\"}, \"rationale\": \"Propose the corrected mapping.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 9012,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 5200
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,247 @@
+{
+  "fault": "F3-reject",
+  "seed": 104,
+  "t0": "2026-10-29T14:00:00Z",
+  "faults": [
+    {
+      "at": 1830,
+      "type": "severity_drift",
+      "environment": "alpha",
+      "params": {
+        "rate": 0.5
+      }
+    }
+  ],
+  "incident": {
+    "id": "inc-alert-ingestion-alpha-priority-shape-20261029T143200Z",
+    "deployment": "alert-ingestion/alpha",
+    "tripwire": "priority-shape"
+  },
+  "responses": [
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_001",
+          "encrypted_content": "enc-placeholder-1"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_001",
+          "name": "set_hypotheses",
+          "arguments": "{\"items\": [{\"id\": \"H1\", \"statement\": \"Upstream severity drift broke alpha priority types.\", \"wouldConfirm\": \"incident signals point at this tenant\", \"alternative\": false}, {\"id\": \"H2\", \"statement\": \"A fleet-wide upstream outage hit every tenant alike.\", \"wouldConfirm\": \"siblings show the same failure\", \"alternative\": true}], \"rationale\": \"State the tenant fault and a fleet-wide alternative.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 8500,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 5200
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_002",
+          "encrypted_content": "enc-placeholder-2"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_002",
+          "name": "query_logs",
+          "arguments": "{\"deployment\": \"alert-ingestion/alpha\", \"window\": {\"lastMinutes\": 120}, \"filter\": {\"component\": \"ingestion\", \"event\": \"alert.ingested\"}, \"rationale\": \"Read the incident deployment around the trip.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 9000,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 5400
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_003",
+          "encrypted_content": "enc-placeholder-3"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_003",
+          "name": "record_evidence",
+          "arguments": "{\"hypothesis\": \"H1\", \"stance\": \"supports\", \"source\": {\"insertId\": \"75ecd103-00000156\"}, \"why\": \"key trip signal from the incident deployment\", \"rationale\": \"Pin the trip signal to the tenant hypothesis.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 9500,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 5600
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_004",
+          "encrypted_content": "enc-placeholder-4"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_004",
+          "name": "compare_siblings",
+          "arguments": "{\"service\": \"alert-ingestion\", \"component\": \"ingestion\", \"window\": {\"lastMinutes\": 120}, \"rationale\": \"Check whether siblings fail the same way.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 10000,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 5800
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_005",
+          "encrypted_content": "enc-placeholder-5"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_005",
+          "name": "query_logs",
+          "arguments": "{\"deployment\": \"alert-ingestion/bravo\", \"window\": {\"lastMinutes\": 120}, \"filter\": {\"component\": \"ingestion\", \"event\": \"connector.run.completed\"}, \"rationale\": \"Read a sibling to test the fleet-wide idea.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 10500,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 6000
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_006",
+          "encrypted_content": "enc-placeholder-6"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_006",
+          "name": "record_evidence",
+          "arguments": "{\"hypothesis\": \"H2\", \"stance\": \"refutes\", \"source\": {\"insertId\": \"52491d04-0000015a\"}, \"why\": \"sibling runs healthy on schedule\", \"rationale\": \"Healthy sibling refutes the fleet-wide hypothesis.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 11000,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 6200
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_007",
+          "encrypted_content": "enc-placeholder-7"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_007",
+          "name": "get_resource",
+          "arguments": "{\"name\": \"projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel\", \"rationale\": \"Read the incident resource state directly.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 11500,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 6400
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_008",
+          "encrypted_content": "enc-placeholder-8"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_008",
+          "name": "record_evidence",
+          "arguments": "{\"hypothesis\": \"H1\", \"stance\": \"supports\", \"source\": {\"callId\": \"call_007\", \"field\": \"parameters.5.value\", \"value\": \"\"}, \"why\": \"resource state backs the tenant hypothesis\", \"rationale\": \"Pin the resource signal to the tenant hypothesis.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 12000,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 6600
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_009",
+          "encrypted_content": "enc-placeholder-9"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_009",
+          "name": "submit_diagnosis",
+          "arguments": "{\"diagnosis\": {\"incidentId\": \"inc-alert-ingestion-alpha-priority-shape-20261029T143200Z\", \"deployment\": \"alert-ingestion/alpha\", \"component\": \"ingestion\", \"category\": \"schema_drift\", \"hypothesis\": \"H1\", \"summary\": \"Upstream severity drift broke alpha priority types.\", \"evidence\": [\"E1\", \"E3\"], \"openQuestions\": [], \"action\": {\"type\": \"propose\", \"method\": \"connectorInstances.patch\", \"resource\": \"projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel\", \"updateMask\": [\"parameters\"], \"patch\": {\"parameters\": [{\"value\": \"00000000-0000-4000-a000-0000000000a1\", \"displayName\": \"Tenant ID\", \"description\": \"\", \"mandatory\": true, \"advanced\": false, \"type\": \"STRING\"}, {\"value\": \"00000000-0000-4000-b000-0000000000a1\", \"displayName\": \"Client ID\", \"description\": \"\", \"mandatory\": true, \"advanced\": false, \"type\": \"STRING\"}, {\"value\": \"********\", \"displayName\": \"Client Secret\", \"description\": \"\", \"mandatory\": true, \"advanced\": false, \"type\": \"PASSWORD\"}, {\"value\": \"law-alpha\", \"displayName\": \"Workspace Name\", \"description\": \"\", \"mandatory\": true, \"advanced\": false, \"type\": \"STRING\"}, {\"value\": \"50\", \"displayName\": \"Max Incidents Per Cycle\", \"description\": \"\", \"mandatory\": false, \"advanced\": false, \"type\": \"INT\"}, {\"value\": \"-1\", \"displayName\": \"Unknown Severity Priority\", \"description\": \"\", \"mandatory\": false, \"advanced\": false, \"type\": \"INT\"}]}}, \"expectedVerification\": {\"tripwire\": \"priority-shape\", \"condition\": \"recovers_within\", \"seconds\": 960}, \"confidence\": \"high\"}, \"rationale\": \"Submit the right-answer diagnosis.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 12500,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 6800
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    }
+  ]
+}

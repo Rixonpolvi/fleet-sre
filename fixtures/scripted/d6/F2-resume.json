@@ -1,0 +1,82 @@
+{
+  "follows": "F2",
+  "trigger": "tripwire",
+  "note": "Resume segment after clearing F2. Cites segment-1 evidence for the credential_failure rule; the new item lands on H1 as E4 (E1, E3 already there; cap is 3).",
+  "responses": [
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_012",
+          "encrypted_content": "enc-placeholder-12"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_012",
+          "name": "test_integration_instance",
+          "arguments": "{\"name\": \"projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/integrationInstances/bravo\", \"rationale\": \"Verify connectivity after the rotation.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 9012,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 5200
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_013",
+          "encrypted_content": "enc-placeholder-13"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_013",
+          "name": "record_evidence",
+          "arguments": "{\"hypothesis\": \"H1\", \"stance\": \"supports\", \"source\": {\"callId\": \"call_012\", \"field\": \"successful\", \"value\": true}, \"why\": \"credential works again after rotation\", \"rationale\": \"Pin the recovery signal to the hypothesis.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 9013,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 5200
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_014",
+          "encrypted_content": "enc-placeholder-14"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_014",
+          "name": "submit_diagnosis",
+          "arguments": "{\"diagnosis\": {\"incidentId\": \"inc-alert-ingestion-bravo-connector-errors-20261029T143800Z\", \"deployment\": \"alert-ingestion/bravo\", \"component\": \"connector\", \"category\": \"credential_failure\", \"hypothesis\": \"H1\", \"summary\": \"The bravo connector credential had expired; rotation restored it.\", \"evidence\": [\"E1\", \"E3\", \"E4\"], \"openQuestions\": [], \"action\": {\"type\": \"none\"}, \"confidence\": \"high\", \"expectedVerification\": {\"tripwire\": \"connector-errors\", \"condition\": \"recovers_within\", \"seconds\": 600}}, \"rationale\": \"Fault cleared; verify recovery.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 9014,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 5200
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    }
+  ]
+}
