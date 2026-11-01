@@ -386,6 +386,31 @@ def investigate(
     return _run(incident, tools, gateway, store, session)
 
 
+def _open_segment(
+    session: Session,
+    *,
+    message: str,
+    extra_turns: int,
+    extra_reads: int,
+) -> None:
+    """Start a new segment on a saved session (d5-pins 15, d6a-pins 1).
+
+    Shared by resume() and reopen(): budgets and counts reset, the turn
+    is recorded so a later `none` needs evidence after it, and the
+    message becomes the next user input.
+    """
+    session.segment_start_turn = session.turn
+    session.turn_limit = session.turn + extra_turns
+    session.read_limit = extra_reads
+    session.segment_reads = 0
+    session.segment_tokens = 0
+    session.refused_submissions = 0
+    session.resumed_at_turns.append(session.turn)
+    session.status = "running"
+    session.reason = ""
+    session.history.append({"role": "user", "content": message})
+
+
 def reopen(
     incident: Any,
     tools: Any,
@@ -396,12 +421,23 @@ def reopen(
     extra_turns: int = 8,
     extra_reads: int = 4,
 ) -> InvestigationResult:
-    """Continue a submitted session (d6a-pins 1). Stub (Session A)."""
-    raise NotImplementedError
+    """Continue a submitted session with a new segment (d6a-pins 1)."""
+    session = store.load(incident.id)
+    if session.status != "submitted":
+        raise ValueError(
+            f"cannot reopen incident {incident.id} with status "
+            f"{session.status}; only submitted sessions reopen"
+        )
+    _open_segment(
+        session, message=message, extra_turns=extra_turns,
+        extra_reads=extra_reads,
+    )
+    store.save(session)
+    return _run(incident, tools, gateway, store, session)
 
 
 class Investigator:
-    """Bound investigate/resume/reopen entry points (d6a-pins 1). Stub."""
+    """Bound investigate/resume/reopen entry points (d6a-pins 1)."""
 
     def __init__(
         self,
@@ -415,20 +451,42 @@ class Investigator:
         resume_turns: int = 8,
         resume_reads: int = 4,
     ) -> None:
-        raise NotImplementedError
+        self.tools = tools
+        self._gateway = gateway
+        self._store = store
+        self._max_turns = max_turns
+        self._max_read_calls = max_read_calls
+        self._max_tokens = max_tokens
+        self._resume_turns = resume_turns
+        self._resume_reads = resume_reads
 
     def start(self, incident: Any) -> InvestigationResult:
-        raise NotImplementedError
+        return investigate(
+            incident, self.tools, self._gateway, self._store,
+            max_turns=self._max_turns,
+            max_read_calls=self._max_read_calls,
+            max_tokens=self._max_tokens,
+        )
 
     def resume(
         self, incident: Any, *, message: str, extra_turns: int = 0
     ) -> InvestigationResult:
-        raise NotImplementedError
+        return resume(
+            incident, self.tools, self._gateway, self._store,
+            message=message,
+            extra_turns=self._resume_turns + extra_turns,
+            extra_reads=self._resume_reads,
+        )
 
     def reopen(
         self, incident: Any, *, message: str, extra_turns: int = 0
     ) -> InvestigationResult:
-        raise NotImplementedError
+        return reopen(
+            incident, self.tools, self._gateway, self._store,
+            message=message,
+            extra_turns=self._resume_turns + extra_turns,
+            extra_reads=self._resume_reads,
+        )
 
 
 def resume(
@@ -448,15 +506,9 @@ def resume(
             f"cannot resume incident {incident.id} with status "
             f"{session.status}; only needs_input sessions resume"
         )
-    session.segment_start_turn = session.turn
-    session.turn_limit = session.turn + extra_turns
-    session.read_limit = extra_reads
-    session.segment_reads = 0
-    session.segment_tokens = 0
-    session.refused_submissions = 0
-    session.resumed_at_turns.append(session.turn)
-    session.status = "running"
-    session.reason = ""
-    session.history.append({"role": "user", "content": message})
+    _open_segment(
+        session, message=message, extra_turns=extra_turns,
+        extra_reads=extra_reads,
+    )
     store.save(session)
     return _run(incident, tools, gateway, store, session)

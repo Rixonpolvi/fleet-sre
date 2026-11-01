@@ -72,6 +72,33 @@ def _latest_clear_at(
     return _latest_fault_at(scenario, environment, at)
 
 
+def replay_tick(
+    clock: SimClock,
+    scheduler: CanaryScheduler,
+    world: World,
+    sink: MemorySink,
+    evaluator: Evaluator,
+    consumed: int,
+    tick_at: datetime,
+) -> tuple[list[TripEvent], int]:
+    """Run one replay tick at `tick_at` (D4 semantics 1).
+
+    Shared by run_scenario and the D6a control loop (d6a-pins 9):
+    scheduler, world, ingest new sink entries in write order, then the
+    evaluator tick. Returns the tick's events and the new consume count.
+    """
+    clock.set(tick_at)
+    scheduler.tick()
+    world.step_until(tick_at)
+    events: list[TripEvent] = []
+    entries = sink.entries
+    while consumed < len(entries):
+        events.extend(evaluator.ingest(entries[consumed]))
+        consumed += 1
+    events.extend(evaluator.tick())
+    return events, consumed
+
+
 def run_scenario(
     contract: Contract, scenario: Scenario, *, tick_seconds: int = 15
 ) -> ScenarioResult:
@@ -103,14 +130,10 @@ def run_scenario(
     steps = scenario.durationSeconds // tick_seconds
     for step in range(steps + 1):
         tick_at = T0 + timedelta(seconds=step * tick_seconds)
-        clock.set(tick_at)
-        scheduler.tick()
-        world.step_until(tick_at)
-        entries = sink.entries
-        while consumed < len(entries):
-            actual.extend(evaluator.ingest(entries[consumed]))
-            consumed += 1
-        actual.extend(evaluator.tick())
+        events, consumed = replay_tick(
+            clock, scheduler, world, sink, evaluator, consumed, tick_at
+        )
+        actual.extend(events)
 
     latencies: dict[tuple[str, str, str], float] = {}
     missing: list[tuple[str, str, str]] = []

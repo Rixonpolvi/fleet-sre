@@ -350,8 +350,13 @@ class ToolSet:
         self.state = state
         self.registry = registry
         self.clock = clock
-        self.verification = verification
+        self._verification = verification
         self._local = 0
+
+    @property
+    def verification(self) -> bool:
+        """Whether the gates refuse (d6a-pins 1). Read-only."""
+        return self._verification
 
     def specs(self) -> list[dict[str, Any]]:
         return copy.deepcopy(_SPECS)
