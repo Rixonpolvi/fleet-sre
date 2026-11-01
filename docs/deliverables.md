@@ -12,6 +12,8 @@ Revised 2026-10-29 (night) before D3: §D3 matches the Chronicle method bodies, 
 
 Revised 2026-10-31 after D4: §D4 matches what was built (PRs #17–#19): interfaces, the wording of D4-T1, T3, T5, T7, T10, T11, T13 and T17, and the rules the evaluator settled ("Semantics settled in D4").
 
+Revised 2026-10-31 (night) after D5: §D5 points to `docs/d5-pins.md` for the interfaces and semantics as built (PRs #22–#27); D5-T7, T9 and T10 reworded; live results recorded.
+
 Nine deliverables, D0–D8. Each one is **two merges**: a tests PR, then an implementation PR. The acceptance tests below are the definition of done. The coding agent translates them into code; it does not decide them.
 
 ---
@@ -491,6 +493,8 @@ class ScriptedTransport(Transport): def __init__(self, responses: list[dict])   
 def investigate(incident: Incident, tools: ToolSet, gateway: ModelGateway, *, max_turns: int = 24, max_read_calls: int = 12, max_tokens: int = 400_000) -> InvestigationResult
 def resume(incident: Incident, tools: ToolSet, gateway: ModelGateway, *, message: str, extra_turns: int = 8) -> InvestigationResult
 ```
+The interface block above is the original plan. [`docs/d5-pins.md`](d5-pins.md) §Interfaces is what was built and wins where they differ.
+
 `status="submitted"` means an accepted `propose` or `none`; its `reason` is the action type. `status="needs_input"` carries one of the reasons in `spec.md` §6.1 (`escalated`, `refused`, `budget`, `token_budget`, `stuck`, `model_unavailable`); for `escalated`, `diagnosis` is set. `make record FAULT=<id>` runs one live investigation on its seeded world and writes it to `fixtures/recorded/<id>.json` for your review.
 
 | ID | Test | Pass condition |
@@ -501,10 +505,10 @@ def resume(incident: Incident, tools: ToolSet, gateway: ModelGateway, *, message
 | D5-T4 | Order gate | Before `set_hypotheses` is accepted, `record_evidence` and `submit_diagnosis` return an error result (no exception) and the loop continues |
 | D5-T5 | Hypotheses gate | Fewer than 2 or more than 4 items, or none marked `alternative`, is refused with problems; a valid set is accepted; replacing the set drops evidence for removed hypotheses |
 | D5-T6 | Evidence gate | Refused, each with a problem naming why: an `insertId` that does not exist; one from a deployment that is neither the incident's nor a sibling queried in this session; a `callId` not in this session; a `field`/`value` that does not match that call's result; an unknown hypothesis; a fourth item for one hypothesis. Accepted evidence gets the next `E<n>` ID |
-| D5-T7 | Diagnosis gate | Each rule in `spec.md` §6.5 refuses a diagnosis that breaks it, with a problem naming it: schema invalid; an unrecorded evidence ID; hypothesis coverage missing; each category's evidence rule unmet (one row per category); an action outside the allowlist or an `updateMask` outside its fields; a resource that is not the incident's component; `none` without evidence recorded after the last resume |
+| D5-T7 | Diagnosis gate | Each rule in `spec.md` §6.5 refuses a diagnosis that breaks it, with a problem naming it: schema invalid; an unrecorded evidence ID; hypothesis coverage missing; each category's evidence rule unmet (one row per category); an action outside the allowlist or an `updateMask` outside its fields; a resource that is not the deployment's own connector instance (`connectorInstances.*`) or job instance (`jobInstances.*`); `none` without evidence recorded after the last resume |
 | D5-T8 | Refusal cap | Three refused submissions → `status="needs_input"`, `reason="refused"`; every refusal and its problems are in the transcript |
-| D5-T9 | Budgets | The model is told on turn `max_turns` that it is the last turn; with no accepted submission the result is `needs_input`/`budget`. The 13th read call is refused with an error and the loop continues. Exceeding `max_tokens` → `needs_input`/`token_budget` |
-| D5-T10 | Stuck | The same tool with the same canonical arguments (keys sorted, `rationale` excluded) a third time → `needs_input`/`stuck` |
+| D5-T9 | Budgets | The model is told on turn `max_turns` that it is the last turn; with no accepted submission the result is `needs_input`/`budget`. A read past the segment's cap (`max_read_calls`, then `extra_reads` per resume) is refused with an error and the loop continues. Exceeding `max_tokens` → `needs_input`/`token_budget` |
+| D5-T10 | Stuck | The same read tool with the same canonical arguments (keys sorted, `rationale` excluded) a third time in a segment → `needs_input`/`stuck`, before the call runs |
 | D5-T11 | Import boundary | import-linter contract: `fleetsre.sre` imports nothing from `google`, `fleetsre.adapters`, `fleetsre.mock` |
 | D5-T12 | Transcript and per-turn save | After every turn the session and transcript are saved: each output item, tool call, result, gate verdict, token counts (reasoning and cached separately) and estimated cost; retrievable by `transcript_id`. An investigation killed after turn k and resumed continues at turn k+1 without re-running turns 1..k |
 | D5-T13 | Resume | `resume` continues the same session: hypotheses and evidence are kept, `message` is the next input, `extra_turns` extends the turn budget, and evidence recorded after the resume carries its turn |
@@ -517,6 +521,13 @@ def resume(incident: Incident, tools: ToolSet, gateway: ModelGateway, *, message
 | D5-T20 (live) | Reported, not gating | In the D5-T19 eval file: refusals by gate per run; for F2, the share of runs that call `compare_siblings` or `test_integration_instance`; and a gates-off run of the same seeds (D5-T18) with the number of submissions the gates would have refused, by gate |
 
 `fixtures/scripted/` (Session A, you review): scripted model response sequences per fault, including the tool calls a good investigator makes. `fixtures/recorded/` (you): after D5-T19 passes, record 2–3 live runs with `make record` and review them; the implementation PR merges once at least one is committed.
+
+**Settled in D5.** [`docs/d5-pins.md`](d5-pins.md) records the interfaces, loop, tools, gates (with the refusal rule codes), recording and evaluation as built, and the live results. In short:
+- Refusal problems carry a rule code (`evidence.value: …`); evaluations count refusals by rule.
+- Budgets, the refusal cap and stuck counts are per segment; a resume starts a new segment with `extra_turns` and `extra_reads`. Stuck applies to read tools only.
+- The category rules are tighter than `spec.md` §6.5's table (pin 29), and `propose` must target the deployment's own connector or job instance.
+- `prompts/investigate.md` went through five versions; v4 and v5 came from the live eval (propose versus escalate, and the submission shape).
+- Live eval (muse-spark-1.3): 18/18 on the final run, at most about $0.10 per investigation. Three reviewed recordings (F1, F2, F3) replay in CI.
 
 **Out of scope:** approvals, executor, verification, authoring, the NEEDS_INPUT resume rules (D6).
 
