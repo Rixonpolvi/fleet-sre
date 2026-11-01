@@ -1038,13 +1038,16 @@ class World:
     def _apply_connector_params(
         self, st: _Connector, params: list[dict[str, Any]]
     ) -> None:
-        old = {p.get("displayName"): p.get("value") for p in st.params}
+        old = {p.get("displayName"): p for p in st.params}
         merged = []
         for param in params:
             value = param.get("value", "")
-            # invented: PASSWORD round-trip keeps the stored value.
-            if param.get("type") == "PASSWORD" and value == "********":
-                value = old.get(param.get("displayName"), "")
+            stored = old.get(param.get("displayName"), {})
+            # invented: PASSWORD round-trip keeps the stored value. The
+            # decision uses the stored parameter's type, so a patch that
+            # omits "type" cannot overwrite a secret with the mask.
+            if stored.get("type") == "PASSWORD" and value == "********":
+                value = stored.get("value", "")
             merged.append(
                 {
                     "value": value,

@@ -1,0 +1,1254 @@
+{
+  "date": "2026-11-01",
+  "model": "muse-spark-1.3",
+  "prices": "zero (FLEETSRE_PRICES_JSON not set)",
+  "faults": {
+    "F1": [
+      {
+        "run": 0,
+        "status": "submitted",
+        "reason": "propose",
+        "turns": 12,
+        "read_calls": 6,
+        "tokens": {
+          "input": 147311,
+          "cached": 106986,
+          "output": 4194,
+          "reasoning": 2237
+        },
+        "cost_usd": 0.0,
+        "refusals": {},
+        "tools_called": [
+          "compare_siblings",
+          "get_resource",
+          "query_logs",
+          "record_evidence",
+          "set_hypotheses",
+          "submit_diagnosis",
+          "test_integration_instance",
+          "update_plan"
+        ],
+        "diagnosis": {
+          "action": {
+            "method": "connectorInstances.restart",
+            "patch": {},
+            "resource": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel",
+            "type": "propose",
+            "updateMask": []
+          },
+          "category": "connector_stalled",
+          "component": "connector",
+          "confidence": "high",
+          "deployment": "alert-ingestion/alpha",
+          "evidence": [
+            "E1",
+            "E2",
+            "E3"
+          ],
+          "expectedVerification": {
+            "condition": "recovers_within",
+            "seconds": 300,
+            "tripwire": "dead-connector"
+          },
+          "hypothesis": "H1",
+          "incidentId": "inc-alert-ingestion-alpha-dead-connector-20261029T143315Z",
+          "rollback": "Restart is transient disable/enable; if left disabled re-enable instance, otherwise re-investigate scheduler",
+          "summary": "Alpha connector stopped emitting run heartbeats after 14:30 while enabled LIVE with valid credential and healthy siblings, indicating tenant-specific scheduler stall"
+        },
+        "accepted": true
+      },
+      {
+        "run": 1,
+        "status": "submitted",
+        "reason": "propose",
+        "turns": 18,
+        "read_calls": 7,
+        "tokens": {
+          "input": 249077,
+          "cached": 200050,
+          "output": 5224,
+          "reasoning": 2155
+        },
+        "cost_usd": 0.0,
+        "refusals": {
+          "args.schema": 1
+        },
+        "tools_called": [
+          "compare_siblings",
+          "get_resource",
+          "list_connector_logs",
+          "query_logs",
+          "record_evidence",
+          "set_hypotheses",
+          "submit_diagnosis",
+          "test_integration_instance",
+          "tripwire_history",
+          "update_plan"
+        ],
+        "diagnosis": {
+          "action": {
+            "method": "connectorInstances.restart",
+            "patch": {},
+            "resource": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel",
+            "type": "propose",
+            "updateMask": []
+          },
+          "category": "connector_stalled",
+          "component": "connector",
+          "confidence": "medium",
+          "deployment": "alert-ingestion/alpha",
+          "evidence": [
+            "E1",
+            "E2",
+            "E5"
+          ],
+          "expectedVerification": {
+            "condition": "recovers_within",
+            "seconds": 300,
+            "tripwire": "dead-connector"
+          },
+          "hypothesis": "H1",
+          "incidentId": "inc-alert-ingestion-alpha-dead-connector-20261029T143315Z",
+          "rollback": "Restart is transient with no config change; if needed restart again or leave enabled to resume schedule",
+          "summary": "Alpha connector stalled after 14:30 with no heartbeats while enabled LIVE and siblings healthy; credentials test passes with no errors, so instance scheduler needs restart."
+        },
+        "accepted": true
+      },
+      {
+        "run": 2,
+        "status": "submitted",
+        "reason": "propose",
+        "turns": 14,
+        "read_calls": 7,
+        "tokens": {
+          "input": 172890,
+          "cached": 141870,
+          "output": 3694,
+          "reasoning": 1407
+        },
+        "cost_usd": 0.0,
+        "refusals": {},
+        "tools_called": [
+          "compare_siblings",
+          "get_resource",
+          "query_logs",
+          "record_evidence",
+          "set_hypotheses",
+          "submit_diagnosis",
+          "test_integration_instance",
+          "tripwire_history",
+          "update_plan"
+        ],
+        "diagnosis": {
+          "action": {
+            "method": "connectorInstances.restart",
+            "patch": {},
+            "resource": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel",
+            "type": "propose",
+            "updateMask": []
+          },
+          "category": "connector_stalled",
+          "component": "connector",
+          "confidence": "medium",
+          "deployment": "alert-ingestion/alpha",
+          "evidence": [
+            "E1",
+            "E4",
+            "E2",
+            "E3"
+          ],
+          "expectedVerification": {
+            "condition": "recovers_within",
+            "seconds": 300,
+            "tripwire": "dead-connector"
+          },
+          "hypothesis": "H1",
+          "incidentId": "inc-alert-ingestion-alpha-dead-connector-20261029T143315Z",
+          "rollback": "Restart is momentary with no config change; if heartbeat does not resume, re-check instance status, no rollback needed",
+          "summary": "Connector alpha-sentinel stalled after 14:30:00 with no further run.started/completed despite enabled LIVE; siblings healthy and credentials valid, so tenant-local scheduler stall needing restart."
+        },
+        "accepted": true
+      }
+    ],
+    "F2": [
+      {
+        "run": 0,
+        "status": "needs_input",
+        "reason": "escalated",
+        "turns": 11,
+        "read_calls": 4,
+        "tokens": {
+          "input": 93483,
+          "cached": 62314,
+          "output": 3611,
+          "reasoning": 1737
+        },
+        "cost_usd": 0.0,
+        "refusals": {},
+        "tools_called": [
+          "compare_siblings",
+          "get_resource",
+          "query_logs",
+          "record_evidence",
+          "set_hypotheses",
+          "submit_diagnosis",
+          "test_integration_instance",
+          "update_plan"
+        ],
+        "diagnosis": {
+          "action": {
+            "escalationSummary": "Bravo connector failing with sustained 401 Unauthorized (8/10 runs) and integration test fails 401; siblings healthy. Human must rotate Client Secret/Tenant credentials for bravo integration and verify connector recovers.",
+            "type": "escalate"
+          },
+          "category": "credential_failure",
+          "component": "connector",
+          "confidence": "high",
+          "deployment": "alert-ingestion/bravo",
+          "evidence": [
+            "E1",
+            "E2",
+            "E3"
+          ],
+          "hypothesis": "H1",
+          "incidentId": "inc-alert-ingestion-bravo-connector-errors-20261029T143800Z",
+          "summary": "Bravo Sentinel connector credentials invalid causing 8 consecutive 401 warnings; isolated to bravo, integration test confirms 401."
+        },
+        "accepted": true
+      },
+      {
+        "run": 1,
+        "status": "needs_input",
+        "reason": "escalated",
+        "turns": 11,
+        "read_calls": 4,
+        "tokens": {
+          "input": 92303,
+          "cached": 60507,
+          "output": 3606,
+          "reasoning": 1825
+        },
+        "cost_usd": 0.0,
+        "refusals": {},
+        "tools_called": [
+          "compare_siblings",
+          "get_resource",
+          "query_logs",
+          "record_evidence",
+          "set_hypotheses",
+          "submit_diagnosis",
+          "test_integration_instance",
+          "update_plan"
+        ],
+        "diagnosis": {
+          "action": {
+            "escalationSummary": "Bravo Sentinel connector 401 Unauthorized on 8 runs and integration test fails; siblings healthy. Human must rotate Client Secret (verify Tenant/Client ID) for integration instance bravo in Sentinel/Entra, then re-test connectivity.",
+            "type": "escalate"
+          },
+          "category": "credential_failure",
+          "component": "connector",
+          "confidence": "high",
+          "deployment": "alert-ingestion/bravo",
+          "evidence": [
+            "E1",
+            "E2",
+            "E3",
+            "E4"
+          ],
+          "hypothesis": "H1",
+          "incidentId": "inc-alert-ingestion-bravo-connector-errors-20261029T143800Z",
+          "summary": "Bravo connector failing authentication with 401 Unauthorized; integration test confirms credential invalid and siblings are healthy."
+        },
+        "accepted": true
+      },
+      {
+        "run": 2,
+        "status": "needs_input",
+        "reason": "escalated",
+        "turns": 12,
+        "read_calls": 4,
+        "tokens": {
+          "input": 152069,
+          "cached": 114252,
+          "output": 3801,
+          "reasoning": 1793
+        },
+        "cost_usd": 0.0,
+        "refusals": {},
+        "tools_called": [
+          "compare_siblings",
+          "get_resource",
+          "query_logs",
+          "record_evidence",
+          "set_hypotheses",
+          "submit_diagnosis",
+          "test_integration_instance",
+          "update_plan"
+        ],
+        "diagnosis": {
+          "action": {
+            "escalationSummary": "Bravo connector failing 401 Unauthorized on all recent runs; integration test confirms bad credential. Human must rotate/check Client Secret (and Tenant/Client ID) for bravo Sentinel workspace in vault/IdP, then test integration.",
+            "type": "escalate"
+          },
+          "category": "credential_failure",
+          "component": "connector",
+          "confidence": "high",
+          "deployment": "alert-ingestion/bravo",
+          "evidence": [
+            "E1",
+            "E2",
+            "E3",
+            "E4"
+          ],
+          "expectedVerification": {
+            "condition": "recovers_within",
+            "seconds": 600,
+            "tripwire": "connector-errors"
+          },
+          "hypothesis": "H1",
+          "incidentId": "inc-alert-ingestion-bravo-connector-errors-20261029T143800Z",
+          "summary": "Bravo-only 401 auth failures tripped connector-errors; integration test fails, siblings healthy, instance enabled/LIVE."
+        },
+        "accepted": true
+      }
+    ],
+    "F3": [
+      {
+        "run": 0,
+        "status": "submitted",
+        "reason": "propose",
+        "turns": 14,
+        "read_calls": 8,
+        "tokens": {
+          "input": 299377,
+          "cached": 203340,
+          "output": 7334,
+          "reasoning": 4801
+        },
+        "cost_usd": 0.0,
+        "refusals": {
+          "args.schema": 1
+        },
+        "tools_called": [
+          "compare_siblings",
+          "get_contract",
+          "get_resource",
+          "query_logs",
+          "record_evidence",
+          "set_hypotheses",
+          "submit_diagnosis",
+          "tripwire_history"
+        ],
+        "diagnosis": {
+          "action": {
+            "method": "connectorInstances.patch",
+            "patch": {
+              "parameters": [
+                {
+                  "advanced": false,
+                  "description": "",
+                  "displayName": "Tenant ID",
+                  "mandatory": true,
+                  "type": "STRING",
+                  "value": "00000000-0000-4000-a000-0000000000a1"
+                },
+                {
+                  "advanced": false,
+                  "description": "",
+                  "displayName": "Client ID",
+                  "mandatory": true,
+                  "type": "STRING",
+                  "value": "00000000-0000-4000-b000-0000000000b2"
+                },
+                {
+                  "advanced": false,
+                  "description": "",
+                  "displayName": "Client Secret",
+                  "mandatory": true,
+                  "type": "PASSWORD",
+                  "value": "********"
+                },
+                {
+                  "advanced": false,
+                  "description": "",
+                  "displayName": "Workspace Name",
+                  "mandatory": true,
+                  "type": "STRING",
+                  "value": "law-alpha"
+                },
+                {
+                  "advanced": false,
+                  "description": "",
+                  "displayName": "Max Incidents Per Cycle",
+                  "mandatory": false,
+                  "type": "INT",
+                  "value": "50"
+                },
+                {
+                  "advanced": false,
+                  "description": "",
+                  "displayName": "Unknown Severity Priority",
+                  "mandatory": false,
+                  "type": "INT",
+                  "value": "100"
+                }
+              ]
+            },
+            "resource": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel",
+            "type": "propose",
+            "updateMask": [
+              "parameters"
+            ]
+          },
+          "category": "schema_drift",
+          "component": "ingestion",
+          "confidence": "medium",
+          "deployment": "alert-ingestion/alpha",
+          "evidence": [
+            "E1",
+            "E3"
+          ],
+          "expectedVerification": {
+            "condition": "recovers_within",
+            "seconds": 2400,
+            "tripwire": "priority-shape"
+          },
+          "hypothesis": "H1",
+          "incidentId": "inc-alert-ingestion-alpha-priority-shape-20261029T143200Z",
+          "openQuestions": [
+            {
+              "hypothesis": "H3",
+              "why": "Only one Critical string seen among 63 alerts with valid integers immediately around it, so cannot yet tell single malformed alert vs start of sustained new severity format"
+            }
+          ],
+          "rollback": "Patch Unknown Severity Priority back to empty string via connectorInstances.patch",
+          "summary": "Upstream alpha incident alpha-inc-000063 arrived with severity string Critical which connector forwarded as priority string because Unknown Severity Priority fallback is empty, violating integer enum."
+        },
+        "accepted": true
+      },
+      {
+        "run": 1,
+        "status": "submitted",
+        "reason": "propose",
+        "turns": 16,
+        "read_calls": 8,
+        "tokens": {
+          "input": 334951,
+          "cached": 253072,
+          "output": 6424,
+          "reasoning": 3649
+        },
+        "cost_usd": 0.0,
+        "refusals": {
+          "args.schema": 1
+        },
+        "tools_called": [
+          "compare_siblings",
+          "get_contract",
+          "get_resource",
+          "query_logs",
+          "record_evidence",
+          "set_hypotheses",
+          "submit_diagnosis",
+          "tripwire_history",
+          "update_plan"
+        ],
+        "diagnosis": {
+          "action": {
+            "method": "connectorInstances.patch",
+            "patch": {
+              "parameters": [
+                {
+                  "advanced": false,
+                  "description": "",
+                  "displayName": "Tenant ID",
+                  "mandatory": true,
+                  "type": "STRING",
+                  "value": "00000000-0000-4000-a000-0000000000a1"
+                },
+                {
+                  "advanced": false,
+                  "description": "",
+                  "displayName": "Client ID",
+                  "mandatory": true,
+                  "type": "STRING",
+                  "value": "00000000-0000-4000-b000-0000000000a1"
+                },
+                {
+                  "advanced": false,
+                  "description": "",
+                  "displayName": "Client Secret",
+                  "mandatory": true,
+                  "type": "PASSWORD",
+                  "value": "********"
+                },
+                {
+                  "advanced": false,
+                  "description": "",
+                  "displayName": "Workspace Name",
+                  "mandatory": true,
+                  "type": "STRING",
+                  "value": "law-alpha"
+                },
+                {
+                  "advanced": false,
+                  "description": "",
+                  "displayName": "Max Incidents Per Cycle",
+                  "mandatory": false,
+                  "type": "INT",
+                  "value": "50"
+                },
+                {
+                  "advanced": false,
+                  "description": "",
+                  "displayName": "Unknown Severity Priority",
+                  "mandatory": false,
+                  "type": "INT",
+                  "value": "100"
+                }
+              ]
+            },
+            "resource": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel",
+            "type": "propose",
+            "updateMask": [
+              "parameters"
+            ]
+          },
+          "category": "schema_drift",
+          "component": "ingestion",
+          "confidence": "medium",
+          "deployment": "alert-ingestion/alpha",
+          "evidence": [
+            "E1",
+            "E2",
+            "E4"
+          ],
+          "expectedVerification": {
+            "condition": "recovers_within",
+            "seconds": 1800,
+            "tripwire": "priority-shape"
+          },
+          "hypothesis": "H1",
+          "incidentId": "inc-alert-ingestion-alpha-priority-shape-20261029T143200Z",
+          "openQuestions": [
+            {
+              "hypothesis": "H3",
+              "why": "Only one Critical seen so far with valid neighbors; whether it recurs as new severity needs monitoring after fallback is set"
+            }
+          ],
+          "rollback": "Patch Unknown Severity Priority back to empty string via same method",
+          "summary": "Upstream sent priority Critical as string instead of integer and empty Unknown Severity Priority fallback let it through, tripping priority-shape."
+        },
+        "accepted": true
+      },
+      {
+        "run": 2,
+        "status": "submitted",
+        "reason": "propose",
+        "turns": 16,
+        "read_calls": 7,
+        "tokens": {
+          "input": 304751,
+          "cached": 241936,
+          "output": 7476,
+          "reasoning": 4607
+        },
+        "cost_usd": 0.0,
+        "refusals": {
+          "args.schema": 1
+        },
+        "tools_called": [
+          "compare_siblings",
+          "get_contract",
+          "get_resource",
+          "query_logs",
+          "record_evidence",
+          "set_hypotheses",
+          "submit_diagnosis",
+          "tripwire_history",
+          "update_plan"
+        ],
+        "diagnosis": {
+          "action": {
+            "method": "connectorInstances.patch",
+            "patch": {
+              "parameters": [
+                {
+                  "advanced": false,
+                  "description": "",
+                  "displayName": "Tenant ID",
+                  "mandatory": true,
+                  "type": "STRING",
+                  "value": "00000000-0000-4000-a000-0000000000a1"
+                },
+                {
+                  "advanced": false,
+                  "description": "",
+                  "displayName": "Client ID",
+                  "mandatory": true,
+                  "type": "STRING",
+                  "value": "00000000-0000-4000-b000-0000000000a1"
+                },
+                {
+                  "advanced": false,
+                  "description": "",
+                  "displayName": "Client Secret",
+                  "mandatory": true,
+                  "type": "PASSWORD",
+                  "value": "********"
+                },
+                {
+                  "advanced": false,
+                  "description": "",
+                  "displayName": "Workspace Name",
+                  "mandatory": true,
+                  "type": "STRING",
+                  "value": "law-alpha"
+                },
+                {
+                  "advanced": false,
+                  "description": "",
+                  "displayName": "Max Incidents Per Cycle",
+                  "mandatory": false,
+                  "type": "INT",
+                  "value": "50"
+                },
+                {
+                  "advanced": false,
+                  "description": "",
+                  "displayName": "Unknown Severity Priority",
+                  "mandatory": false,
+                  "type": "INT",
+                  "value": "-1"
+                }
+              ]
+            },
+            "resource": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel",
+            "type": "propose",
+            "updateMask": [
+              "parameters"
+            ]
+          },
+          "category": "schema_drift",
+          "component": "ingestion",
+          "confidence": "medium",
+          "deployment": "alert-ingestion/alpha",
+          "evidence": [
+            "E1",
+            "E2"
+          ],
+          "expectedVerification": {
+            "condition": "recovers_within",
+            "seconds": 1800,
+            "tripwire": "priority-shape"
+          },
+          "hypothesis": "H1",
+          "incidentId": "inc-alert-ingestion-alpha-priority-shape-20261029T143200Z",
+          "openQuestions": [
+            {
+              "hypothesis": "H3",
+              "why": "Only one string among ~63 alerts so far; unclear if isolated or first of new label set, but fallback fix covers both"
+            }
+          ],
+          "rollback": "Patch Unknown Severity Priority back to empty string via connectorInstances.patch",
+          "summary": "Alpha sent unmapped severity Critical as string violating integer enum; empty Unknown Severity Priority fallback let it pass through. Set fallback to -1 to coerce unknowns to valid enum."
+        },
+        "accepted": true
+      }
+    ],
+    "F4": [
+      {
+        "run": 0,
+        "status": "submitted",
+        "reason": "propose",
+        "turns": 15,
+        "read_calls": 8,
+        "tokens": {
+          "input": 164398,
+          "cached": 111165,
+          "output": 4869,
+          "reasoning": 2440
+        },
+        "cost_usd": 0.0,
+        "refusals": {
+          "args.schema": 1
+        },
+        "tools_called": [
+          "compare_siblings",
+          "get_contract",
+          "get_resource",
+          "list_job_logs",
+          "query_logs",
+          "record_evidence",
+          "set_hypotheses",
+          "submit_diagnosis",
+          "tripwire_history"
+        ],
+        "diagnosis": {
+          "action": {
+            "method": "jobInstances.patch",
+            "patch": {
+              "parameters": [
+                {
+                  "displayName": "Feed URL",
+                  "id": "param-0",
+                  "mandatory": true,
+                  "type": "URL",
+                  "value": "/_upstream/alpha/indicators"
+                },
+                {
+                  "displayName": "Lookback Hours",
+                  "id": "param-1",
+                  "mandatory": true,
+                  "type": "INT",
+                  "value": "24"
+                }
+              ]
+            },
+            "resource": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockThreatIntel/jobs/sync-indicators/jobInstances/alpha-intel",
+            "type": "propose",
+            "updateMask": [
+              "parameters"
+            ]
+          },
+          "category": "job_hollow_success",
+          "component": "job",
+          "confidence": "high",
+          "deployment": "intel-sync/alpha",
+          "evidence": [
+            "E1",
+            "E2",
+            "E3",
+            "E4"
+          ],
+          "expectedVerification": {
+            "condition": "recovers_within",
+            "seconds": 1200,
+            "tripwire": "hollow-run"
+          },
+          "hypothesis": "H1",
+          "incidentId": "inc-intel-sync-alpha-hollow-run-20261029T144500Z",
+          "rollback": "Patch parameters again to restore Lookback Hours to 0 if needed",
+          "summary": "Alpha Lookback Hours is 0 causing SUCCESS with 0 synced since 14:35, while bravo with 24 stays healthy; restoring 24 should resume syncing."
+        },
+        "accepted": true
+      },
+      {
+        "run": 1,
+        "status": "submitted",
+        "reason": "propose",
+        "turns": 16,
+        "read_calls": 8,
+        "tokens": {
+          "input": 180627,
+          "cached": 129808,
+          "output": 5011,
+          "reasoning": 2318
+        },
+        "cost_usd": 0.0,
+        "refusals": {
+          "args.schema": 1
+        },
+        "tools_called": [
+          "compare_siblings",
+          "get_contract",
+          "get_resource",
+          "list_job_logs",
+          "query_logs",
+          "record_evidence",
+          "set_hypotheses",
+          "submit_diagnosis",
+          "tripwire_history"
+        ],
+        "diagnosis": {
+          "action": {
+            "method": "jobInstances.patch",
+            "patch": {
+              "parameters": [
+                {
+                  "displayName": "Feed URL",
+                  "id": "param-0",
+                  "mandatory": true,
+                  "type": "URL",
+                  "value": "/_upstream/alpha/indicators"
+                },
+                {
+                  "displayName": "Lookback Hours",
+                  "id": "param-1",
+                  "mandatory": true,
+                  "type": "INT",
+                  "value": "24"
+                }
+              ]
+            },
+            "resource": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockThreatIntel/jobs/sync-indicators/jobInstances/alpha-intel",
+            "type": "propose",
+            "updateMask": [
+              "parameters"
+            ]
+          },
+          "category": "job_hollow_success",
+          "component": "job",
+          "confidence": "high",
+          "deployment": "intel-sync/alpha",
+          "evidence": [
+            "E1",
+            "E2",
+            "E5"
+          ],
+          "expectedVerification": {
+            "condition": "recovers_within",
+            "seconds": 900,
+            "tripwire": "hollow-run"
+          },
+          "hypothesis": "H1",
+          "incidentId": "inc-intel-sync-alpha-hollow-run-20261029T144500Z",
+          "rollback": "Patch parameters back to Lookback Hours 0 if needed, restoring prior state",
+          "summary": "Alpha Lookback Hours set to 0 at 14:30:30 causes SUCCESS with 0 synced; restore to 24 like healthy sibling bravo"
+        },
+        "accepted": true
+      },
+      {
+        "run": 2,
+        "status": "submitted",
+        "reason": "propose",
+        "turns": 15,
+        "read_calls": 8,
+        "tokens": {
+          "input": 167972,
+          "cached": 128799,
+          "output": 4880,
+          "reasoning": 2554
+        },
+        "cost_usd": 0.0,
+        "refusals": {},
+        "tools_called": [
+          "compare_siblings",
+          "get_contract",
+          "get_resource",
+          "list_job_logs",
+          "query_logs",
+          "record_evidence",
+          "set_hypotheses",
+          "submit_diagnosis",
+          "tripwire_history",
+          "update_plan"
+        ],
+        "diagnosis": {
+          "action": {
+            "method": "jobInstances.patch",
+            "patch": {
+              "parameters": [
+                {
+                  "displayName": "Feed URL",
+                  "id": "param-0",
+                  "mandatory": true,
+                  "type": "URL",
+                  "value": "/_upstream/alpha/indicators"
+                },
+                {
+                  "displayName": "Lookback Hours",
+                  "id": "param-1",
+                  "mandatory": true,
+                  "type": "INT",
+                  "value": "24"
+                }
+              ]
+            },
+            "resource": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockThreatIntel/jobs/sync-indicators/jobInstances/alpha-intel",
+            "type": "propose",
+            "updateMask": [
+              "parameters"
+            ]
+          },
+          "category": "job_hollow_success",
+          "component": "job",
+          "confidence": "high",
+          "deployment": "intel-sync/alpha",
+          "evidence": [
+            "E1",
+            "E2",
+            "E3",
+            "E4"
+          ],
+          "expectedVerification": {
+            "condition": "recovers_within",
+            "seconds": 900,
+            "tripwire": "hollow-run"
+          },
+          "hypothesis": "H1",
+          "incidentId": "inc-intel-sync-alpha-hollow-run-20261029T144500Z",
+          "rollback": "Revert Lookback Hours to 0 via jobInstances.patch if needed",
+          "summary": "Lookback Hours set to 0 at 14:30 causes hollow SUCCESS with 0 synced; restore to 24h"
+        },
+        "accepted": true
+      }
+    ],
+    "F5": [
+      {
+        "run": 0,
+        "status": "needs_input",
+        "reason": "escalated",
+        "turns": 13,
+        "read_calls": 6,
+        "tokens": {
+          "input": 123330,
+          "cached": 87229,
+          "output": 4166,
+          "reasoning": 2145
+        },
+        "cost_usd": 0.0,
+        "refusals": {
+          "args.schema": 1
+        },
+        "tools_called": [
+          "compare_siblings",
+          "get_resource",
+          "list_job_logs",
+          "query_logs",
+          "record_evidence",
+          "set_hypotheses",
+          "submit_diagnosis",
+          "test_integration_instance"
+        ],
+        "diagnosis": {
+          "action": {
+            "escalationSummary": "Bravo sync-indicators failing with Feed 500 on 2 consecutive runs while alpha clean and integration test succeeds. Human must investigate/repair upstream feed at /_upstream/bravo/indicators.",
+            "type": "escalate"
+          },
+          "category": "job_failing",
+          "component": "job",
+          "confidence": "high",
+          "deployment": "intel-sync/bravo",
+          "evidence": [
+            "E1",
+            "E2",
+            "E3",
+            "E4"
+          ],
+          "hypothesis": "H1",
+          "incidentId": "inc-intel-sync-bravo-job-errors-20261029T144000Z",
+          "summary": "Bravo job failing on tenant-specific upstream feed 500; sibling alpha healthy and connectivity test passes."
+        },
+        "accepted": true
+      },
+      {
+        "run": 1,
+        "status": "needs_input",
+        "reason": "escalated",
+        "turns": 12,
+        "read_calls": 5,
+        "tokens": {
+          "input": 115327,
+          "cached": 73036,
+          "output": 4204,
+          "reasoning": 2226
+        },
+        "cost_usd": 0.0,
+        "refusals": {
+          "args.schema": 1
+        },
+        "tools_called": [
+          "compare_siblings",
+          "get_resource",
+          "list_job_logs",
+          "query_logs",
+          "record_evidence",
+          "set_hypotheses",
+          "submit_diagnosis",
+          "update_plan"
+        ],
+        "diagnosis": {
+          "action": {
+            "escalationSummary": "Bravo sync-indicators job failing with upstream Feed returned 500 Internal Server Error on last 2 runs while sibling alpha succeeds; instance is enabled and correctly scheduled with Feed URL /_upstream/bravo/indicators. Human must repair upstream bravo feed service.",
+            "type": "escalate"
+          },
+          "category": "job_failing",
+          "component": "job",
+          "confidence": "high",
+          "deployment": "intel-sync/bravo",
+          "evidence": [
+            "E1",
+            "E2",
+            "E3"
+          ],
+          "expectedVerification": {
+            "condition": "recovers_within",
+            "seconds": 900,
+            "tripwire": "job-errors"
+          },
+          "hypothesis": "H1",
+          "incidentId": "inc-intel-sync-bravo-job-errors-20261029T144000Z",
+          "summary": "Bravo job failing on tenant-specific upstream 500 errors; sibling alpha healthy and instance enabled/scheduled."
+        },
+        "accepted": true
+      },
+      {
+        "run": 2,
+        "status": "needs_input",
+        "reason": "escalated",
+        "turns": 15,
+        "read_calls": 8,
+        "tokens": {
+          "input": 158958,
+          "cached": 131487,
+          "output": 4418,
+          "reasoning": 2218
+        },
+        "cost_usd": 0.0,
+        "refusals": {},
+        "tools_called": [
+          "compare_siblings",
+          "get_resource",
+          "list_job_logs",
+          "query_logs",
+          "record_evidence",
+          "set_hypotheses",
+          "submit_diagnosis",
+          "test_integration_instance",
+          "tripwire_history"
+        ],
+        "diagnosis": {
+          "action": {
+            "escalationSummary": "Bravo sync-indicators job failing with Feed returned 500 Internal Server Error on /_upstream/bravo/indicators; sibling alpha healthy and connectivity test succeeded so not fleet-wide nor credential. Human must repair bravo upstream feed then monitor job-errors.",
+            "type": "escalate"
+          },
+          "category": "job_failing",
+          "component": "job",
+          "confidence": "high",
+          "deployment": "intel-sync/bravo",
+          "evidence": [
+            "E1",
+            "E2",
+            "E5"
+          ],
+          "hypothesis": "H1",
+          "incidentId": "inc-intel-sync-bravo-job-errors-20261029T144000Z",
+          "summary": "Bravo job erroring on tenant-specific upstream feed 500 while alpha succeeds and auth tests OK."
+        },
+        "accepted": true
+      }
+    ],
+    "F7": [
+      {
+        "run": 0,
+        "status": "submitted",
+        "reason": "propose",
+        "turns": 11,
+        "read_calls": 5,
+        "tokens": {
+          "input": 94242,
+          "cached": 60168,
+          "output": 3496,
+          "reasoning": 1613
+        },
+        "cost_usd": 0.0,
+        "refusals": {},
+        "tools_called": [
+          "compare_siblings",
+          "get_resource",
+          "list_job_logs",
+          "query_logs",
+          "record_evidence",
+          "set_hypotheses",
+          "submit_diagnosis",
+          "update_plan"
+        ],
+        "diagnosis": {
+          "action": {
+            "method": "jobInstances.restart",
+            "patch": {},
+            "resource": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockThreatIntel/jobs/sync-indicators/jobInstances/alpha-intel",
+            "type": "propose",
+            "updateMask": []
+          },
+          "category": "job_stalled",
+          "component": "job",
+          "confidence": "medium",
+          "deployment": "intel-sync/alpha",
+          "evidence": [
+            "E1",
+            "E2",
+            "E3"
+          ],
+          "expectedVerification": {
+            "condition": "recovers_within",
+            "seconds": 900,
+            "tripwire": "dead-job"
+          },
+          "hypothesis": "H1",
+          "incidentId": "inc-intel-sync-alpha-dead-job-20261029T144515Z",
+          "rollback": "Restart makes no config change; re-restart or re-run on demand if stall recurs",
+          "summary": "Job alpha-intel enabled but produced no completions after 14:30 SUCCESS, 3 intervals silent, while sibling bravo ran at 14:45 with no errors, indicating tenant scheduler stall needing restart."
+        },
+        "accepted": true
+      },
+      {
+        "run": 1,
+        "status": "submitted",
+        "reason": "propose",
+        "turns": 15,
+        "read_calls": 7,
+        "tokens": {
+          "input": 147623,
+          "cached": 106798,
+          "output": 4421,
+          "reasoning": 1969
+        },
+        "cost_usd": 0.0,
+        "refusals": {
+          "args.schema": 1
+        },
+        "tools_called": [
+          "compare_siblings",
+          "get_resource",
+          "list_job_logs",
+          "query_logs",
+          "record_evidence",
+          "set_hypotheses",
+          "submit_diagnosis",
+          "tripwire_history"
+        ],
+        "diagnosis": {
+          "action": {
+            "method": "jobInstances.restart",
+            "patch": {},
+            "resource": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockThreatIntel/jobs/sync-indicators/jobInstances/alpha-intel",
+            "type": "propose",
+            "updateMask": []
+          },
+          "category": "job_stalled",
+          "component": "job",
+          "confidence": "high",
+          "deployment": "intel-sync/alpha",
+          "evidence": [
+            "E1",
+            "E2",
+            "E3",
+            "E4"
+          ],
+          "expectedVerification": {
+            "condition": "recovers_within",
+            "seconds": 900,
+            "tripwire": "dead-job"
+          },
+          "hypothesis": "H1",
+          "incidentId": "inc-intel-sync-alpha-dead-job-20261029T144515Z",
+          "rollback": "No persistent config change; restart is transient so no rollback needed beyond re-restart if issue recurs",
+          "summary": "Alpha job enabled but produced no completed runs since 14:30 while bravo continued, with no errors, indicating tenant-specific scheduler stall"
+        },
+        "accepted": true
+      },
+      {
+        "run": 2,
+        "status": "submitted",
+        "reason": "propose",
+        "turns": 15,
+        "read_calls": 6,
+        "tokens": {
+          "input": 146673,
+          "cached": 121119,
+          "output": 4582,
+          "reasoning": 2056
+        },
+        "cost_usd": 0.0,
+        "refusals": {},
+        "tools_called": [
+          "compare_siblings",
+          "get_resource",
+          "list_job_logs",
+          "query_logs",
+          "record_evidence",
+          "set_hypotheses",
+          "submit_diagnosis",
+          "tripwire_history",
+          "update_plan"
+        ],
+        "diagnosis": {
+          "action": {
+            "method": "jobInstances.restart",
+            "patch": {},
+            "resource": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockThreatIntel/jobs/sync-indicators/jobInstances/alpha-intel",
+            "type": "propose",
+            "updateMask": []
+          },
+          "category": "job_stalled",
+          "component": "job",
+          "confidence": "high",
+          "deployment": "intel-sync/alpha",
+          "evidence": [
+            "E1",
+            "E2",
+            "E3",
+            "E4",
+            "E5"
+          ],
+          "expectedVerification": {
+            "condition": "recovers_within",
+            "seconds": 900,
+            "tripwire": "dead-job"
+          },
+          "hypothesis": "H1",
+          "incidentId": "inc-intel-sync-alpha-dead-job-20261029T144515Z",
+          "rollback": "Restart job instance again or verify schedule; no config changed so nothing to revert",
+          "summary": "Job alpha-intel stalled after 14:30 SUCCESS with no further runs or errors despite being enabled; sibling bravo healthy, so instance scheduler needs restart."
+        },
+        "accepted": true
+      }
+    ]
+  },
+  "total_cost_usd": 0.0,
+  "f2_probe_share": 1.0,
+  "gates_off_would_refuse": {
+    "F1": {
+      "refused:args.schema": 1,
+      "_run": {
+        "status": "submitted",
+        "reason": "propose",
+        "turns": 17,
+        "category": "connector_stalled"
+      }
+    },
+    "F2": {
+      "_run": {
+        "status": "needs_input",
+        "reason": "escalated",
+        "turns": 11,
+        "category": "credential_failure"
+      }
+    },
+    "F3": {
+      "refused:args.schema": 1,
+      "_run": {
+        "status": "submitted",
+        "reason": "propose",
+        "turns": 12,
+        "category": "schema_drift"
+      }
+    },
+    "F4": {
+      "refused:args.schema": 1,
+      "_run": {
+        "status": "submitted",
+        "reason": "propose",
+        "turns": 16,
+        "category": "job_hollow_success"
+      }
+    },
+    "F5": {
+      "_run": {
+        "status": "needs_input",
+        "reason": "escalated",
+        "turns": 11,
+        "category": "job_failing"
+      }
+    },
+    "F7": {
+      "_run": {
+        "status": "submitted",
+        "reason": "propose",
+        "turns": 13,
+        "category": "job_stalled"
+      }
+    }
+  }
+}

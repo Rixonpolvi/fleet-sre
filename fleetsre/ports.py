@@ -29,16 +29,22 @@ class LogQuery(Protocol):
 
 
 class MemoryLogQuery(LogQuery):
-    """D5 stub: in-memory LogQuery over a MemorySink."""
+    """In-memory LogQuery over a MemorySink (local adapter, spec.md §4.2)."""
 
     def __init__(self, sink: MemorySink) -> None:
-        raise NotImplementedError
+        self._sink = sink
 
     def entries(self, start: datetime, end: datetime) -> list[LogEntry]:
-        raise NotImplementedError
+        return [
+            e for e in self._sink.entries
+            if start <= e.timestamp <= end
+        ]
 
     def get(self, insert_id: str) -> LogEntry | None:
-        raise NotImplementedError
+        for entry in self._sink.entries:
+            if entry.insertId == insert_id:
+                return entry
+        return None
 
 
 class ChronicleError(Exception):
@@ -92,18 +98,32 @@ class StateStore(Protocol):
 
 
 class MemoryStateStore(StateStore):
-    """D5 stub: in-memory StateStore."""
+    """In-memory StateStore: trip events and change records per deployment."""
 
     def __init__(self) -> None:
-        raise NotImplementedError
+        self._records: list[dict[str, Any]] = []
 
     def record_trip(self, event: Any) -> None:
-        raise NotImplementedError
+        at = getattr(event, "at", None)
+        self._records.append({
+            "kind": getattr(event, "kind", "trip"),
+            "deployment": getattr(event, "deployment", ""),
+            "tripwire": getattr(event, "tripwire", ""),
+            "at": at.isoformat() if at is not None else "",
+            "reason": getattr(event, "reason", ""),
+            "evidence": list(getattr(event, "evidence", ())),
+        })
 
     def record_change(
         self, deployment: str, record: dict[str, Any]
     ) -> None:
-        raise NotImplementedError
+        stored = dict(record)
+        stored["deployment"] = deployment
+        stored.setdefault("kind", "change")
+        self._records.append(stored)
 
     def trip_history(self, deployment: str) -> list[dict[str, Any]]:
-        raise NotImplementedError
+        return [
+            dict(r) for r in self._records
+            if r.get("deployment") == deployment
+        ]
