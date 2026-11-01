@@ -14,6 +14,8 @@ Revised 2026-10-29 (night) before D3: Chronicle method bodies, permissions and c
 
 Revised 2026-10-31 after D4: boundary and recovery rules for each tripwire type, settled by the evaluator (§5).
 
+Revised 2026-10-31 (night) after D5: budgets, stuck detection, refusal rule codes, the tightened category rules and the `propose` resource rule as built (§6); measured cost (§8); live result (§12). Detail in `docs/d5-pins.md`.
+
 ---
 
 ## 1. Summary
@@ -189,7 +191,7 @@ Each turn, the gateway sends the full history to the Meta Model API (Responses A
 | Three refused submissions | NEEDS_INPUT, reason `refused` | None until resumed |
 | Turn limit | NEEDS_INPUT, reason `budget` | None until resumed |
 | Token limit | NEEDS_INPUT, reason `token_budget` | None until resumed |
-| The same call a third time | NEEDS_INPUT, reason `stuck` | None until resumed |
+| The same read call a third time in a segment | NEEDS_INPUT, reason `stuck` | None until resumed |
 | Model API still failing after retries | NEEDS_INPUT, reason `model_unavailable` | None until resumed |
 
 - **Resume.** A NEEDS_INPUT incident resumes the same session (hypotheses and evidence kept) only when a human replied, granted more turns, or the incident's tripwire state changed since it paused. Otherwise resume is refused without a model call. What changed is the SRE's next message.
@@ -197,7 +199,7 @@ Each turn, the gateway sends the full history to the Meta Model API (Responses A
 
 ### 6.2 Read tools (proxied, read-only identity)
 
-Every read tool also takes `rationale`. Reads are capped at 12 per session; a 13th read is refused with an error, and the loop continues.
+Every read tool also takes `rationale`. Reads are capped per segment: 12 in the first, 4 more after each resume. A read over the cap is refused with an error, and the loop continues. A component that is not one of the service's component IDs is refused rather than answered with empty data.
 
 | Tool | Returns | Backed by |
 | --- | --- | --- |
@@ -212,7 +214,7 @@ Every read tool also takes `rationale`. Reads are capped at 12 per session; a 13
 
 ### 6.3 Working tools and their gates
 
-The gates run inside these tools. A refused call returns `{"error": "...", "problems": ["..."]}` and never raises. Every tool result reaches the model as `{"callId": "...", "result": {...}}`, because the model cannot read call IDs back from the replayed history (D2 finding). A tool source's `field` is a dotted path into `result` (`successful`, not `result.successful`).
+The gates run inside these tools. A refused call returns `{"error": "...", "problems": ["..."]}` and never raises. Each problem starts with the rule it broke (`evidence.value: …`); the rule codes are listed in `docs/d5-pins.md`. Every tool result reaches the model as `{"callId": "...", "result": {...}}`, because the model cannot read call IDs back from the replayed history (D2 finding). A tool source's `field` is a dotted path into `result` (`successful`, not `result.successful`).
 
 | Tool | Does | Gate (inside the tool) |
 | --- | --- | --- |
@@ -270,7 +272,7 @@ The gates run inside these tools. A refused call returns `{"error": "...", "prob
 2. **Recorded evidence only.** Every ID in `evidence` was recorded in this session.
 3. **Hypothesis coverage.** The concluded hypothesis has at least one cited `supports` item. Every other hypothesis has at least one recorded `refutes` item or an entry in `openQuestions`.
 4. **Category evidence rule.** The cited evidence includes what the category requires (table below).
-5. **Action.** `propose`: the method is in §6.4, `updateMask` is within its allowed fields, and `resource` is the incident's component. `propose` and `none`: `expectedVerification.tripwire` is a tripwire of the incident's deployment. `none`: at least one cited item was recorded after the session's most recent resume. `escalate`: `escalationSummary` is not empty.
+5. **Action.** `propose`: the method is in §6.4, `updateMask` is within its allowed fields, the patch keys are within `updateMask`, and `resource` is the deployment's own connector instance (`connectorInstances.*`) or job instance (`jobInstances.*`). `propose` and `none`: `expectedVerification.tripwire` is a tripwire of the incident's deployment. `none`: at least one cited item was recorded after the session's most recent resume. `escalate`: `escalationSummary` is not empty.
 
 After three refused submissions the incident goes to NEEDS_INPUT with reason `refused`.
 
@@ -278,23 +280,23 @@ After three refused submissions the incident goes to NEEDS_INPUT with reason `re
 
 | Category | Cited evidence must include |
 | --- | --- |
-| `connector_stalled` | The deployment's last `connector.run.completed` entry before the trip |
-| `job_stalled` | The deployment's last `job.run.completed` entry before the trip |
-| `credential_failure` | A WARNING or ERROR entry from the deployment's connector, and a `test_integration_instance` result with `successful: false` |
-| `schema_drift` | An `alert.ingested` entry that violates the tripped schema tripwire |
-| `job_hollow_success` | A `job.run.completed` entry with `indicatorsSynced: 0` |
+| `connector_stalled` | The deployment's latest `connector.run.completed` entry at or before the trip (that exact entry) |
+| `job_stalled` | The deployment's latest `job.run.completed` entry at or before the trip (that exact entry) |
+| `credential_failure` | A WARNING or ERROR entry from the deployment's connector, and a `test_integration_instance` result for the deployment's own integration instance with `successful: false` |
+| `schema_drift` | An entry of the deployment that violates one of its schema tripwires |
+| `job_hollow_success` | A `job.run.completed` entry of the deployment with `status: SUCCESS` and `indicatorsSynced: 0` |
 | `job_failing` | A `job.run.error` entry, or a `job.run.completed` entry with `status: ERROR` |
 | `unknown` | Nothing, but the action must be `escalate` |
 
 ### 6.6 Guardrails
 
 - **Gates inside the tools** (§6.3, §6.5). Refusals are fed back to the model; nothing is retried silently.
-- **Budgets.** Per investigation session: 24 turns, 12 read calls, 400,000 tokens (input plus output, configurable). Two remediation attempts per incident.
-- **Stuck detection.** The same tool with the same canonical arguments (keys sorted, `rationale` excluded) a third time ends the session with reason `stuck`.
+- **Budgets.** Per segment of an investigation (the first run, then each resume): 24 turns, 12 read calls and 400,000 tokens (input plus output) at first, then `extra_turns` and 4 read calls per resume; all configurable. Two remediation attempts per incident.
+- **Stuck detection.** The same read tool with the same canonical arguments (keys sorted, `rationale` excluded) a third time in a segment pauses the session with reason `stuck` before the call runs. Working tools are exempt: repeating one changes state, and repeated refused submissions reach the refusal cap.
 - **Concurrency.** The executor rejects a patch if the resource changed since the SRE read it.
 - **Executor journal.** Append-only. Before any write the executor appends `intent` (approval ID, proposal hash, the resource version read at proposal time), then `started`, then `terminal` with the result. No write happens without a durable `intent` first. On restart, an `intent` without `terminal` is reconciled by re-reading the resource: if the change is already there it is marked done; otherwise it is applied once.
 - **Recorded replay.** Live investigations chosen as fixtures (`fixtures/recorded/`) replay offline in CI through the scripted transport. Any difference in tool calls, gate verdicts or the final diagnosis blocks the merge.
-- **Model calls.** Exponential backoff on 429; diagnoses cached on the public instance; spend caps.
+- **Model calls.** Exponential backoff (1, 2, 4, 8, 16 s) on 429 and 5xx; a 120 s request timeout counts as a 5xx; diagnoses cached on the public instance; spend caps.
 - **Import boundary.** `fleetsre.sre` may not import GCP clients or the Chronicle client directly; it reaches the world only through the tool set.
 
 ## 7. Identity and IAM
@@ -326,7 +328,7 @@ One gateway, per-role config. Assignments are provisional until the D2 spike and
 - **Investigation loop.** Responses API with `store=False` and the full history sent every turn, `include=["reasoning.encrypted_content"]` so reasoning is replayed between turns, `parallel_tool_calls=False`, and `reasoning={"effort": ...}` per role. Effort levels: `none` < `minimal` < `low` < `medium` < `high` (`xhigh` is the same as `high`).
 - **JSON outside tools** (authoring, postmortem). On the Responses API use `text.format` with a JSON schema; `response_format` returns HTTP 400 there. A recursive `$ref` also returns 400, so the schema given to the authoring model must be flattened.
 - **Prompt caching.** Keep the stable prefix first (system prompt, tool specs, contract) and record `usage.input_tokens_details.cached_tokens` and `usage.output_tokens_details.reasoning_tokens` in the transcript (field names confirmed in D2).
-- **Cost.** Muse Spark is billed against the $150 credit on this account (D2: about $0.08 per investigation at ~120k input tokens, ~70% cached). Baseten, Modal and Fireworks each offer $100 to select participants for open-weights models.
+- **Cost.** Muse Spark is billed against the $150 credit on this account (D2: about $0.08 per investigation at ~120k input tokens, ~70% cached; D5: at most about $0.10 per investigation at ~130k input tokens, ~74% cached). Baseten, Modal and Fireworks each offer $100 to select participants for open-weights models.
 
 Muse Code bills the same $150 credit (verified by usage delta).
 
@@ -379,7 +381,7 @@ Live instance: Cloud Run, scheduled chaos loop, no public fault buttons, no publ
 | Weak code from the coding agent | Tests-first PRs, human review per deliverable |
 | Logging API rejects `k8s_container` labels from outside GKE | Checked by hand on D1 day; fallback to a generic resource with the same entry `labels` |
 | SRE wanders or fabricates evidence | Budgets, stuck detection, evidence checked when recorded, category evidence rules |
-| The model does not follow the gated protocol (one call per turn, hypotheses first) | D2 passed with the full protocol (`spikes/RESULTS.md`). If a later model fails it, fallback order: drop `update_plan`; then drop `set_hypotheses` (rule 3 of §6.5 becomes report-only); then pre-computed evidence in the incident |
+| The model does not follow the gated protocol (one call per turn, hypotheses first) | D2 passed with the full protocol (`spikes/RESULTS.md`); the D5 live eval scored 18/18 (`evals/d5-2026-11-01.json`). If a later model fails it, fallback order: drop `update_plan`; then drop `set_hypotheses` (rule 3 of §6.5 becomes report-only); then pre-computed evidence in the incident |
 | Authoring fits the visible scenarios | Held-out scenarios (§5.1) |
 | Live instance abuse or cost | Public mode, caps |
 
