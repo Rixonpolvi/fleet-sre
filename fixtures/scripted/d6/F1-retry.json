@@ -1,0 +1,82 @@
+{
+  "follows": "F1",
+  "trigger": "verification_failed",
+  "note": "Reopen segment after a failed verification (T5) or a conflict (T2). Re-reads the resource and proposes the restart again; the new item lands on H1 as E4.",
+  "responses": [
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_010",
+          "encrypted_content": "enc-placeholder-10"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_010",
+          "name": "get_resource",
+          "arguments": "{\"name\": \"projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel\", \"rationale\": \"Re-read the resource before retrying.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 9010,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 5200
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_011",
+          "encrypted_content": "enc-placeholder-11"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_011",
+          "name": "record_evidence",
+          "arguments": "{\"hypothesis\": \"H1\", \"stance\": \"supports\", \"source\": {\"callId\": \"call_010\", \"field\": \"status\", \"value\": \"LIVE\"}, \"why\": \"still LIVE while stalled\", \"rationale\": \"Pin the resource signal to the hypothesis.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 9011,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 5200
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    },
+    {
+      "output": [
+        {
+          "type": "reasoning",
+          "id": "rs_012",
+          "encrypted_content": "enc-placeholder-12"
+        },
+        {
+          "type": "function_call",
+          "call_id": "call_012",
+          "name": "submit_diagnosis",
+          "arguments": "{\"diagnosis\": {\"incidentId\": \"inc-alert-ingestion-alpha-dead-connector-20261029T143315Z\", \"deployment\": \"alert-ingestion/alpha\", \"component\": \"connector\", \"category\": \"connector_stalled\", \"hypothesis\": \"H1\", \"summary\": \"The alpha connector stalled and stopped running.\", \"evidence\": [\"E1\", \"E4\"], \"openQuestions\": [], \"action\": {\"type\": \"propose\", \"method\": \"connectorInstances.restart\", \"resource\": \"projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel\", \"updateMask\": [], \"patch\": {}}, \"expectedVerification\": {\"tripwire\": \"dead-connector\", \"condition\": \"recovers_within\", \"seconds\": 180}, \"confidence\": \"high\"}, \"rationale\": \"Retry the restart.\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 9012,
+        "output_tokens": 300,
+        "input_tokens_details": {
+          "cached_tokens": 5200
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 150
+        }
+      }
+    }
+  ]
+}

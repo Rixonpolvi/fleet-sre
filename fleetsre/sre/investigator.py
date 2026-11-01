@@ -386,6 +386,51 @@ def investigate(
     return _run(incident, tools, gateway, store, session)
 
 
+def reopen(
+    incident: Any,
+    tools: Any,
+    gateway: Any,
+    store: Any,
+    *,
+    message: str,
+    extra_turns: int = 8,
+    extra_reads: int = 4,
+) -> InvestigationResult:
+    """Continue a submitted session (d6a-pins 1). Stub (Session A)."""
+    raise NotImplementedError
+
+
+class Investigator:
+    """Bound investigate/resume/reopen entry points (d6a-pins 1). Stub."""
+
+    def __init__(
+        self,
+        tools: Any,
+        gateway: Any,
+        store: Any,
+        *,
+        max_turns: int = 24,
+        max_read_calls: int = 12,
+        max_tokens: int = 400_000,
+        resume_turns: int = 8,
+        resume_reads: int = 4,
+    ) -> None:
+        raise NotImplementedError
+
+    def start(self, incident: Any) -> InvestigationResult:
+        raise NotImplementedError
+
+    def resume(
+        self, incident: Any, *, message: str, extra_turns: int = 0
+    ) -> InvestigationResult:
+        raise NotImplementedError
+
+    def reopen(
+        self, incident: Any, *, message: str, extra_turns: int = 0
+    ) -> InvestigationResult:
+        raise NotImplementedError
+
+
 def resume(
     incident: Any,
     tools: Any,
