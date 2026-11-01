@@ -34,7 +34,7 @@ Interfaces and semantics for D6a, the fix loop: `deliverables.md` Â§D6 rows T1â€
    - It records only and moves no incident.
 
 3. **`fleetsre/control/proposals.py`.**
-   - `Proposal(incident_id, seq, hash, method, resource, update_mask, patch, resource_version, diagnosis, created_at)`.
+   - `Proposal(incident_id, seq, hash, method, resource, update_mask, patch, resource_version, diagnosis, created_at)`, where `diagnosis` is a dict, as in `IncidentRecord.diagnosis`.
    - `resource_version(resource: dict) -> str` returns `str(resource["version"])` for a connector instance and `resource["updateTime"]` for a job instance, chosen by the resource name (`/connectorInstances/` or `/jobInstances/`).
    - `proposal_hash(...)` is the SHA-256 hex of `json.dumps({"incidentId", "seq", "method", "resource", "updateMask", "patch", "resourceVersion"}, sort_keys=True, separators=(",", ":"))`.
    - `seq` counts from 1 per incident, so a revised proposal always has a new hash, even with an identical patch.
@@ -75,7 +75,7 @@ Interfaces and semantics for D6a, the fix loop: `deliverables.md` Â§D6 rows T1â€
      - `tripwires: list[str]`: the opening tripwire first, then attached ones in order;
      - `reason`: the NEEDS_INPUT reason or `None`;
      - `paused_at`, `paused_snapshot: dict[str, str] | None`, `pending: Pending | None`;
-     - `diagnosis`: the latest accepted or escalated diagnosis;
+     - `diagnosis: dict | None`: the latest accepted or escalated diagnosis, as `Diagnosis.model_dump(mode="json")`;
      - `proposals: list[Proposal]`, `failed_attempts: int`;
      - `timeline: list[TimelineEvent]`, `transcript_ids: list[str]`, `postmortem: Postmortem | None`.
    - `IncidentManager(evaluator, investigator, approvals, executor, verifier, state, clock, *, registry, reader)`:
@@ -105,8 +105,8 @@ Interfaces and semantics for D6a, the fix loop: `deliverables.md` Â§D6 rows T1â€
 
 10. **Opening and attaching.** `on_trip(event)`:
     - Every event, trip or recovery, first goes to `state.record_trip(event)`, which is what `tripwire_history` reads.
-    - **Recovery:** if the deployment has an open incident, append a `recovery` timeline event to it. Return `None`.
-    - **Trip on a deployment with an incident not RESOLVED or ESCALATED:** attach to it. Add the tripwire to `tripwires` if it isn't there, append an `attached` event, and return its `Incident`.
+    - **Recovery:** if the deployment has an open incident, append a `recovery` timeline event (`detail: {"tripwire"}`) to it. Return `None`.
+    - **Trip on a deployment with an incident not RESOLVED or ESCALATED:** attach to it. Add the tripwire to `tripwires` if it isn't there, append an `attached` event (`detail: {"tripwire"}`), and return its `Incident`.
     - **Any other trip:** create `Incident.from_trip(event, registry, clock.now())` with state OPEN, `pending = Pending("start", trigger="opened")` and an `opened` event, and return it.
 
 11. **`tick()`.** It works through `incidents()` in order:
