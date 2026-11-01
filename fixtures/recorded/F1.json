@@ -1,0 +1,2411 @@
+{
+  "fault": "F1",
+  "seed": 102,
+  "t0": "2026-10-29T14:00:00Z",
+  "faults": [
+    {
+      "at": 1830,
+      "type": "connector_stall",
+      "environment": "alpha",
+      "params": {}
+    }
+  ],
+  "incident": {
+    "id": "inc-alert-ingestion-alpha-dead-connector-20261029T143315Z",
+    "deployment": "alert-ingestion/alpha",
+    "tripwire": "dead-connector",
+    "opened_at": "2026-10-29T14:33:15Z",
+    "trip_event": {
+      "kind": "trip",
+      "deployment": "alert-ingestion/alpha",
+      "tripwire": "dead-connector",
+      "at": "2026-10-29T14:33:15+00:00",
+      "reason": "no connector.run.completed for more than 3 x 60s",
+      "evidence": [
+        "b8172ce6-00000146"
+      ]
+    },
+    "service": "alert-ingestion",
+    "component": "connector",
+    "resources": {
+      "connector": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel",
+      "integrationInstance": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/integrationInstances/alpha"
+    },
+    "siblings": [
+      "alert-ingestion/bravo",
+      "alert-ingestion/canary",
+      "alert-ingestion/charlie"
+    ]
+  },
+  "responses": [
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d4477616812d0d14b38:rs_4a51ccf9-f3de-4b41-9026-ec4f03bed3a2",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"items\":[{\"id\":\"H1\",\"statement\":\"Connector instance disabled or misconfigured stopping scheduled runs in alpha\",\"wouldConfirm\":\"get_resource shows enabled false or bad interval, and no recent run.completed\"},{\"id\":\"H2\",\"statement\":\"Integration credential/auth failure preventing runs in alpha\",\"wouldConfirm\":\"connector logs show auth errors and test_integration_instance fails\"},{\"id\":\"H3\",\"alternative\":true,\"statement\":\"Fleet-wide upstream or platform outage affecting all deployments\",\"wouldConfirm\":\"siblings also missing heartbeats in same window\"}],\"rationale\":\"Establish competing hypotheses for dead connector cadence trip\"}",
+          "call_id": "call_f2fb944f-6c5b-4198-922c-23542b1ce3d1",
+          "name": "set_hypotheses",
+          "type": "function_call",
+          "id": "fc_f2fb944f-6c5b-4198-922c-23542b1ce3d1",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 5711,
+        "input_tokens_details": {
+          "cached_tokens": 5617
+        },
+        "output_tokens": 204,
+        "output_tokens_details": {
+          "reasoning_tokens": 7
+        },
+        "total_tokens": 5915
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d454879f1e290fb4ab7:rs_c53cf524-bfbc-4c1a-ad8d-dd510f10d886",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"items\":[{\"alternative\":false,\"id\":\"H1\",\"statement\":\"Connector instance disabled or misconfigured stopping scheduled runs in alpha\",\"wouldConfirm\":\"get_resource shows enabled false or bad interval, and no recent run.completed\"},{\"alternative\":false,\"id\":\"H2\",\"statement\":\"Integration credential/auth failure preventing runs in alpha\",\"wouldConfirm\":\"connector logs show auth errors and test_integration_instance fails\"},{\"alternative\":true,\"id\":\"H3\",\"statement\":\"Fleet-wide upstream or platform outage affecting all deployments\",\"wouldConfirm\":\"siblings also missing heartbeats in same window\"}],\"rationale\":\"Establish competing hypotheses for dead connector cadence trip\"}",
+          "call_id": "call_d90ac096-1be8-44e1-b3c5-94ed68ec270b",
+          "name": "set_hypotheses",
+          "type": "function_call",
+          "id": "fc_d90ac096-1be8-44e1-b3c5-94ed68ec270b",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 6007,
+        "input_tokens_details": {
+          "cached_tokens": 5745
+        },
+        "output_tokens": 229,
+        "output_tokens_details": {
+          "reasoning_tokens": 22
+        },
+        "total_tokens": 6236
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d4734ac382e3b024f50:rs_38b55de5-9bac-4b9b-89c8-8ed668e17084",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "id": "rs_95ef475c-a5c3-499f-a069-f16af7db8c59",
+          "content": [
+            {
+              "annotations": [],
+              "text": "Investigating the dead-connector alert \u2014 checking recent runs and fleet health.",
+              "type": "output_text",
+              "logprobs": []
+            }
+          ],
+          "role": "assistant",
+          "status": "completed",
+          "type": "message",
+          "phase": "commentary"
+        },
+        {
+          "arguments": "{\"plan\":[\"Check recent connector.run.completed via query_logs\",\"Check instance state via get_resource\",\"Compare siblings to rule out fleet-wide issue\",\"Test integration if auth suspected\"],\"rationale\":\"Outline steps to settle H1 H2 H3 hypotheses\"}",
+          "call_id": "call_ac407068-18e1-47cb-b43e-cc06fb58cad3",
+          "name": "update_plan",
+          "type": "function_call",
+          "id": "fc_ac407068-18e1-47cb-b43e-cc06fb58cad3",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 6307,
+        "input_tokens_details": {
+          "cached_tokens": 5617
+        },
+        "output_tokens": 235,
+        "output_tokens_details": {
+          "reasoning_tokens": 102
+        },
+        "total_tokens": 6542
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d48e32142cb30ca48eb:rs_f15889dd-e514-493a-bac5-73216656ff2e",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"deployment\":\"alert-ingestion/alpha\",\"filter\":{\"component\":\"connector\",\"event\":\"connector.run.completed\"},\"rationale\":\"Find latest connector heartbeat before trip\",\"window\":{\"lastMinutes\":60}}",
+          "call_id": "call_fd3c7842-ac79-48d0-aa6d-5030dc81a1df",
+          "name": "query_logs",
+          "type": "function_call",
+          "id": "fc_fd3c7842-ac79-48d0-aa6d-5030dc81a1df",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 6599,
+        "input_tokens_details": {
+          "cached_tokens": 6001
+        },
+        "output_tokens": 123,
+        "output_tokens_details": {
+          "reasoning_tokens": 3
+        },
+        "total_tokens": 6722
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d4966a48c27797f411c:rs_1c2bb07c-9d5b-4e43-be02-97dbed86f9d9",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"deployment\":\"alert-ingestion/alpha\",\"filter\":{\"component\":\"connector\"},\"rationale\":\"Look for errors or stop events after last heartbeat\",\"window\":{\"lastMinutes\":15}}",
+          "call_id": "call_20845a44-60f4-4010-b858-1032d41b0ab1",
+          "name": "query_logs",
+          "type": "function_call",
+          "id": "fc_20845a44-60f4-4010-b858-1032d41b0ab1",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 10519,
+        "input_tokens_details": {
+          "cached_tokens": 6513
+        },
+        "output_tokens": 203,
+        "output_tokens_details": {
+          "reasoning_tokens": 88
+        },
+        "total_tokens": 10722
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d4a0ae252072a344d35:rs_43feee55-738c-4c05-9e75-4abd254c73d8",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"name\":\"projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel\",\"rationale\":\"Check if connector disabled or misconfigured\"}",
+          "call_id": "call_ae8c14b2-8b24-4e60-b960-2b0f4947fdc0",
+          "name": "get_resource",
+          "type": "function_call",
+          "id": "fc_ae8c14b2-8b24-4e60-b960-2b0f4947fdc0",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 13693,
+        "input_tokens_details": {
+          "cached_tokens": 10481
+        },
+        "output_tokens": 162,
+        "output_tokens_details": {
+          "reasoning_tokens": 55
+        },
+        "total_tokens": 13855
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d4b7787decf86a74713:rs_0c21e076-57b6-4e7e-95de-a42651f2ab81",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"component\":\"connector\",\"rationale\":\"Check if siblings also silent to rule out fleet issue\",\"service\":\"alert-ingestion\",\"window\":{\"lastMinutes\":15}}",
+          "call_id": "call_d369cd0c-b73f-4c0a-807c-e54b8add861e",
+          "name": "compare_siblings",
+          "type": "function_call",
+          "id": "fc_d369cd0c-b73f-4c0a-807c-e54b8add861e",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 14450,
+        "input_tokens_details": {
+          "cached_tokens": 5745
+        },
+        "output_tokens": 149,
+        "output_tokens_details": {
+          "reasoning_tokens": 38
+        },
+        "total_tokens": 14599
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d4cbbef9d706da34eb3:rs_336c6dbb-5ef1-4fd6-94f8-0632c429bd94",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "id": "rs_4ae95ad2-0331-4c38-98b9-1729ddeede40",
+          "content": [
+            {
+              "annotations": [],
+              "text": "Alpha is silent while sibling tenants are healthy \u2014 now checking for tenant-specific faults.",
+              "type": "output_text",
+              "logprobs": []
+            }
+          ],
+          "role": "assistant",
+          "status": "completed",
+          "type": "message",
+          "phase": "commentary"
+        },
+        {
+          "arguments": "{\"deployment\":\"alert-ingestion/alpha\",\"filter\":{\"component\":\"connector\",\"minSeverity\":\"WARNING\"},\"rationale\":\"Look for auth or error warnings in connector\",\"window\":{\"lastMinutes\":60}}",
+          "call_id": "call_fa2f607a-86ec-4d7b-a19a-d5a0c0ec2f1d",
+          "name": "query_logs",
+          "type": "function_call",
+          "id": "fc_fa2f607a-86ec-4d7b-a19a-d5a0c0ec2f1d",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 15045,
+        "input_tokens_details": {
+          "cached_tokens": 6257
+        },
+        "output_tokens": 267,
+        "output_tokens_details": {
+          "reasoning_tokens": 122
+        },
+        "total_tokens": 15312
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d4d53ed1b02c98642ed:rs_b76d3dee-a7ce-4eba-b3c7-27d36c50b227",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"name\":\"projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/integrationInstances/alpha\",\"rationale\":\"Verify credential health to rule out H2\"}",
+          "call_id": "call_450fa1af-afb2-40b1-801a-dbbb3f9c7540",
+          "name": "test_integration_instance",
+          "type": "function_call",
+          "id": "fc_450fa1af-afb2-40b1-801a-dbbb3f9c7540",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 15389,
+        "input_tokens_details": {
+          "cached_tokens": 14449
+        },
+        "output_tokens": 131,
+        "output_tokens_details": {
+          "reasoning_tokens": 30
+        },
+        "total_tokens": 15520
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d4eeaeff2d588224418:rs_bccb894f-b476-4674-81d8-d260b3d810ae",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"deployment\":\"alert-ingestion/alpha\",\"rationale\":\"Check recent trips and changes before stall\"}",
+          "call_id": "call_bf96a69e-c33c-4689-bdd9-a716e97e0796",
+          "name": "tripwire_history",
+          "type": "function_call",
+          "id": "fc_bf96a69e-c33c-4689-bdd9-a716e97e0796",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 15594,
+        "input_tokens_details": {
+          "cached_tokens": 13681
+        },
+        "output_tokens": 126,
+        "output_tokens_details": {
+          "reasoning_tokens": 47
+        },
+        "total_tokens": 15720
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d50bdb75bbc851447e3:rs_65f1e7d5-ecf8-49f2-97b8-d1893f889a11",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"hypothesis\":\"H1\",\"rationale\":\"Cite stall evidence for connector_stalled requirement\",\"source\":{\"insertId\":\"b8172ce6-00000146\"},\"stance\":\"supports\",\"why\":\"Latest heartbeat at 14:30, over 3 intervals before 14:33 trip, proving stall\"}",
+          "call_id": "call_2d07e8a3-4fb1-4684-96d7-7411bb6b788e",
+          "name": "record_evidence",
+          "type": "function_call",
+          "id": "fc_2d07e8a3-4fb1-4684-96d7-7411bb6b788e",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 15794,
+        "input_tokens_details": {
+          "cached_tokens": 15345
+        },
+        "output_tokens": 310,
+        "output_tokens_details": {
+          "reasoning_tokens": 158
+        },
+        "total_tokens": 16104
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d516374191bdd0a4172:rs_5de23167-e7f1-4cb6-a98a-0afbb6d1d2c3",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "id": "rs_a4c64032-6e97-4d36-bcda-3a49b9897a9c",
+          "content": [
+            {
+              "annotations": [],
+              "text": "I've confirmed the stall signature \u2014 gathering final evidence for the diagnosis.",
+              "type": "output_text",
+              "logprobs": []
+            }
+          ],
+          "role": "assistant",
+          "status": "completed",
+          "type": "message",
+          "phase": "commentary"
+        },
+        {
+          "arguments": "{\"hypothesis\":\"H1\",\"rationale\":\"Cite enabled LIVE yet silent as stall proof\",\"source\":{\"callId\":\"call_ae8c14b2-8b24-4e60-b960-2b0f4947fdc0\",\"field\":\"enabled\",\"value\":true},\"stance\":\"supports\",\"why\":\"Instance enabled true but no heartbeats for 3+ intervals, scheduler stalled not disabled\"}",
+          "call_id": "call_07409528-1c99-4f09-84cb-73621135a2bf",
+          "name": "record_evidence",
+          "type": "function_call",
+          "id": "fc_07409528-1c99-4f09-84cb-73621135a2bf",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 16190,
+        "input_tokens_details": {
+          "cached_tokens": 15473
+        },
+        "output_tokens": 212,
+        "output_tokens_details": {
+          "reasoning_tokens": 13
+        },
+        "total_tokens": 16402
+      }
+    },
+    {
+      "output": [
+        {
+          "arguments": "{\"hypothesis\":\"H3\",\"rationale\":\"Cite siblings healthy to refute fleet-wide outage\",\"source\":{\"callId\":\"call_d369cd0c-b73f-4c0a-807c-e54b8add861e\",\"field\":\"deployments.alert-ingestion/bravo.lastHeartbeatAt\",\"value\":\"2026-10-29T14:33:00Z\"},\"stance\":\"refutes\",\"why\":\"Sibling bravo heartbeat at 14:33 healthy while alpha stuck at 14:30, not fleet-wide\"}",
+          "call_id": "call_6f44a0a9-ea5d-4a0e-8ec3-1827063ad310",
+          "name": "record_evidence",
+          "type": "function_call",
+          "id": "fc_6f44a0a9-ea5d-4a0e-8ec3-1827063ad310",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 16483,
+        "input_tokens_details": {
+          "cached_tokens": 16113
+        },
+        "output_tokens": 198,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 16681
+      }
+    },
+    {
+      "output": [
+        {
+          "arguments": "{\"hypothesis\":\"H2\",\"rationale\":\"Cite successful connectivity to refute credential failure\",\"source\":{\"callId\":\"call_450fa1af-afb2-40b1-801a-dbbb3f9c7540\",\"field\":\"successful\",\"value\":true},\"stance\":\"refutes\",\"why\":\"Integration test succeeded, credentials valid, no auth failure\"}",
+          "call_id": "call_5d7a45e4-47dc-45ff-9b2b-568d5dfa6559",
+          "name": "record_evidence",
+          "type": "function_call",
+          "id": "fc_5d7a45e4-47dc-45ff-9b2b-568d5dfa6559",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 16763,
+        "input_tokens_details": {
+          "cached_tokens": 16369
+        },
+        "output_tokens": 161,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 16924
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d55f5e9991d2a6b4850:rs_2ea22d42-de52-4952-bdc1-d1eeaa05393e",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"diagnosis\":{\"action\":{\"method\":\"connectorInstances.restart\",\"patch\":{},\"resource\":\"projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel\",\"type\":\"propose\",\"updateMask\":[]},\"category\":\"connector_stalled\",\"component\":\"connector\",\"confidence\":\"high\",\"deployment\":\"alert-ingestion/alpha\",\"evidence\":[\"E1\",\"E2\"],\"expectedVerification\":{\"condition\":\"recovers_within\",\"seconds\":300,\"tripwire\":\"dead-connector\"},\"hypothesis\":\"H1\",\"incidentId\":\"inc-alert-ingestion-alpha-dead-connector-20261029T143315Z\",\"rollback\":\"No config changed; if issue recurs re-investigate, restart can be repeated with no state to revert\",\"summary\":\"Alpha connector stalled after 14:30 with no further heartbeats while enabled LIVE; siblings healthy and credentials valid, indicating tenant scheduler stall needing restart\"},\"rationale\":\"Submit stalled connector restart with tenant-specific evidence\"}",
+          "call_id": "call_7d7f971f-de51-4210-8452-018deb4efa1a",
+          "name": "submit_diagnosis",
+          "type": "function_call",
+          "id": "fc_7d7f971f-de51-4210-8452-018deb4efa1a",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 17003,
+        "input_tokens_details": {
+          "cached_tokens": 14961
+        },
+        "output_tokens": 618,
+        "output_tokens_details": {
+          "reasoning_tokens": 309
+        },
+        "total_tokens": 17621
+      }
+    }
+  ],
+  "transcript": [
+    {
+      "turn": 1,
+      "items": [
+        {
+          "id": "rs_6ae69d4477616812d0d14b38:rs_4a51ccf9-f3de-4b41-9026-ec4f03bed3a2",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"items\":[{\"id\":\"H1\",\"statement\":\"Connector instance disabled or misconfigured stopping scheduled runs in alpha\",\"wouldConfirm\":\"get_resource shows enabled false or bad interval, and no recent run.completed\"},{\"id\":\"H2\",\"statement\":\"Integration credential/auth failure preventing runs in alpha\",\"wouldConfirm\":\"connector logs show auth errors and test_integration_instance fails\"},{\"id\":\"H3\",\"alternative\":true,\"statement\":\"Fleet-wide upstream or platform outage affecting all deployments\",\"wouldConfirm\":\"siblings also missing heartbeats in same window\"}],\"rationale\":\"Establish competing hypotheses for dead connector cadence trip\"}",
+          "call_id": "call_f2fb944f-6c5b-4198-922c-23542b1ce3d1",
+          "name": "set_hypotheses",
+          "type": "function_call",
+          "id": "fc_f2fb944f-6c5b-4198-922c-23542b1ce3d1",
+          "status": "completed"
+        }
+      ],
+      "tool": "set_hypotheses",
+      "args": {
+        "items": [
+          {
+            "id": "H1",
+            "statement": "Connector instance disabled or misconfigured stopping scheduled runs in alpha",
+            "wouldConfirm": "get_resource shows enabled false or bad interval, and no recent run.completed"
+          },
+          {
+            "id": "H2",
+            "statement": "Integration credential/auth failure preventing runs in alpha",
+            "wouldConfirm": "connector logs show auth errors and test_integration_instance fails"
+          },
+          {
+            "id": "H3",
+            "alternative": true,
+            "statement": "Fleet-wide upstream or platform outage affecting all deployments",
+            "wouldConfirm": "siblings also missing heartbeats in same window"
+          }
+        ],
+        "rationale": "Establish competing hypotheses for dead connector cadence trip"
+      },
+      "verdict": "refused",
+      "problems": [
+        "args.schema: items.0: 'alternative' is a required property"
+      ],
+      "output": {
+        "callId": "call_f2fb944f-6c5b-4198-922c-23542b1ce3d1",
+        "result": {
+          "error": "set_hypotheses refused",
+          "problems": [
+            "args.schema: items.0: 'alternative' is a required property"
+          ]
+        }
+      },
+      "usage": {
+        "input_tokens": 5711,
+        "output_tokens": 204,
+        "cached_tokens": 5617,
+        "reasoning_tokens": 7
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 2,
+      "items": [
+        {
+          "id": "rs_6ae69d454879f1e290fb4ab7:rs_c53cf524-bfbc-4c1a-ad8d-dd510f10d886",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"items\":[{\"alternative\":false,\"id\":\"H1\",\"statement\":\"Connector instance disabled or misconfigured stopping scheduled runs in alpha\",\"wouldConfirm\":\"get_resource shows enabled false or bad interval, and no recent run.completed\"},{\"alternative\":false,\"id\":\"H2\",\"statement\":\"Integration credential/auth failure preventing runs in alpha\",\"wouldConfirm\":\"connector logs show auth errors and test_integration_instance fails\"},{\"alternative\":true,\"id\":\"H3\",\"statement\":\"Fleet-wide upstream or platform outage affecting all deployments\",\"wouldConfirm\":\"siblings also missing heartbeats in same window\"}],\"rationale\":\"Establish competing hypotheses for dead connector cadence trip\"}",
+          "call_id": "call_d90ac096-1be8-44e1-b3c5-94ed68ec270b",
+          "name": "set_hypotheses",
+          "type": "function_call",
+          "id": "fc_d90ac096-1be8-44e1-b3c5-94ed68ec270b",
+          "status": "completed"
+        }
+      ],
+      "tool": "set_hypotheses",
+      "args": {
+        "items": [
+          {
+            "alternative": false,
+            "id": "H1",
+            "statement": "Connector instance disabled or misconfigured stopping scheduled runs in alpha",
+            "wouldConfirm": "get_resource shows enabled false or bad interval, and no recent run.completed"
+          },
+          {
+            "alternative": false,
+            "id": "H2",
+            "statement": "Integration credential/auth failure preventing runs in alpha",
+            "wouldConfirm": "connector logs show auth errors and test_integration_instance fails"
+          },
+          {
+            "alternative": true,
+            "id": "H3",
+            "statement": "Fleet-wide upstream or platform outage affecting all deployments",
+            "wouldConfirm": "siblings also missing heartbeats in same window"
+          }
+        ],
+        "rationale": "Establish competing hypotheses for dead connector cadence trip"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_d90ac096-1be8-44e1-b3c5-94ed68ec270b",
+        "result": {
+          "ok": true,
+          "count": 3
+        }
+      },
+      "usage": {
+        "input_tokens": 6007,
+        "output_tokens": 229,
+        "cached_tokens": 5745,
+        "reasoning_tokens": 22
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 3,
+      "items": [
+        {
+          "id": "rs_6ae69d4734ac382e3b024f50:rs_38b55de5-9bac-4b9b-89c8-8ed668e17084",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "id": "rs_95ef475c-a5c3-499f-a069-f16af7db8c59",
+          "content": [
+            {
+              "annotations": [],
+              "text": "Investigating the dead-connector alert \u2014 checking recent runs and fleet health.",
+              "type": "output_text",
+              "logprobs": []
+            }
+          ],
+          "role": "assistant",
+          "status": "completed",
+          "type": "message",
+          "phase": "commentary"
+        },
+        {
+          "arguments": "{\"plan\":[\"Check recent connector.run.completed via query_logs\",\"Check instance state via get_resource\",\"Compare siblings to rule out fleet-wide issue\",\"Test integration if auth suspected\"],\"rationale\":\"Outline steps to settle H1 H2 H3 hypotheses\"}",
+          "call_id": "call_ac407068-18e1-47cb-b43e-cc06fb58cad3",
+          "name": "update_plan",
+          "type": "function_call",
+          "id": "fc_ac407068-18e1-47cb-b43e-cc06fb58cad3",
+          "status": "completed"
+        }
+      ],
+      "tool": "update_plan",
+      "args": {
+        "plan": [
+          "Check recent connector.run.completed via query_logs",
+          "Check instance state via get_resource",
+          "Compare siblings to rule out fleet-wide issue",
+          "Test integration if auth suspected"
+        ],
+        "rationale": "Outline steps to settle H1 H2 H3 hypotheses"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_ac407068-18e1-47cb-b43e-cc06fb58cad3",
+        "result": {
+          "ok": true
+        }
+      },
+      "usage": {
+        "input_tokens": 6307,
+        "output_tokens": 235,
+        "cached_tokens": 5617,
+        "reasoning_tokens": 102
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 4,
+      "items": [
+        {
+          "id": "rs_6ae69d48e32142cb30ca48eb:rs_f15889dd-e514-493a-bac5-73216656ff2e",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"deployment\":\"alert-ingestion/alpha\",\"filter\":{\"component\":\"connector\",\"event\":\"connector.run.completed\"},\"rationale\":\"Find latest connector heartbeat before trip\",\"window\":{\"lastMinutes\":60}}",
+          "call_id": "call_fd3c7842-ac79-48d0-aa6d-5030dc81a1df",
+          "name": "query_logs",
+          "type": "function_call",
+          "id": "fc_fd3c7842-ac79-48d0-aa6d-5030dc81a1df",
+          "status": "completed"
+        }
+      ],
+      "tool": "query_logs",
+      "args": {
+        "deployment": "alert-ingestion/alpha",
+        "filter": {
+          "component": "connector",
+          "event": "connector.run.completed"
+        },
+        "rationale": "Find latest connector heartbeat before trip",
+        "window": {
+          "lastMinutes": 60
+        }
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_fd3c7842-ac79-48d0-aa6d-5030dc81a1df",
+        "result": {
+          "entries": [
+            {
+              "insertId": "b8172ce6-00000146",
+              "timestamp": "2026-10-29T14:30:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000129",
+                "environment": "alpha",
+                "alertsFetched": 0
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "995f4e71-0000013c",
+              "timestamp": "2026-10-29T14:29:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000123",
+                "environment": "alpha",
+                "alertsFetched": 2
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "3e3e8486-00000131",
+              "timestamp": "2026-10-29T14:28:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000119",
+                "environment": "alpha",
+                "alertsFetched": 1
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "9842a885-00000128",
+              "timestamp": "2026-10-29T14:27:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000115",
+                "environment": "alpha",
+                "alertsFetched": 0
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "c3c41cee-00000120",
+              "timestamp": "2026-10-29T14:26:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000111",
+                "environment": "alpha",
+                "alertsFetched": 1
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "9bfbad3c-00000116",
+              "timestamp": "2026-10-29T14:25:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000107",
+                "environment": "alpha",
+                "alertsFetched": 5
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "1f0cf4f7-00000107",
+              "timestamp": "2026-10-29T14:24:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000101",
+                "environment": "alpha",
+                "alertsFetched": 3
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "e0c68107-000000fb",
+              "timestamp": "2026-10-29T14:23:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000097",
+                "environment": "alpha",
+                "alertsFetched": 0
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "9e57bd55-000000f2",
+              "timestamp": "2026-10-29T14:22:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000093",
+                "environment": "alpha",
+                "alertsFetched": 1
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "d715a58b-000000e7",
+              "timestamp": "2026-10-29T14:21:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000089",
+                "environment": "alpha",
+                "alertsFetched": 2
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "b1fdd69e-000000dd",
+              "timestamp": "2026-10-29T14:20:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000085",
+                "environment": "alpha",
+                "alertsFetched": 2
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "9101d203-000000d1",
+              "timestamp": "2026-10-29T14:19:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000079",
+                "environment": "alpha",
+                "alertsFetched": 3
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "e2f165a1-000000c6",
+              "timestamp": "2026-10-29T14:18:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000075",
+                "environment": "alpha",
+                "alertsFetched": 3
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "ce510519-000000ba",
+              "timestamp": "2026-10-29T14:17:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000071",
+                "environment": "alpha",
+                "alertsFetched": 1
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "24130801-000000b1",
+              "timestamp": "2026-10-29T14:16:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000067",
+                "environment": "alpha",
+                "alertsFetched": 1
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "35096ec4-000000a8",
+              "timestamp": "2026-10-29T14:15:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000063",
+                "environment": "alpha",
+                "alertsFetched": 3
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "dc39962a-0000009a",
+              "timestamp": "2026-10-29T14:14:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000057",
+                "environment": "alpha",
+                "alertsFetched": 2
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "00f61c5b-00000090",
+              "timestamp": "2026-10-29T14:13:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000053",
+                "environment": "alpha",
+                "alertsFetched": 1
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "5b0f422d-00000087",
+              "timestamp": "2026-10-29T14:12:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000049",
+                "environment": "alpha",
+                "alertsFetched": 1
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "466e19f3-0000007c",
+              "timestamp": "2026-10-29T14:11:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000045",
+                "environment": "alpha",
+                "alertsFetched": 2
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "44f42c71-00000072",
+              "timestamp": "2026-10-29T14:10:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000041",
+                "environment": "alpha",
+                "alertsFetched": 5
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "66319b35-00000063",
+              "timestamp": "2026-10-29T14:09:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000035",
+                "environment": "alpha",
+                "alertsFetched": 3
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "88b8946f-00000057",
+              "timestamp": "2026-10-29T14:08:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000031",
+                "environment": "alpha",
+                "alertsFetched": 3
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "370c6227-0000004c",
+              "timestamp": "2026-10-29T14:07:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000027",
+                "environment": "alpha",
+                "alertsFetched": 2
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "a0b8a127-00000042",
+              "timestamp": "2026-10-29T14:06:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000023",
+                "environment": "alpha",
+                "alertsFetched": 0
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "d78b0b37-0000003a",
+              "timestamp": "2026-10-29T14:05:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000019",
+                "environment": "alpha",
+                "alertsFetched": 2
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "96578203-0000002d",
+              "timestamp": "2026-10-29T14:04:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000013",
+                "environment": "alpha",
+                "alertsFetched": 4
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "70ae902b-00000020",
+              "timestamp": "2026-10-29T14:03:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000009",
+                "environment": "alpha",
+                "alertsFetched": 1
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "a59ed092-00000016",
+              "timestamp": "2026-10-29T14:02:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000005",
+                "environment": "alpha",
+                "alertsFetched": 5
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "9225cf4c-00000007",
+              "timestamp": "2026-10-29T14:01:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000001",
+                "environment": "alpha",
+                "alertsFetched": 5
+              },
+              "container": "python"
+            }
+          ],
+          "total": 30,
+          "truncated": false
+        }
+      },
+      "usage": {
+        "input_tokens": 6599,
+        "output_tokens": 123,
+        "cached_tokens": 6001,
+        "reasoning_tokens": 3
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 5,
+      "items": [
+        {
+          "id": "rs_6ae69d4966a48c27797f411c:rs_1c2bb07c-9d5b-4e43-be02-97dbed86f9d9",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"deployment\":\"alert-ingestion/alpha\",\"filter\":{\"component\":\"connector\"},\"rationale\":\"Look for errors or stop events after last heartbeat\",\"window\":{\"lastMinutes\":15}}",
+          "call_id": "call_20845a44-60f4-4010-b858-1032d41b0ab1",
+          "name": "query_logs",
+          "type": "function_call",
+          "id": "fc_20845a44-60f4-4010-b858-1032d41b0ab1",
+          "status": "completed"
+        }
+      ],
+      "tool": "query_logs",
+      "args": {
+        "deployment": "alert-ingestion/alpha",
+        "filter": {
+          "component": "connector"
+        },
+        "rationale": "Look for errors or stop events after last heartbeat",
+        "window": {
+          "lastMinutes": 15
+        }
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_20845a44-60f4-4010-b858-1032d41b0ab1",
+        "result": {
+          "entries": [
+            {
+              "insertId": "b8172ce6-00000146",
+              "timestamp": "2026-10-29T14:30:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000129",
+                "environment": "alpha",
+                "alertsFetched": 0
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "227a6243-00000145",
+              "timestamp": "2026-10-29T14:30:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000129",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "995f4e71-0000013c",
+              "timestamp": "2026-10-29T14:29:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000123",
+                "environment": "alpha",
+                "alertsFetched": 2
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "765c68f9-00000139",
+              "timestamp": "2026-10-29T14:29:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000123",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "4a4becd9-0000012f",
+              "timestamp": "2026-10-29T14:28:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000119",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "3e3e8486-00000131",
+              "timestamp": "2026-10-29T14:28:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000119",
+                "environment": "alpha",
+                "alertsFetched": 1
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "a1dd0d42-00000127",
+              "timestamp": "2026-10-29T14:27:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000115",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "9842a885-00000128",
+              "timestamp": "2026-10-29T14:27:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000115",
+                "environment": "alpha",
+                "alertsFetched": 0
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "c3c41cee-00000120",
+              "timestamp": "2026-10-29T14:26:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000111",
+                "environment": "alpha",
+                "alertsFetched": 1
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "1b194a2d-0000011e",
+              "timestamp": "2026-10-29T14:26:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000111",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "9bfbad3c-00000116",
+              "timestamp": "2026-10-29T14:25:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000107",
+                "environment": "alpha",
+                "alertsFetched": 5
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "94aaf1aa-00000110",
+              "timestamp": "2026-10-29T14:25:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000107",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "edf0d423-00000103",
+              "timestamp": "2026-10-29T14:24:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000101",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "1f0cf4f7-00000107",
+              "timestamp": "2026-10-29T14:24:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000101",
+                "environment": "alpha",
+                "alertsFetched": 3
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "fe503cbc-000000fa",
+              "timestamp": "2026-10-29T14:23:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000097",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "e0c68107-000000fb",
+              "timestamp": "2026-10-29T14:23:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000097",
+                "environment": "alpha",
+                "alertsFetched": 0
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "9e57bd55-000000f2",
+              "timestamp": "2026-10-29T14:22:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000093",
+                "environment": "alpha",
+                "alertsFetched": 1
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "58394033-000000f0",
+              "timestamp": "2026-10-29T14:22:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000093",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "d715a58b-000000e7",
+              "timestamp": "2026-10-29T14:21:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000089",
+                "environment": "alpha",
+                "alertsFetched": 2
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "5b37b979-000000e4",
+              "timestamp": "2026-10-29T14:21:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000089",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "dd1c0ce1-000000da",
+              "timestamp": "2026-10-29T14:20:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000085",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "b1fdd69e-000000dd",
+              "timestamp": "2026-10-29T14:20:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000085",
+                "environment": "alpha",
+                "alertsFetched": 2
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "9101d203-000000d1",
+              "timestamp": "2026-10-29T14:19:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000079",
+                "environment": "alpha",
+                "alertsFetched": 3
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "0519a924-000000cd",
+              "timestamp": "2026-10-29T14:19:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000079",
+                "environment": "alpha"
+              },
+              "container": "python"
+            }
+          ],
+          "total": 24,
+          "truncated": false
+        }
+      },
+      "usage": {
+        "input_tokens": 10519,
+        "output_tokens": 203,
+        "cached_tokens": 6513,
+        "reasoning_tokens": 88
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 6,
+      "items": [
+        {
+          "id": "rs_6ae69d4a0ae252072a344d35:rs_43feee55-738c-4c05-9e75-4abd254c73d8",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"name\":\"projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel\",\"rationale\":\"Check if connector disabled or misconfigured\"}",
+          "call_id": "call_ae8c14b2-8b24-4e60-b960-2b0f4947fdc0",
+          "name": "get_resource",
+          "type": "function_call",
+          "id": "fc_ae8c14b2-8b24-4e60-b960-2b0f4947fdc0",
+          "status": "completed"
+        }
+      ],
+      "tool": "get_resource",
+      "args": {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel",
+        "rationale": "Check if connector disabled or misconfigured"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_ae8c14b2-8b24-4e60-b960-2b0f4947fdc0",
+        "result": {
+          "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel",
+          "agent": "",
+          "environment": "projects/fleet-sre-demo/locations/us/instances/mock-soar/environments/alpha",
+          "displayName": "Mock Sentinel Incidents Connector",
+          "description": "",
+          "intervalSeconds": 60,
+          "documentationLink": "",
+          "allowList": [],
+          "productFieldName": "device_product",
+          "eventFieldName": "event_name",
+          "timeoutSeconds": 30,
+          "connectorDefinitionName": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents",
+          "integrationVersion": "1.0",
+          "version": 1,
+          "loggingEnabledUntilUnixMs": "0",
+          "statistics": {
+            "pastDayAlertsCount": 64,
+            "avgAlertsPerDay": 64
+          },
+          "parameters": [
+            {
+              "value": "00000000-0000-4000-a000-0000000000a1",
+              "displayName": "Tenant ID",
+              "description": "",
+              "mandatory": true,
+              "advanced": false,
+              "type": "STRING"
+            },
+            {
+              "value": "00000000-0000-4000-b000-0000000000a1",
+              "displayName": "Client ID",
+              "description": "",
+              "mandatory": true,
+              "advanced": false,
+              "type": "STRING"
+            },
+            {
+              "value": "********",
+              "displayName": "Client Secret",
+              "description": "",
+              "mandatory": true,
+              "advanced": false,
+              "type": "PASSWORD"
+            },
+            {
+              "value": "law-alpha",
+              "displayName": "Workspace Name",
+              "description": "",
+              "mandatory": true,
+              "advanced": false,
+              "type": "STRING"
+            },
+            {
+              "value": "50",
+              "displayName": "Max Incidents Per Cycle",
+              "description": "",
+              "mandatory": false,
+              "advanced": false,
+              "type": "INT"
+            },
+            {
+              "value": "",
+              "displayName": "Unknown Severity Priority",
+              "description": "",
+              "mandatory": false,
+              "advanced": false,
+              "type": "INT"
+            }
+          ],
+          "connectorId": "alpha-sentinel",
+          "identifier": "alpha-sentinel",
+          "id": "alpha-sentinel",
+          "updateAvailable": false,
+          "custom": true,
+          "enabled": true,
+          "remote": false,
+          "status": "LIVE",
+          "integration": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel"
+        }
+      },
+      "usage": {
+        "input_tokens": 13693,
+        "output_tokens": 162,
+        "cached_tokens": 10481,
+        "reasoning_tokens": 55
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 7,
+      "items": [
+        {
+          "id": "rs_6ae69d4b7787decf86a74713:rs_0c21e076-57b6-4e7e-95de-a42651f2ab81",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"component\":\"connector\",\"rationale\":\"Check if siblings also silent to rule out fleet issue\",\"service\":\"alert-ingestion\",\"window\":{\"lastMinutes\":15}}",
+          "call_id": "call_d369cd0c-b73f-4c0a-807c-e54b8add861e",
+          "name": "compare_siblings",
+          "type": "function_call",
+          "id": "fc_d369cd0c-b73f-4c0a-807c-e54b8add861e",
+          "status": "completed"
+        }
+      ],
+      "tool": "compare_siblings",
+      "args": {
+        "component": "connector",
+        "rationale": "Check if siblings also silent to rule out fleet issue",
+        "service": "alert-ingestion",
+        "window": {
+          "lastMinutes": 15
+        }
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_d369cd0c-b73f-4c0a-807c-e54b8add861e",
+        "result": {
+          "service": "alert-ingestion",
+          "component": "connector",
+          "window": {
+            "lastMinutes": 15
+          },
+          "deployments": {
+            "alert-ingestion/alpha": {
+              "runs": 12,
+              "warningRuns": 0,
+              "errorRuns": 0,
+              "alertsIngested": 20,
+              "lastHeartbeatAt": "2026-10-29T14:30:00Z",
+              "lastHeartbeatId": "b8172ce6-00000146",
+              "worstInsertId": "b8172ce6-00000146"
+            },
+            "alert-ingestion/bravo": {
+              "runs": 15,
+              "warningRuns": 0,
+              "errorRuns": 0,
+              "alertsIngested": 8,
+              "lastHeartbeatAt": "2026-10-29T14:33:00Z",
+              "lastHeartbeatId": "52b591ed-0000015c",
+              "worstInsertId": "78a39d15-0000015b"
+            },
+            "alert-ingestion/canary": {
+              "runs": 15,
+              "warningRuns": 0,
+              "errorRuns": 0,
+              "alertsIngested": 0,
+              "lastHeartbeatAt": "2026-10-29T14:33:00Z",
+              "lastHeartbeatId": "fe596133-00000160",
+              "worstInsertId": "fe596133-00000160"
+            },
+            "alert-ingestion/charlie": {
+              "runs": 15,
+              "warningRuns": 0,
+              "errorRuns": 0,
+              "alertsIngested": 0,
+              "lastHeartbeatAt": "2026-10-29T14:33:00Z",
+              "lastHeartbeatId": "2d0aba8b-0000015e",
+              "worstInsertId": "7d86ba8d-0000015d"
+            }
+          }
+        }
+      },
+      "usage": {
+        "input_tokens": 14450,
+        "output_tokens": 149,
+        "cached_tokens": 5745,
+        "reasoning_tokens": 38
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 8,
+      "items": [
+        {
+          "id": "rs_6ae69d4cbbef9d706da34eb3:rs_336c6dbb-5ef1-4fd6-94f8-0632c429bd94",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "id": "rs_4ae95ad2-0331-4c38-98b9-1729ddeede40",
+          "content": [
+            {
+              "annotations": [],
+              "text": "Alpha is silent while sibling tenants are healthy \u2014 now checking for tenant-specific faults.",
+              "type": "output_text",
+              "logprobs": []
+            }
+          ],
+          "role": "assistant",
+          "status": "completed",
+          "type": "message",
+          "phase": "commentary"
+        },
+        {
+          "arguments": "{\"deployment\":\"alert-ingestion/alpha\",\"filter\":{\"component\":\"connector\",\"minSeverity\":\"WARNING\"},\"rationale\":\"Look for auth or error warnings in connector\",\"window\":{\"lastMinutes\":60}}",
+          "call_id": "call_fa2f607a-86ec-4d7b-a19a-d5a0c0ec2f1d",
+          "name": "query_logs",
+          "type": "function_call",
+          "id": "fc_fa2f607a-86ec-4d7b-a19a-d5a0c0ec2f1d",
+          "status": "completed"
+        }
+      ],
+      "tool": "query_logs",
+      "args": {
+        "deployment": "alert-ingestion/alpha",
+        "filter": {
+          "component": "connector",
+          "minSeverity": "WARNING"
+        },
+        "rationale": "Look for auth or error warnings in connector",
+        "window": {
+          "lastMinutes": 60
+        }
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_fa2f607a-86ec-4d7b-a19a-d5a0c0ec2f1d",
+        "result": {
+          "entries": [],
+          "total": 0,
+          "truncated": false
+        }
+      },
+      "usage": {
+        "input_tokens": 15045,
+        "output_tokens": 267,
+        "cached_tokens": 6257,
+        "reasoning_tokens": 122
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 9,
+      "items": [
+        {
+          "id": "rs_6ae69d4d53ed1b02c98642ed:rs_b76d3dee-a7ce-4eba-b3c7-27d36c50b227",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"name\":\"projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/integrationInstances/alpha\",\"rationale\":\"Verify credential health to rule out H2\"}",
+          "call_id": "call_450fa1af-afb2-40b1-801a-dbbb3f9c7540",
+          "name": "test_integration_instance",
+          "type": "function_call",
+          "id": "fc_450fa1af-afb2-40b1-801a-dbbb3f9c7540",
+          "status": "completed"
+        }
+      ],
+      "tool": "test_integration_instance",
+      "args": {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/integrationInstances/alpha",
+        "rationale": "Verify credential health to rule out H2"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_450fa1af-afb2-40b1-801a-dbbb3f9c7540",
+        "result": {
+          "successful": true,
+          "message": "Connection test succeeded"
+        }
+      },
+      "usage": {
+        "input_tokens": 15389,
+        "output_tokens": 131,
+        "cached_tokens": 14449,
+        "reasoning_tokens": 30
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 10,
+      "items": [
+        {
+          "id": "rs_6ae69d4eeaeff2d588224418:rs_bccb894f-b476-4674-81d8-d260b3d810ae",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"deployment\":\"alert-ingestion/alpha\",\"rationale\":\"Check recent trips and changes before stall\"}",
+          "call_id": "call_bf96a69e-c33c-4689-bdd9-a716e97e0796",
+          "name": "tripwire_history",
+          "type": "function_call",
+          "id": "fc_bf96a69e-c33c-4689-bdd9-a716e97e0796",
+          "status": "completed"
+        }
+      ],
+      "tool": "tripwire_history",
+      "args": {
+        "deployment": "alert-ingestion/alpha",
+        "rationale": "Check recent trips and changes before stall"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_bf96a69e-c33c-4689-bdd9-a716e97e0796",
+        "result": {
+          "deployment": "alert-ingestion/alpha",
+          "events": []
+        }
+      },
+      "usage": {
+        "input_tokens": 15594,
+        "output_tokens": 126,
+        "cached_tokens": 13681,
+        "reasoning_tokens": 47
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 11,
+      "items": [
+        {
+          "id": "rs_6ae69d50bdb75bbc851447e3:rs_65f1e7d5-ecf8-49f2-97b8-d1893f889a11",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"hypothesis\":\"H1\",\"rationale\":\"Cite stall evidence for connector_stalled requirement\",\"source\":{\"insertId\":\"b8172ce6-00000146\"},\"stance\":\"supports\",\"why\":\"Latest heartbeat at 14:30, over 3 intervals before 14:33 trip, proving stall\"}",
+          "call_id": "call_2d07e8a3-4fb1-4684-96d7-7411bb6b788e",
+          "name": "record_evidence",
+          "type": "function_call",
+          "id": "fc_2d07e8a3-4fb1-4684-96d7-7411bb6b788e",
+          "status": "completed"
+        }
+      ],
+      "tool": "record_evidence",
+      "args": {
+        "hypothesis": "H1",
+        "rationale": "Cite stall evidence for connector_stalled requirement",
+        "source": {
+          "insertId": "b8172ce6-00000146"
+        },
+        "stance": "supports",
+        "why": "Latest heartbeat at 14:30, over 3 intervals before 14:33 trip, proving stall"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_2d07e8a3-4fb1-4684-96d7-7411bb6b788e",
+        "result": {
+          "ok": true,
+          "id": "E1",
+          "remaining": [
+            "H2",
+            "H3"
+          ]
+        }
+      },
+      "usage": {
+        "input_tokens": 15794,
+        "output_tokens": 310,
+        "cached_tokens": 15345,
+        "reasoning_tokens": 158
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 12,
+      "items": [
+        {
+          "id": "rs_6ae69d516374191bdd0a4172:rs_5de23167-e7f1-4cb6-a98a-0afbb6d1d2c3",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "id": "rs_a4c64032-6e97-4d36-bcda-3a49b9897a9c",
+          "content": [
+            {
+              "annotations": [],
+              "text": "I've confirmed the stall signature \u2014 gathering final evidence for the diagnosis.",
+              "type": "output_text",
+              "logprobs": []
+            }
+          ],
+          "role": "assistant",
+          "status": "completed",
+          "type": "message",
+          "phase": "commentary"
+        },
+        {
+          "arguments": "{\"hypothesis\":\"H1\",\"rationale\":\"Cite enabled LIVE yet silent as stall proof\",\"source\":{\"callId\":\"call_ae8c14b2-8b24-4e60-b960-2b0f4947fdc0\",\"field\":\"enabled\",\"value\":true},\"stance\":\"supports\",\"why\":\"Instance enabled true but no heartbeats for 3+ intervals, scheduler stalled not disabled\"}",
+          "call_id": "call_07409528-1c99-4f09-84cb-73621135a2bf",
+          "name": "record_evidence",
+          "type": "function_call",
+          "id": "fc_07409528-1c99-4f09-84cb-73621135a2bf",
+          "status": "completed"
+        }
+      ],
+      "tool": "record_evidence",
+      "args": {
+        "hypothesis": "H1",
+        "rationale": "Cite enabled LIVE yet silent as stall proof",
+        "source": {
+          "callId": "call_ae8c14b2-8b24-4e60-b960-2b0f4947fdc0",
+          "field": "enabled",
+          "value": true
+        },
+        "stance": "supports",
+        "why": "Instance enabled true but no heartbeats for 3+ intervals, scheduler stalled not disabled"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_07409528-1c99-4f09-84cb-73621135a2bf",
+        "result": {
+          "ok": true,
+          "id": "E2",
+          "remaining": [
+            "H2",
+            "H3"
+          ]
+        }
+      },
+      "usage": {
+        "input_tokens": 16190,
+        "output_tokens": 212,
+        "cached_tokens": 15473,
+        "reasoning_tokens": 13
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 13,
+      "items": [
+        {
+          "arguments": "{\"hypothesis\":\"H3\",\"rationale\":\"Cite siblings healthy to refute fleet-wide outage\",\"source\":{\"callId\":\"call_d369cd0c-b73f-4c0a-807c-e54b8add861e\",\"field\":\"deployments.alert-ingestion/bravo.lastHeartbeatAt\",\"value\":\"2026-10-29T14:33:00Z\"},\"stance\":\"refutes\",\"why\":\"Sibling bravo heartbeat at 14:33 healthy while alpha stuck at 14:30, not fleet-wide\"}",
+          "call_id": "call_6f44a0a9-ea5d-4a0e-8ec3-1827063ad310",
+          "name": "record_evidence",
+          "type": "function_call",
+          "id": "fc_6f44a0a9-ea5d-4a0e-8ec3-1827063ad310",
+          "status": "completed"
+        }
+      ],
+      "tool": "record_evidence",
+      "args": {
+        "hypothesis": "H3",
+        "rationale": "Cite siblings healthy to refute fleet-wide outage",
+        "source": {
+          "callId": "call_d369cd0c-b73f-4c0a-807c-e54b8add861e",
+          "field": "deployments.alert-ingestion/bravo.lastHeartbeatAt",
+          "value": "2026-10-29T14:33:00Z"
+        },
+        "stance": "refutes",
+        "why": "Sibling bravo heartbeat at 14:33 healthy while alpha stuck at 14:30, not fleet-wide"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_6f44a0a9-ea5d-4a0e-8ec3-1827063ad310",
+        "result": {
+          "ok": true,
+          "id": "E3",
+          "remaining": [
+            "H2"
+          ]
+        }
+      },
+      "usage": {
+        "input_tokens": 16483,
+        "output_tokens": 198,
+        "cached_tokens": 16113,
+        "reasoning_tokens": 0
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 14,
+      "items": [
+        {
+          "arguments": "{\"hypothesis\":\"H2\",\"rationale\":\"Cite successful connectivity to refute credential failure\",\"source\":{\"callId\":\"call_450fa1af-afb2-40b1-801a-dbbb3f9c7540\",\"field\":\"successful\",\"value\":true},\"stance\":\"refutes\",\"why\":\"Integration test succeeded, credentials valid, no auth failure\"}",
+          "call_id": "call_5d7a45e4-47dc-45ff-9b2b-568d5dfa6559",
+          "name": "record_evidence",
+          "type": "function_call",
+          "id": "fc_5d7a45e4-47dc-45ff-9b2b-568d5dfa6559",
+          "status": "completed"
+        }
+      ],
+      "tool": "record_evidence",
+      "args": {
+        "hypothesis": "H2",
+        "rationale": "Cite successful connectivity to refute credential failure",
+        "source": {
+          "callId": "call_450fa1af-afb2-40b1-801a-dbbb3f9c7540",
+          "field": "successful",
+          "value": true
+        },
+        "stance": "refutes",
+        "why": "Integration test succeeded, credentials valid, no auth failure"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_5d7a45e4-47dc-45ff-9b2b-568d5dfa6559",
+        "result": {
+          "ok": true,
+          "id": "E4",
+          "remaining": []
+        }
+      },
+      "usage": {
+        "input_tokens": 16763,
+        "output_tokens": 161,
+        "cached_tokens": 16369,
+        "reasoning_tokens": 0
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 15,
+      "items": [
+        {
+          "id": "rs_6ae69d55f5e9991d2a6b4850:rs_2ea22d42-de52-4952-bdc1-d1eeaa05393e",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"diagnosis\":{\"action\":{\"method\":\"connectorInstances.restart\",\"patch\":{},\"resource\":\"projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel\",\"type\":\"propose\",\"updateMask\":[]},\"category\":\"connector_stalled\",\"component\":\"connector\",\"confidence\":\"high\",\"deployment\":\"alert-ingestion/alpha\",\"evidence\":[\"E1\",\"E2\"],\"expectedVerification\":{\"condition\":\"recovers_within\",\"seconds\":300,\"tripwire\":\"dead-connector\"},\"hypothesis\":\"H1\",\"incidentId\":\"inc-alert-ingestion-alpha-dead-connector-20261029T143315Z\",\"rollback\":\"No config changed; if issue recurs re-investigate, restart can be repeated with no state to revert\",\"summary\":\"Alpha connector stalled after 14:30 with no further heartbeats while enabled LIVE; siblings healthy and credentials valid, indicating tenant scheduler stall needing restart\"},\"rationale\":\"Submit stalled connector restart with tenant-specific evidence\"}",
+          "call_id": "call_7d7f971f-de51-4210-8452-018deb4efa1a",
+          "name": "submit_diagnosis",
+          "type": "function_call",
+          "id": "fc_7d7f971f-de51-4210-8452-018deb4efa1a",
+          "status": "completed"
+        }
+      ],
+      "tool": "submit_diagnosis",
+      "args": {
+        "diagnosis": {
+          "action": {
+            "method": "connectorInstances.restart",
+            "patch": {},
+            "resource": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel",
+            "type": "propose",
+            "updateMask": []
+          },
+          "category": "connector_stalled",
+          "component": "connector",
+          "confidence": "high",
+          "deployment": "alert-ingestion/alpha",
+          "evidence": [
+            "E1",
+            "E2"
+          ],
+          "expectedVerification": {
+            "condition": "recovers_within",
+            "seconds": 300,
+            "tripwire": "dead-connector"
+          },
+          "hypothesis": "H1",
+          "incidentId": "inc-alert-ingestion-alpha-dead-connector-20261029T143315Z",
+          "rollback": "No config changed; if issue recurs re-investigate, restart can be repeated with no state to revert",
+          "summary": "Alpha connector stalled after 14:30 with no further heartbeats while enabled LIVE; siblings healthy and credentials valid, indicating tenant scheduler stall needing restart"
+        },
+        "rationale": "Submit stalled connector restart with tenant-specific evidence"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_7d7f971f-de51-4210-8452-018deb4efa1a",
+        "result": {
+          "ok": true,
+          "status": "accepted",
+          "action": "propose"
+        }
+      },
+      "usage": {
+        "input_tokens": 17003,
+        "output_tokens": 618,
+        "cached_tokens": 14961,
+        "reasoning_tokens": 309
+      },
+      "cost_usd": 0.0
+    }
+  ],
+  "diagnosis": {
+    "action": {
+      "method": "connectorInstances.restart",
+      "patch": {},
+      "resource": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel",
+      "type": "propose",
+      "updateMask": []
+    },
+    "category": "connector_stalled",
+    "component": "connector",
+    "confidence": "high",
+    "deployment": "alert-ingestion/alpha",
+    "evidence": [
+      "E1",
+      "E2"
+    ],
+    "expectedVerification": {
+      "condition": "recovers_within",
+      "seconds": 300,
+      "tripwire": "dead-connector"
+    },
+    "hypothesis": "H1",
+    "incidentId": "inc-alert-ingestion-alpha-dead-connector-20261029T143315Z",
+    "rollback": "No config changed; if issue recurs re-investigate, restart can be repeated with no state to revert",
+    "summary": "Alpha connector stalled after 14:30 with no further heartbeats while enabled LIVE; siblings healthy and credentials valid, indicating tenant scheduler stall needing restart"
+  }
+}
