@@ -1,4 +1,4 @@
-"""Approval records (d6a-pins 2). Stub: behavior raises."""
+"""Approval records (d6a-pins 2). Records only; moves no incident."""
 
 from datetime import datetime
 from typing import Any
@@ -27,12 +27,24 @@ class ApprovalStore:
     """Records approvals/rejections only; moves no incident (pin 2)."""
 
     def __init__(self, clock: Any) -> None:
-        raise NotImplementedError
+        self._clock = clock
+        self._records: list[Approval | Rejection] = []
+        self._approvals = 0
+        self._rejections = 0
 
     def approve(
         self, incident_id: str, proposal_hash: str, approver: str
     ) -> Approval:
-        raise NotImplementedError
+        self._approvals += 1
+        record = Approval(
+            id=f"A{self._approvals}",
+            incident_id=incident_id,
+            proposal_hash=proposal_hash,
+            approver=approver,
+            at=self._clock.now(),
+        )
+        self._records.append(record)
+        return record
 
     def reject(
         self,
@@ -41,10 +53,29 @@ class ApprovalStore:
         approver: str,
         notes: str,
     ) -> Rejection:
-        raise NotImplementedError
+        if not notes or not notes.strip():
+            raise ValueError("rejection notes must not be empty")
+        self._rejections += 1
+        record = Rejection(
+            id=f"R{self._rejections}",
+            incident_id=incident_id,
+            proposal_hash=proposal_hash,
+            approver=approver,
+            notes=notes,
+            at=self._clock.now(),
+        )
+        self._records.append(record)
+        return record
 
     def approval_for(self, proposal_hash: str) -> Approval | None:
-        raise NotImplementedError
+        found: Approval | None = None
+        for record in self._records:
+            if (
+                isinstance(record, Approval)
+                and record.proposal_hash == proposal_hash
+            ):
+                found = record
+        return found
 
     def records(self) -> list[Any]:
-        raise NotImplementedError
+        return list(self._records)
