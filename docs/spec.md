@@ -16,17 +16,19 @@ Revised 2026-10-31 after D4: boundary and recovery rules for each tripwire type,
 
 Revised 2026-10-31 (night) after D5: budgets, stuck detection, refusal rule codes, the tightened category rules and the `propose` resource rule as built (§6); measured cost (§8); live result (§12). Detail in `docs/d5-pins.md`.
 
+Revised 2026-11-01 before D6: re-plan (§9). All four cuts are taken; D6 splits into D6a (fix loop) and D6b (authoring); the postmortem is built from the incident record, not by a model (§3, §8); there is no live instance (§10). D6a detail in `docs/d6a-pins.md`.
+
 ---
 
 ## 1. Summary
 
-Fleet SRE is an agentic site reliability engineer for MSSPs running multi-tenant Google SecOps SOAR. It writes each service's monitoring contract, investigates when a tripwire fires, proposes a fix for a human to approve, and amends the contract when an incident exposes a gap. The platform underneath exists only to give it safe tools and deterministic checks.
+Fleet SRE is an agentic site reliability engineer for MSSPs running multi-tenant Google SecOps SOAR. It writes each service's monitoring contract, investigates when a tripwire fires and proposes a fix for a human to approve. The platform underneath exists only to give it safe tools and deterministic checks.
 
 - **Problem.** An MSSP runs many tenants (SOAR environments) across many services in one instance. Connectors fail silently, a `LIVE` status can sit on a connector that ingests nothing, and each tenant's monitoring depends on who onboarded it.
-- **What the SRE does.** Authors one contract per service version, investigates incidents with read-only tools, proposes allowlisted actions, writes the postmortem and drafts contract amendments.
+- **What the SRE does.** Authors one contract per service version, investigates incidents with read-only tools and proposes allowlisted actions. The platform writes the postmortem from the incident record. Drafting contract amendments is designed but cut (§9).
 - **Why it can be trusted.** It isn't. Deterministic code grades every output: contracts by a chaos scorecard, evidence when it is recorded, diagnoses when they are submitted, fixes by tripwires.
-- **Fleet leverage.** Amendments land on the service contract, so one tenant's incident hardens every tenant on that service.
-- **Built on.** A local-first Python system with a mock SecOps built against Google's published Chronicle API and SOAR log format, deployed to a personal GCP project (Cloud Logging, Pub/Sub, IAM, Cloud Run, Firestore).
+- **Fleet leverage.** Amendments land on the service contract, so one tenant's incident hardens every tenant on that service. (Designed; the amendment step is cut, §9.)
+- **Built on.** A local-first Python system with a mock SecOps built against Google's published Chronicle API and SOAR log format, with Cloud Logging and IAM on a personal GCP project (Pub/Sub, Cloud Run and Firestore are cut, §9).
 - **Entry.** Meta Global AI Developer Hackathon, Indie track, "Build for Your World" theme. Submission due 2026-11-04 at 9:00 PM ET.
 
 ## 2. Design principles
@@ -45,7 +47,7 @@ Field lessons that shape the tripwires: absence-only detection cannot tell quiet
 
 ## 3. The SRE loop
 
-The model acts at three points (author, investigate, close). Deterministic code grades each output before anything changes; inside an investigation, the gates sit in the tools (§6.1).
+The model acts at two points (author, investigate); closing is deterministic (step 7). Deterministic code grades each output before anything changes; inside an investigation, the gates sit in the tools (§6.1).
 
 ```mermaid
 flowchart LR
@@ -60,8 +62,8 @@ flowchart LR
   G -- "approved" --> H["Apply fix (deployer identity)"] --> I{"Verified?"}
   F -- "no action: verify recovery" --> I
   I -- "no: retry, max 2, then escalate" --> F
-  I -- "yes" --> J["Close incident (SRE postmortem)"]
-  J -- "gap found: amend" --> A
+  I -- "yes" --> J["Close incident (postmortem)"]
+  J -. "gap found: amend (cut)" .-> A
 ```
 
 1. **Author.** Given a service brief, sample logs and parameters, the SRE drafts a contract. The harness scores it; the SRE revises against the scorecard (max 3 revisions); a human approves.
@@ -70,7 +72,7 @@ flowchart LR
 4. **Hand off.** An escalation, or an investigation that hits a limit, pauses the incident at NEEDS_INPUT. No model calls are made while it waits. It resumes the same session only when something changed: a human replied, more turns were granted, or the incident's tripwire state changed (for example, a credential was rotated outside the platform).
 5. **Approve and apply.** A human sees hypotheses, evidence and the patch diff, and approves or rejects with notes; notes go back to the SRE as its next message. On approval the executor journals its intent, then applies the change under the deployer identity.
 6. **Verify.** A change-point window tightens checks on that component. The diagnosis states the expected outcome; the tripwires decide. Failure returns to investigation at most twice, then escalates.
-7. **Close and learn.** The SRE writes a postmortem. If the incident exposed a gap (a late or missing trip), it drafts an amendment, which goes back through the scorecard and approval and then applies to every deployment of that service.
+7. **Close and learn.** The platform writes the postmortem from the incident record: timeline, pauses and what resumed them, category, action and transcripts. Amendment (the SRE drafts a contract change after a late or missing trip; it is rescored, approved and applied to every deployment of the service) is designed but cut (§9).
 
 ## 4. The platform
 
@@ -95,6 +97,8 @@ flowchart LR
 The local log format is Cloud Logging's `LogEntry` JSON (see `mocks.md` §5), so fixtures, local replay and Cloud Logging share one structure.
 
 ### 4.3 Runtime (deployed)
+
+Designed, not deployed: the re-plan (§9) keeps Cloud Logging and IAM only.
 
 ```mermaid
 flowchart LR
@@ -318,7 +322,7 @@ One gateway, per-role config. Assignments are provisional until the D2 spike and
 | --- | --- | --- | --- |
 | Author / amend contracts | Rare | Muse Wonder via Meta Model API (model ID to confirm on the dashboard) | `high` |
 | Investigate / propose | Per incident | `muse-spark-1.3` via Meta Model API | `medium` |
-| Postmortem | Per closed incident | `muse-spark-1.3` | `low` |
+| Postmortem | — | None: built from the incident record (D6a) | — |
 | Fallback | On rate limits | Muse Spark Open from a partner, if credits arrive: Baseten `meta-models/muse-spark-open` (base URL `https://inference.baseten.co/v1`) or Fireworks `accounts/fireworks/models/muse-spark-open` | `medium` |
 | Building the project | Throughout | Muse Code | — |
 
@@ -326,7 +330,7 @@ One gateway, per-role config. Assignments are provisional until the D2 spike and
 
 - **Endpoint and key.** Base URL `https://api.meta.ai/v1`. The key lives in `MODEL_API_KEY` and is passed explicitly; the OpenAI SDK does not read that variable on its own.
 - **Investigation loop.** Responses API with `store=False` and the full history sent every turn, `include=["reasoning.encrypted_content"]` so reasoning is replayed between turns, `parallel_tool_calls=False`, and `reasoning={"effort": ...}` per role. Effort levels: `none` < `minimal` < `low` < `medium` < `high` (`xhigh` is the same as `high`).
-- **JSON outside tools** (authoring, postmortem). On the Responses API use `text.format` with a JSON schema; `response_format` returns HTTP 400 there. A recursive `$ref` also returns 400, so the schema given to the authoring model must be flattened.
+- **JSON outside tools** (authoring). On the Responses API use `text.format` with a JSON schema; `response_format` returns HTTP 400 there. A recursive `$ref` also returns 400, so the schema given to the authoring model must be flattened.
 - **Prompt caching.** Keep the stable prefix first (system prompt, tool specs, contract) and record `usage.input_tokens_details.cached_tokens` and `usage.output_tokens_details.reasoning_tokens` in the transcript (field names confirmed in D2).
 - **Cost.** Muse Spark is billed against the $150 credit on this account (D2: about $0.08 per investigation at ~120k input tokens, ~70% cached; D5: at most about $0.10 per investigation at ~130k input tokens, ~74% cached). Baseten, Modal and Fireworks each offer $100 to select participants for open-weights models.
 
@@ -340,14 +344,15 @@ Two merges per deliverable: a tests PR, then an implementation PR. Details and f
 | --- | --- |
 | Wed Oct 28 | D0 scaffold and guardrails · D1 contracts, log contract, scenarios (human) · D2 SRE feasibility spike |
 | Thu Oct 29 | D3 mock SecOps (local) · D4 evaluator and chaos harness |
-| Fri Oct 30 | D5 SRE investigator |
-| Sat Oct 31 | D6 fix loop, authoring, amendment |
-| Sun Nov 1 | D7 GCP adapters and IAM |
-| Mon Nov 2 | D8 UI, live chaos loop, deploy |
-| Tue Nov 3 | Feature freeze, README, video |
-| Wed Nov 4 | Submit by 9:00 PM ET |
+| Fri Oct 30 – Sat Oct 31 | D5 SRE investigator |
+| Sun Nov 1 | D6a fix loop |
+| Mon Nov 2 | D6b authoring · D7 Cloud Logging and IAM |
+| Tue Nov 3 | D8 minimal UI, `make demo`, README |
+| Wed Nov 4 | Video; submit by 18:00 (deadline 9:00 PM ET) |
 
 **Cut order if a day slips:** (1) second service in the video, (2) UI polish, including step mode, (3) public chaos loop, (4) amendment step. Never cut the investigation loop and its gates, the authoring scorecard loop or the Green Liar beat.
+
+**Applied 2026-11-01.** All four cuts are taken: `intel-sync` stays out of the video; UI polish and step mode go; the public chaos loop and the live instance go (`make demo` and the video carry the demo); the amendment step goes. D7 shrinks to Cloud Logging and the IAM air gap, and D8 to the grid, incident view, turn timeline, handoff card, approve and reject, `make demo` and the README (`deliverables.md` §D7, §D8). D6 splits into D6a (fix loop) and D6b (authoring), each a tests/implementation pair. If D6a is not merged by Mon Nov 2 18:00, D7 is dropped.
 
 ## 10. Demo (3:00 max)
 
@@ -356,12 +361,12 @@ Two merges per deliverable: a tests PR, then an implementation PR. Details and f
 | 0:00–0:20 | The MSSP problem: tenants × services, silent failures, `LIVE` while nothing arrives |
 | 0:20–0:50 | SRE authors a contract; scorecard fails a scenario; it revises and passes, including held-out scenarios it never saw; human approves |
 | 0:50–1:05 | Fleet grid: two services, three tenants, one low-volume, all green |
-| 1:05–2:15 | Stall trips cadence while the quiet tenant stays green. Credential Green Liar trips errorSignature and canary; the timeline shows each turn's rationale, tool call and gate verdict: hypotheses (credential versus fleet-wide), `compare_siblings`, `test_integration_instance`, escalation. The incident waits with no model calls; "mark rotated"; the same incident resumes and the tripwires confirm recovery. Severity drift trips schema; SRE proposes a parameter patch; approval; tripwires confirm recovery |
-| 2:15–2:30 | SRE drafts an amendment; rescored, approved, applied to every tenant |
+| 1:05–2:15 | Stall trips cadence while the quiet tenant stays green. Credential Green Liar trips errorSignature and canary; the timeline shows each turn's rationale, tool call and gate verdict: hypotheses (credential versus fleet-wide), `compare_siblings`, `test_integration_instance`, escalation. The incident waits with no model calls; "mark rotated"; the same incident resumes and the tripwires confirm recovery. Severity drift trips schema; SRE proposes a parameter patch |
+| 2:15–2:30 | Reject with notes on the severity-drift proposal: both F3 recordings set `Unknown Severity Priority` to `-1`, so `Critical` would become Informational. The human rejects with "unknown severities should map to 100"; the SRE revises in the same session; approval; tripwires confirm recovery |
 | 2:30–2:50 | Checks off versus on: the same live runs with gates off, and how many bad submissions the gates refused. Architecture; IAM tests showing reader and SRE get 403s |
-| 2:50–3:00 | What was built during the hackathon; repo and live link |
+| 2:50–3:00 | What was built during the hackathon; repo link |
 
-Live instance: Cloud Run, scheduled chaos loop, no public fault buttons, no public approvals, capped model calls. So that the public page shows recoveries unattended, a demo auto-approver stands in for the human on chaos-loop incidents, and when an F2 incident reaches NEEDS_INPUT the chaos loop clears the fault. Every such action is labelled as a demo action ("demo auto-approval", "demo: credential rotated").
+No live instance (cut 2026-11-01, §9): the demo is recorded from `make demo`.
 
 ## 11. Hackathon compliance
 
@@ -383,9 +388,8 @@ Live instance: Cloud Run, scheduled chaos loop, no public fault buttons, no publ
 | SRE wanders or fabricates evidence | Budgets, stuck detection, evidence checked when recorded, category evidence rules |
 | The model does not follow the gated protocol (one call per turn, hypotheses first) | D2 passed with the full protocol (`spikes/RESULTS.md`); the D5 live eval scored 18/18 (`evals/d5-2026-11-01.json`). If a later model fails it, fallback order: drop `update_plan`; then drop `set_hypotheses` (rule 3 of §6.5 becomes report-only); then pre-computed evidence in the incident |
 | Authoring fits the visible scenarios | Held-out scenarios (§5.1) |
-| Live instance abuse or cost | Public mode, caps |
 
-Open: partner credits for the fallback; Muse Wonder's model ID; model per role after evals; escalation channel (UI only or email); whether `intel-sync` appears in the video.
+Open: partner credits for the fallback; Muse Wonder's model ID; model per role after evals; escalation channel (UI only or email).
 
 ## Sources
 
