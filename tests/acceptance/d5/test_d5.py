@@ -1476,8 +1476,9 @@ def test_d5_t19_live_eval():
             refusals: dict = {}
             for record in transcript:
                 if record.get("verdict") == "refused":
-                    gate = record.get("tool", "unknown")
-                    refusals[gate] = refusals.get(gate, 0) + 1
+                    for problem in record.get("problems") or ["?: none"]:
+                        rule = str(problem).split(":", 1)[0]
+                        refusals[rule] = refusals.get(rule, 0) + 1
             called = sorted({
                 r.get("tool") for r in transcript if r.get("tool")
             })
@@ -1573,9 +1574,17 @@ def test_d5_t20_reported_not_gating():
         transcript = store.transcript(result.transcript_id)
         by_gate: dict = {}
         for record in transcript:
-            if record.get("verdict") == "wouldRefuse":
-                gate = record.get("tool", "unknown")
-                by_gate[gate] = by_gate.get(gate, 0) + 1
+            if record.get("verdict") in ("wouldRefuse", "refused"):
+                key = ("" if record.get("verdict") == "wouldRefuse"
+                       else "refused:")
+                for problem in record.get("problems") or ["?: none"]:
+                    rule = key + str(problem).split(":", 1)[0]
+                    by_gate[rule] = by_gate.get(rule, 0) + 1
+        by_gate["_run"] = {
+            "status": result.status, "reason": result.reason,
+            "turns": result.turns,
+            "category": (result.diagnosis or {}).get("category"),
+        }
         off_counts[fault] = by_gate
     data["gates_off_would_refuse"] = off_counts
     eval_path.write_text(json.dumps(data, indent=2) + "\n")
