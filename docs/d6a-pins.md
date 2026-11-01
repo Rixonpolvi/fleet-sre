@@ -134,8 +134,9 @@ Interfaces and semantics for D6a, the fix loop: `deliverables.md` Â§D6 rows T1â€
 
 13. **Resuming on a tripwire change.**
     - On each tick, a NEEDS_INPUT incident compares `{tw: evaluator.status()[deployment][tw] for tw in tripwires}` with `paused_snapshot`.
-    - Any difference resumes it in the same tick: `Pending("resume", message=<pin 21>, trigger="tripwire")`, run as in pin 11. A tripwire attached after the pause counts as a difference (`none -> tripped`).
-    - No difference means no model call.
+    - It resumes, in the same tick, only when a tripwire that was `tripped` in `paused_snapshot` is now `ok`: `Pending("resume", message=<pin 21>, trigger="tripwire")`, run as in pin 11.
+    - A trip while paused (a new tripwire attached, or an `ok` one tripping) only adds an `attached` event. It does not resume, and `paused_snapshot` is not updated. The next resume message lists it under `changes` (`none -> tripped` for a newly attached tripwire).
+    - Anything else means no model call. (Amended 2026-11-01 after the Session A pre-flight: F2's canary trips about 5 minutes after the pause, and resuming on it cost a model call and broke T7's one-hour quiet window.)
 
 14. **Approve, reject, apply.**
     - **`approve(id, hash, by)`:**
