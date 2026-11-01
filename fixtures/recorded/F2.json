@@ -1,0 +1,1425 @@
+{
+  "fault": "F2",
+  "seed": 103,
+  "t0": "2026-10-29T14:00:00Z",
+  "faults": [
+    {
+      "at": 1830,
+      "type": "credential_expiry",
+      "environment": "bravo",
+      "params": {}
+    }
+  ],
+  "incident": {
+    "id": "inc-alert-ingestion-bravo-connector-errors-20261029T143800Z",
+    "deployment": "alert-ingestion/bravo",
+    "tripwire": "connector-errors",
+    "opened_at": "2026-10-29T14:38:00Z",
+    "trip_event": {
+      "kind": "trip",
+      "deployment": "alert-ingestion/bravo",
+      "tripwire": "connector-errors",
+      "at": "2026-10-29T14:38:00+00:00",
+      "reason": "8 of last 10 runs at WARNING or worse",
+      "evidence": [
+        "9bcd6cb1-00000146",
+        "bbd23e2e-00000152",
+        "7e1ba1cf-0000015d",
+        "55d4e3f6-00000168",
+        "263f2491-00000176",
+        "1531fb9b-00000181",
+        "5540b5ab-0000018a",
+        "cd8e93b5-00000194"
+      ]
+    },
+    "service": "alert-ingestion",
+    "component": "connector",
+    "resources": {
+      "connector": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel",
+      "integrationInstance": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/integrationInstances/bravo"
+    },
+    "siblings": [
+      "alert-ingestion/alpha",
+      "alert-ingestion/canary",
+      "alert-ingestion/charlie"
+    ]
+  },
+  "responses": [
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d341ebe8299e290487e:rs_ba0363f8-4c6e-4e80-b461-c980fd4c2930",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "id": "rs_8e20dfb8-00c2-4196-99bf-5338c53007cb",
+          "content": [
+            {
+              "annotations": [],
+              "text": "Fixing on failure patterns \u2014 setting competing explanations first.",
+              "type": "output_text",
+              "logprobs": []
+            }
+          ],
+          "role": "assistant",
+          "status": "completed",
+          "type": "message",
+          "phase": "commentary"
+        },
+        {
+          "arguments": "{\"items\":[{\"id\":\"H1\",\"statement\":\"Connector credential for bravo integration instance is invalid or expired causing auth failures\",\"wouldConfirm\":\"WARNING+ logs show auth/credential errors and integration test fails\"},{\"alternative\":true,\"id\":\"H2\",\"statement\":\"Upstream MockSentinel API is failing fleet-wide affecting all sibling deployments\",\"wouldConfirm\":\"Siblings show same error signature at same time\"},{\"id\":\"H3\",\"statement\":\"Bravo connector instance is misbehaving/stalled needing restart despite config being valid\",\"wouldConfirm\":\"Logs show timeouts/internal errors but credential test succeeds and siblings healthy\"}],\"rationale\":\"Set competing hypotheses: credential vs fleet-wide vs instance fault\"}",
+          "call_id": "call_babbefb5-63eb-4d2f-906d-f8c3efc57f2f",
+          "name": "set_hypotheses",
+          "type": "function_call",
+          "id": "fc_babbefb5-63eb-4d2f-906d-f8c3efc57f2f",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 5790,
+        "input_tokens_details": {
+          "cached_tokens": 5745
+        },
+        "output_tokens": 347,
+        "output_tokens_details": {
+          "reasoning_tokens": 113
+        },
+        "total_tokens": 6137
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d35d3050c359d724fc3:rs_27223924-d112-4c7d-927f-6f6a2f134f1e",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"items\":[{\"alternative\":false,\"id\":\"H1\",\"statement\":\"Connector credential for bravo integration instance is invalid or expired causing auth failures\",\"wouldConfirm\":\"WARNING+ logs show auth/credential errors and integration test fails\"},{\"alternative\":true,\"id\":\"H2\",\"statement\":\"Upstream MockSentinel API is failing fleet-wide affecting all sibling deployments\",\"wouldConfirm\":\"Siblings show same error signature at same time\"},{\"alternative\":false,\"id\":\"H3\",\"statement\":\"Bravo connector instance is misbehaving/stalled needing restart despite config being valid\",\"wouldConfirm\":\"Logs show timeouts/internal errors but credential test succeeds and siblings healthy\"}],\"rationale\":\"Set competing hypotheses: credential vs fleet-wide vs instance fault\"}",
+          "call_id": "call_168f3809-da76-4447-9fed-8e4dc257c2da",
+          "name": "set_hypotheses",
+          "type": "function_call",
+          "id": "fc_168f3809-da76-4447-9fed-8e4dc257c2da",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 6230,
+        "input_tokens_details": {
+          "cached_tokens": 5745
+        },
+        "output_tokens": 247,
+        "output_tokens_details": {
+          "reasoning_tokens": 22
+        },
+        "total_tokens": 6477
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d36a475c12a94924aeb:rs_6eb70adf-d18f-4a44-b0a3-becad51050cb",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"plan\":[{\"hypothesis\":\"H1\",\"steps\":\"query bravo connector WARNING+ logs; test integration instance\"},{\"hypothesis\":\"H2\",\"steps\":\"compare siblings connector errors across fleet\"},{\"hypothesis\":\"H3\",\"steps\":\"get connector resource status and check run behavior\"}],\"rationale\":\"Plan to test credential, fleet-wide, and instance hypotheses\"}",
+          "call_id": "call_50131654-1efe-4138-95c6-ca99d75b86f9",
+          "name": "update_plan",
+          "type": "function_call",
+          "id": "fc_50131654-1efe-4138-95c6-ca99d75b86f9",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 6547,
+        "input_tokens_details": {
+          "cached_tokens": 5745
+        },
+        "output_tokens": 160,
+        "output_tokens_details": {
+          "reasoning_tokens": 22
+        },
+        "total_tokens": 6707
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d37176018aefcd44829:rs_b133c0b5-763f-48dd-a76e-97157d616a7b",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "id": "rs_51a83779-faf6-44d2-b9b5-3301a13bf66b",
+          "content": [
+            {
+              "annotations": [],
+              "text": "Hypotheses framed \u2014 now inspecting this tenant's error logs.",
+              "type": "output_text",
+              "logprobs": []
+            }
+          ],
+          "role": "assistant",
+          "status": "completed",
+          "type": "message",
+          "phase": "commentary"
+        },
+        {
+          "arguments": "{\"deployment\":\"alert-ingestion/bravo\",\"filter\":{\"component\":\"connector\",\"minSeverity\":\"WARNING\"},\"rationale\":\"See WARNING+ connector logs for bravo to identify error type\",\"window\":{\"lastMinutes\":360}}",
+          "call_id": "call_506aa402-f1c9-4750-972e-d06b7a37aba1",
+          "name": "query_logs",
+          "type": "function_call",
+          "id": "fc_506aa402-f1c9-4750-972e-d06b7a37aba1",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 6767,
+        "input_tokens_details": {
+          "cached_tokens": 6513
+        },
+        "output_tokens": 158,
+        "output_tokens_details": {
+          "reasoning_tokens": 11
+        },
+        "total_tokens": 6925
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d38fc88e8ca4df944f7:rs_117e72dd-db12-43b4-ac4e-bcd679610611",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"component\":\"connector\",\"rationale\":\"Check if siblings also have 401 errors or only bravo\",\"service\":\"alert-ingestion\",\"window\":{\"lastMinutes\":360}}",
+          "call_id": "call_31ccb94e-0a1b-42bd-a619-1f30337d9f75",
+          "name": "compare_siblings",
+          "type": "function_call",
+          "id": "fc_31ccb94e-0a1b-42bd-a619-1f30337d9f75",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 8066,
+        "input_tokens_details": {
+          "cached_tokens": 5745
+        },
+        "output_tokens": 146,
+        "output_tokens_details": {
+          "reasoning_tokens": 33
+        },
+        "total_tokens": 8212
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d3960c28b29291944e0:rs_19be5c9f-a4f3-4efd-b205-a7d425b763cd",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"name\":\"projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/integrationInstances/bravo\",\"rationale\":\"Verify credential is invalid for bravo instance\"}",
+          "call_id": "call_f91d71c6-c871-488c-a0c3-fc6448f080ae",
+          "name": "test_integration_instance",
+          "type": "function_call",
+          "id": "fc_f91d71c6-c871-488c-a0c3-fc6448f080ae",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 8659,
+        "input_tokens_details": {
+          "cached_tokens": 8049
+        },
+        "output_tokens": 151,
+        "output_tokens_details": {
+          "reasoning_tokens": 49
+        },
+        "total_tokens": 8810
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d3bdd53f3c07cee46eb:rs_943c8c2b-8aad-4cdb-a9a6-51054cc201fb",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "id": "rs_b7ee9434-09d5-4f53-b1bd-6713f98fedd6",
+          "content": [
+            {
+              "annotations": [],
+              "text": "Tenant-specific auth failures confirmed \u2014 gathering evidence to rule out wider causes.",
+              "type": "output_text",
+              "logprobs": []
+            }
+          ],
+          "role": "assistant",
+          "status": "completed",
+          "type": "message",
+          "phase": "commentary"
+        },
+        {
+          "arguments": "{\"hypothesis\":\"H1\",\"rationale\":\"401 auth log supports credential failure\",\"source\":{\"insertId\":\"cd8e93b5-00000194\"},\"stance\":\"supports\",\"why\":\"Bravo connector WARNING shows 401 Unauthorized authenticating to Sentinel workspace\"}",
+          "call_id": "call_09ad848e-a06c-4db7-8f1f-8537b4396552",
+          "name": "record_evidence",
+          "type": "function_call",
+          "id": "fc_09ad848e-a06c-4db7-8f1f-8537b4396552",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 8887,
+        "input_tokens_details": {
+          "cached_tokens": 6129
+        },
+        "output_tokens": 495,
+        "output_tokens_details": {
+          "reasoning_tokens": 330
+        },
+        "total_tokens": 9382
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d3c21d2d06b836e4989:rs_3aa31280-d14a-431e-9057-fee9702464db",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"hypothesis\":\"H1\",\"rationale\":\"Failed connectivity test confirms credential invalid\",\"source\":{\"callId\":\"call_f91d71c6-c871-488c-a0c3-fc6448f080ae\",\"field\":\"successful\",\"value\":false},\"stance\":\"supports\",\"why\":\"Integration test for bravo instance failed with 401, confirming stored credential rejected\"}",
+          "call_id": "call_c7f37156-37f5-4e4f-848c-395d30ae7f5e",
+          "name": "record_evidence",
+          "type": "function_call",
+          "id": "fc_c7f37156-37f5-4e4f-848c-395d30ae7f5e",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 9465,
+        "input_tokens_details": {
+          "cached_tokens": 8817
+        },
+        "output_tokens": 176,
+        "output_tokens_details": {
+          "reasoning_tokens": 8
+        },
+        "total_tokens": 9641
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d3df40732675e004a74:rs_eea78c8b-b762-48ae-a344-347e72083238",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"hypothesis\":\"H2\",\"rationale\":\"Siblings healthy refutes fleet-wide outage\",\"source\":{\"callId\":\"call_31ccb94e-0a1b-42bd-a619-1f30337d9f75\",\"field\":\"deployments.alert-ingestion/alpha.warningRuns\",\"value\":0},\"stance\":\"refutes\",\"why\":\"Sibling alpha had 0 warning runs vs bravo 8, so failure is tenant-specific not fleet-wide\"}",
+          "call_id": "call_bc82ecf5-127f-44b6-b03c-b5c2af1cab0a",
+          "name": "record_evidence",
+          "type": "function_call",
+          "id": "fc_bc82ecf5-127f-44b6-b03c-b5c2af1cab0a",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 9726,
+        "input_tokens_details": {
+          "cached_tokens": 5745
+        },
+        "output_tokens": 198,
+        "output_tokens_details": {
+          "reasoning_tokens": 9
+        },
+        "total_tokens": 9924
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d3f097279edf7854ea2:rs_4dc68a1a-10dd-40bf-a0aa-f2d595d9b77f",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"name\":\"projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel\",\"rationale\":\"Check connector settings for any fixable parameter before escalate\"}",
+          "call_id": "call_b58ca1be-b269-4538-9551-d6bcb989a0a7",
+          "name": "get_resource",
+          "type": "function_call",
+          "id": "fc_b58ca1be-b269-4538-9551-d6bcb989a0a7",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 10003,
+        "input_tokens_details": {
+          "cached_tokens": 6641
+        },
+        "output_tokens": 250,
+        "output_tokens_details": {
+          "reasoning_tokens": 138
+        },
+        "total_tokens": 10253
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d41aa98e6be698d4dfd:rs_bfd4633e-d553-4304-8b41-d7baed8b2b93",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"hypothesis\":\"H3\",\"rationale\":\"Failed test refutes restart-only fix\",\"source\":{\"callId\":\"call_f91d71c6-c871-488c-a0c3-fc6448f080ae\",\"field\":\"message\",\"value\":\"Connection test failed: 401 Unauthorized\"},\"stance\":\"refutes\",\"why\":\"Credential test fails with 401, so restart will not fix; stored secret itself is rejected\"}",
+          "call_id": "call_a0b6a7af-9663-4d2c-8fd9-8881671da233",
+          "name": "record_evidence",
+          "type": "function_call",
+          "id": "fc_a0b6a7af-9663-4d2c-8fd9-8881671da233",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 10849,
+        "input_tokens_details": {
+          "cached_tokens": 9457
+        },
+        "output_tokens": 372,
+        "output_tokens_details": {
+          "reasoning_tokens": 191
+        },
+        "total_tokens": 11221
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d436366cb7d605a468f:rs_25b418c2-9d0f-4601-8c56-a8a0e3c9055a",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "id": "rs_bcb439dd-2ca8-401f-a255-3fa07f68a266",
+          "content": [
+            {
+              "annotations": [],
+              "text": "Evidence complete \u2014 submitting the diagnosis for human action.",
+              "type": "output_text",
+              "logprobs": []
+            }
+          ],
+          "role": "assistant",
+          "status": "completed",
+          "type": "message",
+          "phase": "commentary"
+        },
+        {
+          "arguments": "{\"diagnosis\":{\"action\":{\"escalationSummary\":\"Bravo connector failing 401 Unauthorized on all 8 tripped runs; integration test also 401. Siblings healthy. Human must rotate Client Secret/TenantID for bravo integration instance and verify.\",\"type\":\"escalate\"},\"category\":\"credential_failure\",\"component\":\"connector\",\"confidence\":\"high\",\"deployment\":\"alert-ingestion/bravo\",\"evidence\":[\"E1\",\"E2\",\"E3\",\"E4\"],\"hypothesis\":\"H1\",\"incidentId\":\"inc-alert-ingestion-bravo-connector-errors-20261029T143800Z\",\"summary\":\"Bravo Sentinel connector credential rejected (401) on 8/10 runs; integration test fails while siblings healthy, requiring credential rotation.\"},\"rationale\":\"Submit credential_failure escalate with 401 logs and failed test\"}",
+          "call_id": "call_e5848969-627a-48eb-ae70-c0da77dfa93e",
+          "name": "submit_diagnosis",
+          "type": "function_call",
+          "id": "fc_e5848969-627a-48eb-ae70-c0da77dfa93e",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 11298,
+        "input_tokens_details": {
+          "cached_tokens": 9969
+        },
+        "output_tokens": 476,
+        "output_tokens_details": {
+          "reasoning_tokens": 207
+        },
+        "total_tokens": 11774
+      }
+    }
+  ],
+  "transcript": [
+    {
+      "turn": 1,
+      "items": [
+        {
+          "id": "rs_6ae69d341ebe8299e290487e:rs_ba0363f8-4c6e-4e80-b461-c980fd4c2930",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "id": "rs_8e20dfb8-00c2-4196-99bf-5338c53007cb",
+          "content": [
+            {
+              "annotations": [],
+              "text": "Fixing on failure patterns \u2014 setting competing explanations first.",
+              "type": "output_text",
+              "logprobs": []
+            }
+          ],
+          "role": "assistant",
+          "status": "completed",
+          "type": "message",
+          "phase": "commentary"
+        },
+        {
+          "arguments": "{\"items\":[{\"id\":\"H1\",\"statement\":\"Connector credential for bravo integration instance is invalid or expired causing auth failures\",\"wouldConfirm\":\"WARNING+ logs show auth/credential errors and integration test fails\"},{\"alternative\":true,\"id\":\"H2\",\"statement\":\"Upstream MockSentinel API is failing fleet-wide affecting all sibling deployments\",\"wouldConfirm\":\"Siblings show same error signature at same time\"},{\"id\":\"H3\",\"statement\":\"Bravo connector instance is misbehaving/stalled needing restart despite config being valid\",\"wouldConfirm\":\"Logs show timeouts/internal errors but credential test succeeds and siblings healthy\"}],\"rationale\":\"Set competing hypotheses: credential vs fleet-wide vs instance fault\"}",
+          "call_id": "call_babbefb5-63eb-4d2f-906d-f8c3efc57f2f",
+          "name": "set_hypotheses",
+          "type": "function_call",
+          "id": "fc_babbefb5-63eb-4d2f-906d-f8c3efc57f2f",
+          "status": "completed"
+        }
+      ],
+      "tool": "set_hypotheses",
+      "args": {
+        "items": [
+          {
+            "id": "H1",
+            "statement": "Connector credential for bravo integration instance is invalid or expired causing auth failures",
+            "wouldConfirm": "WARNING+ logs show auth/credential errors and integration test fails"
+          },
+          {
+            "alternative": true,
+            "id": "H2",
+            "statement": "Upstream MockSentinel API is failing fleet-wide affecting all sibling deployments",
+            "wouldConfirm": "Siblings show same error signature at same time"
+          },
+          {
+            "id": "H3",
+            "statement": "Bravo connector instance is misbehaving/stalled needing restart despite config being valid",
+            "wouldConfirm": "Logs show timeouts/internal errors but credential test succeeds and siblings healthy"
+          }
+        ],
+        "rationale": "Set competing hypotheses: credential vs fleet-wide vs instance fault"
+      },
+      "verdict": "refused",
+      "problems": [
+        "args.schema: items.0: 'alternative' is a required property"
+      ],
+      "output": {
+        "callId": "call_babbefb5-63eb-4d2f-906d-f8c3efc57f2f",
+        "result": {
+          "error": "set_hypotheses refused",
+          "problems": [
+            "args.schema: items.0: 'alternative' is a required property"
+          ]
+        }
+      },
+      "usage": {
+        "input_tokens": 5790,
+        "output_tokens": 347,
+        "cached_tokens": 5745,
+        "reasoning_tokens": 113
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 2,
+      "items": [
+        {
+          "id": "rs_6ae69d35d3050c359d724fc3:rs_27223924-d112-4c7d-927f-6f6a2f134f1e",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"items\":[{\"alternative\":false,\"id\":\"H1\",\"statement\":\"Connector credential for bravo integration instance is invalid or expired causing auth failures\",\"wouldConfirm\":\"WARNING+ logs show auth/credential errors and integration test fails\"},{\"alternative\":true,\"id\":\"H2\",\"statement\":\"Upstream MockSentinel API is failing fleet-wide affecting all sibling deployments\",\"wouldConfirm\":\"Siblings show same error signature at same time\"},{\"alternative\":false,\"id\":\"H3\",\"statement\":\"Bravo connector instance is misbehaving/stalled needing restart despite config being valid\",\"wouldConfirm\":\"Logs show timeouts/internal errors but credential test succeeds and siblings healthy\"}],\"rationale\":\"Set competing hypotheses: credential vs fleet-wide vs instance fault\"}",
+          "call_id": "call_168f3809-da76-4447-9fed-8e4dc257c2da",
+          "name": "set_hypotheses",
+          "type": "function_call",
+          "id": "fc_168f3809-da76-4447-9fed-8e4dc257c2da",
+          "status": "completed"
+        }
+      ],
+      "tool": "set_hypotheses",
+      "args": {
+        "items": [
+          {
+            "alternative": false,
+            "id": "H1",
+            "statement": "Connector credential for bravo integration instance is invalid or expired causing auth failures",
+            "wouldConfirm": "WARNING+ logs show auth/credential errors and integration test fails"
+          },
+          {
+            "alternative": true,
+            "id": "H2",
+            "statement": "Upstream MockSentinel API is failing fleet-wide affecting all sibling deployments",
+            "wouldConfirm": "Siblings show same error signature at same time"
+          },
+          {
+            "alternative": false,
+            "id": "H3",
+            "statement": "Bravo connector instance is misbehaving/stalled needing restart despite config being valid",
+            "wouldConfirm": "Logs show timeouts/internal errors but credential test succeeds and siblings healthy"
+          }
+        ],
+        "rationale": "Set competing hypotheses: credential vs fleet-wide vs instance fault"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_168f3809-da76-4447-9fed-8e4dc257c2da",
+        "result": {
+          "ok": true,
+          "count": 3
+        }
+      },
+      "usage": {
+        "input_tokens": 6230,
+        "output_tokens": 247,
+        "cached_tokens": 5745,
+        "reasoning_tokens": 22
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 3,
+      "items": [
+        {
+          "id": "rs_6ae69d36a475c12a94924aeb:rs_6eb70adf-d18f-4a44-b0a3-becad51050cb",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"plan\":[{\"hypothesis\":\"H1\",\"steps\":\"query bravo connector WARNING+ logs; test integration instance\"},{\"hypothesis\":\"H2\",\"steps\":\"compare siblings connector errors across fleet\"},{\"hypothesis\":\"H3\",\"steps\":\"get connector resource status and check run behavior\"}],\"rationale\":\"Plan to test credential, fleet-wide, and instance hypotheses\"}",
+          "call_id": "call_50131654-1efe-4138-95c6-ca99d75b86f9",
+          "name": "update_plan",
+          "type": "function_call",
+          "id": "fc_50131654-1efe-4138-95c6-ca99d75b86f9",
+          "status": "completed"
+        }
+      ],
+      "tool": "update_plan",
+      "args": {
+        "plan": [
+          {
+            "hypothesis": "H1",
+            "steps": "query bravo connector WARNING+ logs; test integration instance"
+          },
+          {
+            "hypothesis": "H2",
+            "steps": "compare siblings connector errors across fleet"
+          },
+          {
+            "hypothesis": "H3",
+            "steps": "get connector resource status and check run behavior"
+          }
+        ],
+        "rationale": "Plan to test credential, fleet-wide, and instance hypotheses"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_50131654-1efe-4138-95c6-ca99d75b86f9",
+        "result": {
+          "ok": true
+        }
+      },
+      "usage": {
+        "input_tokens": 6547,
+        "output_tokens": 160,
+        "cached_tokens": 5745,
+        "reasoning_tokens": 22
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 4,
+      "items": [
+        {
+          "id": "rs_6ae69d37176018aefcd44829:rs_b133c0b5-763f-48dd-a76e-97157d616a7b",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "id": "rs_51a83779-faf6-44d2-b9b5-3301a13bf66b",
+          "content": [
+            {
+              "annotations": [],
+              "text": "Hypotheses framed \u2014 now inspecting this tenant's error logs.",
+              "type": "output_text",
+              "logprobs": []
+            }
+          ],
+          "role": "assistant",
+          "status": "completed",
+          "type": "message",
+          "phase": "commentary"
+        },
+        {
+          "arguments": "{\"deployment\":\"alert-ingestion/bravo\",\"filter\":{\"component\":\"connector\",\"minSeverity\":\"WARNING\"},\"rationale\":\"See WARNING+ connector logs for bravo to identify error type\",\"window\":{\"lastMinutes\":360}}",
+          "call_id": "call_506aa402-f1c9-4750-972e-d06b7a37aba1",
+          "name": "query_logs",
+          "type": "function_call",
+          "id": "fc_506aa402-f1c9-4750-972e-d06b7a37aba1",
+          "status": "completed"
+        }
+      ],
+      "tool": "query_logs",
+      "args": {
+        "deployment": "alert-ingestion/bravo",
+        "filter": {
+          "component": "connector",
+          "minSeverity": "WARNING"
+        },
+        "rationale": "See WARNING+ connector logs for bravo to identify error type",
+        "window": {
+          "lastMinutes": 360
+        }
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_506aa402-f1c9-4750-972e-d06b7a37aba1",
+        "result": {
+          "entries": [
+            {
+              "insertId": "cd8e93b5-00000194",
+              "timestamp": "2026-10-29T14:38:00Z",
+              "severity": "WARNING",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "bravo-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.warning",
+                "runId": "run-00000164",
+                "environment": "bravo",
+                "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "5540b5ab-0000018a",
+              "timestamp": "2026-10-29T14:37:00Z",
+              "severity": "WARNING",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "bravo-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.warning",
+                "runId": "run-00000160",
+                "environment": "bravo",
+                "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "1531fb9b-00000181",
+              "timestamp": "2026-10-29T14:36:00Z",
+              "severity": "WARNING",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "bravo-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.warning",
+                "runId": "run-00000156",
+                "environment": "bravo",
+                "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "263f2491-00000176",
+              "timestamp": "2026-10-29T14:35:00Z",
+              "severity": "WARNING",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "bravo-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.warning",
+                "runId": "run-00000152",
+                "environment": "bravo",
+                "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "55d4e3f6-00000168",
+              "timestamp": "2026-10-29T14:34:00Z",
+              "severity": "WARNING",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "bravo-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.warning",
+                "runId": "run-00000146",
+                "environment": "bravo",
+                "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "7e1ba1cf-0000015d",
+              "timestamp": "2026-10-29T14:33:00Z",
+              "severity": "WARNING",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "bravo-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.warning",
+                "runId": "run-00000142",
+                "environment": "bravo",
+                "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "bbd23e2e-00000152",
+              "timestamp": "2026-10-29T14:32:00Z",
+              "severity": "WARNING",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "bravo-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.warning",
+                "runId": "run-00000138",
+                "environment": "bravo",
+                "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "9bcd6cb1-00000146",
+              "timestamp": "2026-10-29T14:31:00Z",
+              "severity": "WARNING",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "bravo-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.warning",
+                "runId": "run-00000134",
+                "environment": "bravo",
+                "message": "Failed to authenticate to Sentinel workspace: 401 Unauthorized"
+              },
+              "container": "python"
+            }
+          ],
+          "total": 8,
+          "truncated": false
+        }
+      },
+      "usage": {
+        "input_tokens": 6767,
+        "output_tokens": 158,
+        "cached_tokens": 6513,
+        "reasoning_tokens": 11
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 5,
+      "items": [
+        {
+          "id": "rs_6ae69d38fc88e8ca4df944f7:rs_117e72dd-db12-43b4-ac4e-bcd679610611",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"component\":\"connector\",\"rationale\":\"Check if siblings also have 401 errors or only bravo\",\"service\":\"alert-ingestion\",\"window\":{\"lastMinutes\":360}}",
+          "call_id": "call_31ccb94e-0a1b-42bd-a619-1f30337d9f75",
+          "name": "compare_siblings",
+          "type": "function_call",
+          "id": "fc_31ccb94e-0a1b-42bd-a619-1f30337d9f75",
+          "status": "completed"
+        }
+      ],
+      "tool": "compare_siblings",
+      "args": {
+        "component": "connector",
+        "rationale": "Check if siblings also have 401 errors or only bravo",
+        "service": "alert-ingestion",
+        "window": {
+          "lastMinutes": 360
+        }
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_31ccb94e-0a1b-42bd-a619-1f30337d9f75",
+        "result": {
+          "service": "alert-ingestion",
+          "component": "connector",
+          "window": {
+            "lastMinutes": 360
+          },
+          "deployments": {
+            "alert-ingestion/alpha": {
+              "runs": 38,
+              "warningRuns": 0,
+              "errorRuns": 0,
+              "alertsIngested": 64,
+              "lastHeartbeatAt": "2026-10-29T14:38:00Z",
+              "lastHeartbeatId": "10d17cb5-00000192",
+              "worstInsertId": "1e50c629-00000190"
+            },
+            "alert-ingestion/bravo": {
+              "runs": 38,
+              "warningRuns": 8,
+              "errorRuns": 0,
+              "alertsIngested": 15,
+              "lastHeartbeatAt": "2026-10-29T14:38:00Z",
+              "lastHeartbeatId": "2fc4640e-00000195",
+              "worstInsertId": "cd8e93b5-00000194"
+            },
+            "alert-ingestion/canary": {
+              "runs": 38,
+              "warningRuns": 0,
+              "errorRuns": 0,
+              "alertsIngested": 0,
+              "lastHeartbeatAt": "2026-10-29T14:38:00Z",
+              "lastHeartbeatId": "2e52b6bf-00000199",
+              "worstInsertId": "86b2a078-00000198"
+            },
+            "alert-ingestion/charlie": {
+              "runs": 38,
+              "warningRuns": 0,
+              "errorRuns": 0,
+              "alertsIngested": 4,
+              "lastHeartbeatAt": "2026-10-29T14:38:00Z",
+              "lastHeartbeatId": "ec477cdd-00000197",
+              "worstInsertId": "ec7ab776-00000196"
+            }
+          }
+        }
+      },
+      "usage": {
+        "input_tokens": 8066,
+        "output_tokens": 146,
+        "cached_tokens": 5745,
+        "reasoning_tokens": 33
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 6,
+      "items": [
+        {
+          "id": "rs_6ae69d3960c28b29291944e0:rs_19be5c9f-a4f3-4efd-b205-a7d425b763cd",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"name\":\"projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/integrationInstances/bravo\",\"rationale\":\"Verify credential is invalid for bravo instance\"}",
+          "call_id": "call_f91d71c6-c871-488c-a0c3-fc6448f080ae",
+          "name": "test_integration_instance",
+          "type": "function_call",
+          "id": "fc_f91d71c6-c871-488c-a0c3-fc6448f080ae",
+          "status": "completed"
+        }
+      ],
+      "tool": "test_integration_instance",
+      "args": {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/integrationInstances/bravo",
+        "rationale": "Verify credential is invalid for bravo instance"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_f91d71c6-c871-488c-a0c3-fc6448f080ae",
+        "result": {
+          "successful": false,
+          "message": "Connection test failed: 401 Unauthorized"
+        }
+      },
+      "usage": {
+        "input_tokens": 8659,
+        "output_tokens": 151,
+        "cached_tokens": 8049,
+        "reasoning_tokens": 49
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 7,
+      "items": [
+        {
+          "id": "rs_6ae69d3bdd53f3c07cee46eb:rs_943c8c2b-8aad-4cdb-a9a6-51054cc201fb",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "id": "rs_b7ee9434-09d5-4f53-b1bd-6713f98fedd6",
+          "content": [
+            {
+              "annotations": [],
+              "text": "Tenant-specific auth failures confirmed \u2014 gathering evidence to rule out wider causes.",
+              "type": "output_text",
+              "logprobs": []
+            }
+          ],
+          "role": "assistant",
+          "status": "completed",
+          "type": "message",
+          "phase": "commentary"
+        },
+        {
+          "arguments": "{\"hypothesis\":\"H1\",\"rationale\":\"401 auth log supports credential failure\",\"source\":{\"insertId\":\"cd8e93b5-00000194\"},\"stance\":\"supports\",\"why\":\"Bravo connector WARNING shows 401 Unauthorized authenticating to Sentinel workspace\"}",
+          "call_id": "call_09ad848e-a06c-4db7-8f1f-8537b4396552",
+          "name": "record_evidence",
+          "type": "function_call",
+          "id": "fc_09ad848e-a06c-4db7-8f1f-8537b4396552",
+          "status": "completed"
+        }
+      ],
+      "tool": "record_evidence",
+      "args": {
+        "hypothesis": "H1",
+        "rationale": "401 auth log supports credential failure",
+        "source": {
+          "insertId": "cd8e93b5-00000194"
+        },
+        "stance": "supports",
+        "why": "Bravo connector WARNING shows 401 Unauthorized authenticating to Sentinel workspace"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_09ad848e-a06c-4db7-8f1f-8537b4396552",
+        "result": {
+          "ok": true,
+          "id": "E1",
+          "remaining": [
+            "H2",
+            "H3"
+          ]
+        }
+      },
+      "usage": {
+        "input_tokens": 8887,
+        "output_tokens": 495,
+        "cached_tokens": 6129,
+        "reasoning_tokens": 330
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 8,
+      "items": [
+        {
+          "id": "rs_6ae69d3c21d2d06b836e4989:rs_3aa31280-d14a-431e-9057-fee9702464db",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"hypothesis\":\"H1\",\"rationale\":\"Failed connectivity test confirms credential invalid\",\"source\":{\"callId\":\"call_f91d71c6-c871-488c-a0c3-fc6448f080ae\",\"field\":\"successful\",\"value\":false},\"stance\":\"supports\",\"why\":\"Integration test for bravo instance failed with 401, confirming stored credential rejected\"}",
+          "call_id": "call_c7f37156-37f5-4e4f-848c-395d30ae7f5e",
+          "name": "record_evidence",
+          "type": "function_call",
+          "id": "fc_c7f37156-37f5-4e4f-848c-395d30ae7f5e",
+          "status": "completed"
+        }
+      ],
+      "tool": "record_evidence",
+      "args": {
+        "hypothesis": "H1",
+        "rationale": "Failed connectivity test confirms credential invalid",
+        "source": {
+          "callId": "call_f91d71c6-c871-488c-a0c3-fc6448f080ae",
+          "field": "successful",
+          "value": false
+        },
+        "stance": "supports",
+        "why": "Integration test for bravo instance failed with 401, confirming stored credential rejected"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_c7f37156-37f5-4e4f-848c-395d30ae7f5e",
+        "result": {
+          "ok": true,
+          "id": "E2",
+          "remaining": [
+            "H2",
+            "H3"
+          ]
+        }
+      },
+      "usage": {
+        "input_tokens": 9465,
+        "output_tokens": 176,
+        "cached_tokens": 8817,
+        "reasoning_tokens": 8
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 9,
+      "items": [
+        {
+          "id": "rs_6ae69d3df40732675e004a74:rs_eea78c8b-b762-48ae-a344-347e72083238",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"hypothesis\":\"H2\",\"rationale\":\"Siblings healthy refutes fleet-wide outage\",\"source\":{\"callId\":\"call_31ccb94e-0a1b-42bd-a619-1f30337d9f75\",\"field\":\"deployments.alert-ingestion/alpha.warningRuns\",\"value\":0},\"stance\":\"refutes\",\"why\":\"Sibling alpha had 0 warning runs vs bravo 8, so failure is tenant-specific not fleet-wide\"}",
+          "call_id": "call_bc82ecf5-127f-44b6-b03c-b5c2af1cab0a",
+          "name": "record_evidence",
+          "type": "function_call",
+          "id": "fc_bc82ecf5-127f-44b6-b03c-b5c2af1cab0a",
+          "status": "completed"
+        }
+      ],
+      "tool": "record_evidence",
+      "args": {
+        "hypothesis": "H2",
+        "rationale": "Siblings healthy refutes fleet-wide outage",
+        "source": {
+          "callId": "call_31ccb94e-0a1b-42bd-a619-1f30337d9f75",
+          "field": "deployments.alert-ingestion/alpha.warningRuns",
+          "value": 0
+        },
+        "stance": "refutes",
+        "why": "Sibling alpha had 0 warning runs vs bravo 8, so failure is tenant-specific not fleet-wide"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_bc82ecf5-127f-44b6-b03c-b5c2af1cab0a",
+        "result": {
+          "ok": true,
+          "id": "E3",
+          "remaining": [
+            "H3"
+          ]
+        }
+      },
+      "usage": {
+        "input_tokens": 9726,
+        "output_tokens": 198,
+        "cached_tokens": 5745,
+        "reasoning_tokens": 9
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 10,
+      "items": [
+        {
+          "id": "rs_6ae69d3f097279edf7854ea2:rs_4dc68a1a-10dd-40bf-a0aa-f2d595d9b77f",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"name\":\"projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel\",\"rationale\":\"Check connector settings for any fixable parameter before escalate\"}",
+          "call_id": "call_b58ca1be-b269-4538-9551-d6bcb989a0a7",
+          "name": "get_resource",
+          "type": "function_call",
+          "id": "fc_b58ca1be-b269-4538-9551-d6bcb989a0a7",
+          "status": "completed"
+        }
+      ],
+      "tool": "get_resource",
+      "args": {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel",
+        "rationale": "Check connector settings for any fixable parameter before escalate"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_b58ca1be-b269-4538-9551-d6bcb989a0a7",
+        "result": {
+          "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/bravo-sentinel",
+          "agent": "",
+          "environment": "projects/fleet-sre-demo/locations/us/instances/mock-soar/environments/bravo",
+          "displayName": "Mock Sentinel Incidents Connector",
+          "description": "",
+          "intervalSeconds": 60,
+          "documentationLink": "",
+          "allowList": [],
+          "productFieldName": "device_product",
+          "eventFieldName": "event_name",
+          "timeoutSeconds": 30,
+          "connectorDefinitionName": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents",
+          "integrationVersion": "1.0",
+          "version": 1,
+          "loggingEnabledUntilUnixMs": "0",
+          "statistics": {
+            "pastDayAlertsCount": 15,
+            "avgAlertsPerDay": 15
+          },
+          "parameters": [
+            {
+              "value": "00000000-0000-4000-a000-0000000000b2",
+              "displayName": "Tenant ID",
+              "description": "",
+              "mandatory": true,
+              "advanced": false,
+              "type": "STRING"
+            },
+            {
+              "value": "00000000-0000-4000-b000-0000000000b2",
+              "displayName": "Client ID",
+              "description": "",
+              "mandatory": true,
+              "advanced": false,
+              "type": "STRING"
+            },
+            {
+              "value": "********",
+              "displayName": "Client Secret",
+              "description": "",
+              "mandatory": true,
+              "advanced": false,
+              "type": "PASSWORD"
+            },
+            {
+              "value": "law-bravo",
+              "displayName": "Workspace Name",
+              "description": "",
+              "mandatory": true,
+              "advanced": false,
+              "type": "STRING"
+            },
+            {
+              "value": "50",
+              "displayName": "Max Incidents Per Cycle",
+              "description": "",
+              "mandatory": false,
+              "advanced": false,
+              "type": "INT"
+            },
+            {
+              "value": "",
+              "displayName": "Unknown Severity Priority",
+              "description": "",
+              "mandatory": false,
+              "advanced": false,
+              "type": "INT"
+            }
+          ],
+          "connectorId": "bravo-sentinel",
+          "identifier": "bravo-sentinel",
+          "id": "bravo-sentinel",
+          "updateAvailable": false,
+          "custom": true,
+          "enabled": true,
+          "remote": false,
+          "status": "LIVE",
+          "integration": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel"
+        }
+      },
+      "usage": {
+        "input_tokens": 10003,
+        "output_tokens": 250,
+        "cached_tokens": 6641,
+        "reasoning_tokens": 138
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 11,
+      "items": [
+        {
+          "id": "rs_6ae69d41aa98e6be698d4dfd:rs_bfd4633e-d553-4304-8b41-d7baed8b2b93",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"hypothesis\":\"H3\",\"rationale\":\"Failed test refutes restart-only fix\",\"source\":{\"callId\":\"call_f91d71c6-c871-488c-a0c3-fc6448f080ae\",\"field\":\"message\",\"value\":\"Connection test failed: 401 Unauthorized\"},\"stance\":\"refutes\",\"why\":\"Credential test fails with 401, so restart will not fix; stored secret itself is rejected\"}",
+          "call_id": "call_a0b6a7af-9663-4d2c-8fd9-8881671da233",
+          "name": "record_evidence",
+          "type": "function_call",
+          "id": "fc_a0b6a7af-9663-4d2c-8fd9-8881671da233",
+          "status": "completed"
+        }
+      ],
+      "tool": "record_evidence",
+      "args": {
+        "hypothesis": "H3",
+        "rationale": "Failed test refutes restart-only fix",
+        "source": {
+          "callId": "call_f91d71c6-c871-488c-a0c3-fc6448f080ae",
+          "field": "message",
+          "value": "Connection test failed: 401 Unauthorized"
+        },
+        "stance": "refutes",
+        "why": "Credential test fails with 401, so restart will not fix; stored secret itself is rejected"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_a0b6a7af-9663-4d2c-8fd9-8881671da233",
+        "result": {
+          "ok": true,
+          "id": "E4",
+          "remaining": []
+        }
+      },
+      "usage": {
+        "input_tokens": 10849,
+        "output_tokens": 372,
+        "cached_tokens": 9457,
+        "reasoning_tokens": 191
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 12,
+      "items": [
+        {
+          "id": "rs_6ae69d436366cb7d605a468f:rs_25b418c2-9d0f-4601-8c56-a8a0e3c9055a",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "id": "rs_bcb439dd-2ca8-401f-a255-3fa07f68a266",
+          "content": [
+            {
+              "annotations": [],
+              "text": "Evidence complete \u2014 submitting the diagnosis for human action.",
+              "type": "output_text",
+              "logprobs": []
+            }
+          ],
+          "role": "assistant",
+          "status": "completed",
+          "type": "message",
+          "phase": "commentary"
+        },
+        {
+          "arguments": "{\"diagnosis\":{\"action\":{\"escalationSummary\":\"Bravo connector failing 401 Unauthorized on all 8 tripped runs; integration test also 401. Siblings healthy. Human must rotate Client Secret/TenantID for bravo integration instance and verify.\",\"type\":\"escalate\"},\"category\":\"credential_failure\",\"component\":\"connector\",\"confidence\":\"high\",\"deployment\":\"alert-ingestion/bravo\",\"evidence\":[\"E1\",\"E2\",\"E3\",\"E4\"],\"hypothesis\":\"H1\",\"incidentId\":\"inc-alert-ingestion-bravo-connector-errors-20261029T143800Z\",\"summary\":\"Bravo Sentinel connector credential rejected (401) on 8/10 runs; integration test fails while siblings healthy, requiring credential rotation.\"},\"rationale\":\"Submit credential_failure escalate with 401 logs and failed test\"}",
+          "call_id": "call_e5848969-627a-48eb-ae70-c0da77dfa93e",
+          "name": "submit_diagnosis",
+          "type": "function_call",
+          "id": "fc_e5848969-627a-48eb-ae70-c0da77dfa93e",
+          "status": "completed"
+        }
+      ],
+      "tool": "submit_diagnosis",
+      "args": {
+        "diagnosis": {
+          "action": {
+            "escalationSummary": "Bravo connector failing 401 Unauthorized on all 8 tripped runs; integration test also 401. Siblings healthy. Human must rotate Client Secret/TenantID for bravo integration instance and verify.",
+            "type": "escalate"
+          },
+          "category": "credential_failure",
+          "component": "connector",
+          "confidence": "high",
+          "deployment": "alert-ingestion/bravo",
+          "evidence": [
+            "E1",
+            "E2",
+            "E3",
+            "E4"
+          ],
+          "hypothesis": "H1",
+          "incidentId": "inc-alert-ingestion-bravo-connector-errors-20261029T143800Z",
+          "summary": "Bravo Sentinel connector credential rejected (401) on 8/10 runs; integration test fails while siblings healthy, requiring credential rotation."
+        },
+        "rationale": "Submit credential_failure escalate with 401 logs and failed test"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_e5848969-627a-48eb-ae70-c0da77dfa93e",
+        "result": {
+          "ok": true,
+          "status": "accepted",
+          "action": "escalate"
+        }
+      },
+      "usage": {
+        "input_tokens": 11298,
+        "output_tokens": 476,
+        "cached_tokens": 9969,
+        "reasoning_tokens": 207
+      },
+      "cost_usd": 0.0
+    }
+  ],
+  "diagnosis": {
+    "action": {
+      "escalationSummary": "Bravo connector failing 401 Unauthorized on all 8 tripped runs; integration test also 401. Siblings healthy. Human must rotate Client Secret/TenantID for bravo integration instance and verify.",
+      "type": "escalate"
+    },
+    "category": "credential_failure",
+    "component": "connector",
+    "confidence": "high",
+    "deployment": "alert-ingestion/bravo",
+    "evidence": [
+      "E1",
+      "E2",
+      "E3",
+      "E4"
+    ],
+    "hypothesis": "H1",
+    "incidentId": "inc-alert-ingestion-bravo-connector-errors-20261029T143800Z",
+    "summary": "Bravo Sentinel connector credential rejected (401) on 8/10 runs; integration test fails while siblings healthy, requiring credential rotation."
+  }
+}

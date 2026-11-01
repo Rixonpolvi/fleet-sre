@@ -1,0 +1,4230 @@
+{
+  "fault": "F3",
+  "seed": 104,
+  "t0": "2026-10-29T14:00:00Z",
+  "faults": [
+    {
+      "at": 1830,
+      "type": "severity_drift",
+      "environment": "alpha",
+      "params": {
+        "rate": 0.5
+      }
+    }
+  ],
+  "incident": {
+    "id": "inc-alert-ingestion-alpha-priority-shape-20261029T143200Z",
+    "deployment": "alert-ingestion/alpha",
+    "tripwire": "priority-shape",
+    "opened_at": "2026-10-29T14:32:00Z",
+    "trip_event": {
+      "kind": "trip",
+      "deployment": "alert-ingestion/alpha",
+      "tripwire": "priority-shape",
+      "at": "2026-10-29T14:32:00+00:00",
+      "reason": "field jsonPayload.alert.priority is not an integer: 'Critical'",
+      "evidence": [
+        "75ecd103-00000156"
+      ]
+    },
+    "service": "alert-ingestion",
+    "component": "ingestion",
+    "resources": {
+      "connector": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel",
+      "integrationInstance": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/integrationInstances/alpha"
+    },
+    "siblings": [
+      "alert-ingestion/bravo",
+      "alert-ingestion/canary",
+      "alert-ingestion/charlie"
+    ]
+  },
+  "responses": [
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d583c51d9aa1ab540f5:rs_990e778a-a754-4ce5-ab7d-fa6065d8e173",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "id": "rs_6a324027-305d-4a01-ab85-b50402d0fdc0",
+          "content": [
+            {
+              "annotations": [],
+              "text": "Investigating the priority-shape breach \u2014 setting hypotheses to guide the diagnosis.",
+              "type": "output_text",
+              "logprobs": []
+            }
+          ],
+          "role": "assistant",
+          "status": "completed",
+          "type": "message",
+          "phase": "commentary"
+        },
+        {
+          "arguments": "{\"items\":[{\"alternative\":false,\"id\":\"H1\",\"statement\":\"Upstream source for alpha changed priority format from integers to string labels like 'Critical', causing schema drift\",\"wouldConfirm\":\"Recent alert.ingested entries for alpha show string priority values, siblings remain integer\"},{\"alternative\":false,\"id\":\"H2\",\"statement\":\"Transient single malformed alert in alpha, not systematic drift\",\"wouldConfirm\":\"Only one bad entry among otherwise valid integer priorities in alpha\"},{\"alternative\":true,\"id\":\"H3\",\"statement\":\"Fleet-wide upstream change affecting all tenants, not alpha-specific\",\"wouldConfirm\":\"Siblings also show string priority values in recent ingested alerts\"}],\"rationale\":\"Set competing schema-drift vs transient vs fleet-wide hypotheses for priority field violation\"}",
+          "call_id": "call_f127656a-f263-4730-a837-750a6a884df7",
+          "name": "set_hypotheses",
+          "type": "function_call",
+          "id": "fc_f127656a-f263-4730-a837-750a6a884df7",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 5742,
+        "input_tokens_details": {
+          "cached_tokens": 5617
+        },
+        "output_tokens": 395,
+        "output_tokens_details": {
+          "reasoning_tokens": 141
+        },
+        "total_tokens": 6137
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d5956784263e3254ae6:rs_ba9ea3eb-ff9d-4fec-b5d9-281607d14d7a",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"deployment\":\"alert-ingestion/alpha\",\"filter\":{\"component\":\"ingestion\",\"event\":\"alert.ingested\"},\"rationale\":\"Check recent ingested alerts priority values for drift vs transient\",\"window\":{\"lastMinutes\":60}}",
+          "call_id": "call_217a0402-7558-4fcc-9125-121a62f2dea5",
+          "name": "query_logs",
+          "type": "function_call",
+          "id": "fc_217a0402-7558-4fcc-9125-121a62f2dea5",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 6204,
+        "input_tokens_details": {
+          "cached_tokens": 5745
+        },
+        "output_tokens": 269,
+        "output_tokens_details": {
+          "reasoning_tokens": 142
+        },
+        "total_tokens": 6473
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d5bbac1b0d244174b38:rs_57be8bf5-05da-426a-b3dc-905c57f87420",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"component\":\"ingestion\",\"rationale\":\"Check if siblings also show string priority drift or only alpha\",\"service\":\"alert-ingestion\",\"window\":{\"lastMinutes\":60}}",
+          "call_id": "call_10e624d0-05dd-44bb-ba2e-398257b5090b",
+          "name": "compare_siblings",
+          "type": "function_call",
+          "id": "fc_10e624d0-05dd-44bb-ba2e-398257b5090b",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 16003,
+        "input_tokens_details": {
+          "cached_tokens": 6129
+        },
+        "output_tokens": 307,
+        "output_tokens_details": {
+          "reasoning_tokens": 194
+        },
+        "total_tokens": 16310
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d5c9e76bd2db5fd4664:rs_945dafcb-9f58-4d87-b066-bb9b2342bef9",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"deployment\":\"alert-ingestion/bravo\",\"filter\":{\"component\":\"ingestion\",\"event\":\"alert.ingested\"},\"rationale\":\"Check sibling bravo priority values to test fleet-wide hypothesis\",\"window\":{\"lastMinutes\":60}}",
+          "call_id": "call_f4348f5b-39b4-4296-9a20-f0ec45e8e9a6",
+          "name": "query_logs",
+          "type": "function_call",
+          "id": "fc_f4348f5b-39b4-4296-9a20-f0ec45e8e9a6",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 16720,
+        "input_tokens_details": {
+          "cached_tokens": 5745
+        },
+        "output_tokens": 307,
+        "output_tokens_details": {
+          "reasoning_tokens": 179
+        },
+        "total_tokens": 17027
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d5e9a1e178964a94d9a:rs_ee6ed64b-8684-43d1-a32d-fe18c0755d6c",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "id": "rs_7073def9-c619-4111-9dc7-3195acdcb952",
+          "content": [
+            {
+              "annotations": [],
+              "text": "Alpha shows an isolated string value while siblings look clean \u2014 now checking the connector configuration.",
+              "type": "output_text",
+              "logprobs": []
+            }
+          ],
+          "role": "assistant",
+          "status": "completed",
+          "type": "message",
+          "phase": "commentary"
+        },
+        {
+          "arguments": "{\"name\":\"projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel\",\"rationale\":\"Check connector settings for priority mapping control before escalate vs propose\"}",
+          "call_id": "call_859ed790-8efd-46d3-b91a-da9e2201c843",
+          "name": "get_resource",
+          "type": "function_call",
+          "id": "fc_859ed790-8efd-46d3-b91a-da9e2201c843",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 20569,
+        "input_tokens_details": {
+          "cached_tokens": 16625
+        },
+        "output_tokens": 432,
+        "output_tokens_details": {
+          "reasoning_tokens": 295
+        },
+        "total_tokens": 21001
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d6546e2efc3147145f5:rs_aa1eb148-b73c-4bba-9316-93bf6d192c6d",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"rationale\":\"Check expected priority contract and mapping context\",\"service\":\"alert-ingestion\"}",
+          "call_id": "call_d3d9ae1b-97e3-479e-9972-2723fc1b06a3",
+          "name": "get_contract",
+          "type": "function_call",
+          "id": "fc_d3d9ae1b-97e3-479e-9972-2723fc1b06a3",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 21590,
+        "input_tokens_details": {
+          "cached_tokens": 15985
+        },
+        "output_tokens": 1349,
+        "output_tokens_details": {
+          "reasoning_tokens": 1276
+        },
+        "total_tokens": 22939
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d66fa381058d0564b81:rs_1ba2dec8-7077-4511-bdc0-52144c9a9da3",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"deployment\":\"alert-ingestion/alpha\",\"rationale\":\"Check recent trips and approved changes for context\"}",
+          "call_id": "call_d6f1a4bb-f1a7-410c-b64c-bad24fde49b7",
+          "name": "tripwire_history",
+          "type": "function_call",
+          "id": "fc_d6f1a4bb-f1a7-410c-b64c-bad24fde49b7",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 23520,
+        "input_tokens_details": {
+          "cached_tokens": 21489
+        },
+        "output_tokens": 98,
+        "output_tokens_details": {
+          "reasoning_tokens": 18
+        },
+        "total_tokens": 23618
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d68bca93f86cce34137:rs_224fda21-d9b9-41b6-aadf-d91c174b5cd3",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "id": "rs_a16c5f1d-a7b6-4468-b7ba-8f06af8dfbff",
+          "content": [
+            {
+              "annotations": [],
+              "text": "Contract and history show no recent changes \u2014 now examining connector activity around the violation.",
+              "type": "output_text",
+              "logprobs": []
+            }
+          ],
+          "role": "assistant",
+          "status": "completed",
+          "type": "message",
+          "phase": "commentary"
+        },
+        {
+          "arguments": "{\"deployment\":\"alert-ingestion/alpha\",\"filter\":{\"component\":\"connector\"},\"rationale\":\"Check connector runs for errors or severity handling clues\",\"window\":{\"lastMinutes\":60}}",
+          "call_id": "call_4f8e4596-33fb-4267-bd6a-bbad3306863d",
+          "name": "query_logs",
+          "type": "function_call",
+          "id": "fc_4f8e4596-33fb-4267-bd6a-bbad3306863d",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 23695,
+        "input_tokens_details": {
+          "cached_tokens": 20465
+        },
+        "output_tokens": 167,
+        "output_tokens_details": {
+          "reasoning_tokens": 28
+        },
+        "total_tokens": 23862
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d6cc4096b0349d942c8:rs_234f3366-feb9-4330-ad81-61e1b4123585",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"items\":[{\"alternative\":false,\"id\":\"H1\",\"statement\":\"Alpha connector Unknown Severity Priority is empty, so unknown string severity 'Critical' passes through as priority violating integer enum\",\"wouldConfirm\":\"Violating entry shows string priority and connector param Unknown Severity Priority is empty\"},{\"alternative\":false,\"id\":\"H2\",\"statement\":\"Single transient malformed alert in alpha, surrounding alerts valid and no config cause\",\"wouldConfirm\":\"Only one violating entry among many valid integer priorities with no config gap\"},{\"alternative\":true,\"id\":\"H3\",\"statement\":\"Fleet-wide upstream severity format change affecting all tenants, not alpha-specific\",\"wouldConfirm\":\"Siblings bravo/charlie also show string priority values\"}],\"rationale\":\"Refine H1 to config cause found in connector params for propose fix\"}",
+          "call_id": "call_e23274b9-7a6c-45e0-8cec-55836c6a8a6a",
+          "name": "set_hypotheses",
+          "type": "function_call",
+          "id": "fc_e23274b9-7a6c-45e0-8cec-55836c6a8a6a",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 29977,
+        "input_tokens_details": {
+          "cached_tokens": 23409
+        },
+        "output_tokens": 791,
+        "output_tokens_details": {
+          "reasoning_tokens": 552
+        },
+        "total_tokens": 30768
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d70c3d2c8ba66234c0f:rs_42a9b293-9b53-49ca-8dc0-e4776c63b755",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"hypothesis\":\"H1\",\"rationale\":\"Cite violating string priority entry for schema drift\",\"source\":{\"insertId\":\"75ecd103-00000156\"},\"stance\":\"supports\",\"why\":\"Entry priority is string 'Critical' not integer enum [-1,40,60,80,100], violating priority-shape tripwire\"}",
+          "call_id": "call_5abd71a4-0f8b-408a-be20-c94cd186345a",
+          "name": "record_evidence",
+          "type": "function_call",
+          "id": "fc_5abd71a4-0f8b-408a-be20-c94cd186345a",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 30843,
+        "input_tokens_details": {
+          "cached_tokens": 29937
+        },
+        "output_tokens": 901,
+        "output_tokens_details": {
+          "reasoning_tokens": 746
+        },
+        "total_tokens": 31744
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d71696fc1e5ab4045f9:rs_dfc42ecf-f918-4c11-b87f-42ac8516f916",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"hypothesis\":\"H1\",\"rationale\":\"Cite empty Unknown Severity Priority setting enabling passthrough\",\"source\":{\"callId\":\"call_859ed790-8efd-46d3-b91a-da9e2201c843\",\"field\":\"parameters.5.value\",\"value\":\"\"},\"stance\":\"supports\",\"why\":\"Unknown Severity Priority is empty, so unknown severities have no integer fallback and pass through as strings\"}",
+          "call_id": "call_1b888585-d921-448a-ae35-e0c791275ff5",
+          "name": "record_evidence",
+          "type": "function_call",
+          "id": "fc_1b888585-d921-448a-ae35-e0c791275ff5",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 31825,
+        "input_tokens_details": {
+          "cached_tokens": 23665
+        },
+        "output_tokens": 192,
+        "output_tokens_details": {
+          "reasoning_tokens": 15
+        },
+        "total_tokens": 32017
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d72c7eb8362694c425c:rs_50ce6f05-cd40-43a3-826c-e5690e14133e",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "id": "rs_e0781d85-3a3d-4b6c-b556-72d70fd7a36e",
+          "content": [
+            {
+              "annotations": [],
+              "text": "Core evidence for the alpha-specific drift is recorded \u2014 now gathering counter-evidence from siblings.",
+              "type": "output_text",
+              "logprobs": []
+            }
+          ],
+          "role": "assistant",
+          "status": "completed",
+          "type": "message",
+          "phase": "commentary"
+        },
+        {
+          "arguments": "{\"hypothesis\":\"H3\",\"rationale\":\"Cite sibling clean integer priority to refute fleet-wide change\",\"source\":{\"callId\":\"call_f4348f5b-39b4-4296-9a20-f0ec45e8e9a6\",\"field\":\"entries.0.jsonPayload.alert.priority\",\"value\":-1},\"stance\":\"refutes\",\"why\":\"Bravo latest ingested alert priority is integer -1 within enum, showing siblings unaffected and change is alpha-specific\"}",
+          "call_id": "call_60f999ca-bc40-489b-bc36-3ed8ecc7249b",
+          "name": "record_evidence",
+          "type": "function_call",
+          "id": "fc_60f999ca-bc40-489b-bc36-3ed8ecc7249b",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 32096,
+        "input_tokens_details": {
+          "cached_tokens": 5745
+        },
+        "output_tokens": 231,
+        "output_tokens_details": {
+          "reasoning_tokens": 12
+        },
+        "total_tokens": 32327
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d7468a244a296fc4c35:rs_1bdfa4e4-256b-4d99-82e6-dd7013400d39",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"hypothesis\":\"H2\",\"rationale\":\"Refute transient-only claim by showing config gap allows recurrence\",\"source\":{\"callId\":\"call_859ed790-8efd-46d3-b91a-da9e2201c843\",\"field\":\"parameters.5.displayName\",\"value\":\"Unknown Severity Priority\"},\"stance\":\"refutes\",\"why\":\"Empty fallback setting exists at index 5, so future unknown severities will recur, not a one-off with no cause\"}",
+          "call_id": "call_aec56246-fc61-4d49-ad91-68e16b663f80",
+          "name": "record_evidence",
+          "type": "function_call",
+          "id": "fc_aec56246-fc61-4d49-ad91-68e16b663f80",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 32404,
+        "input_tokens_details": {
+          "cached_tokens": 31985
+        },
+        "output_tokens": 330,
+        "output_tokens_details": {
+          "reasoning_tokens": 140
+        },
+        "total_tokens": 32734
+      }
+    },
+    {
+      "output": [
+        {
+          "id": "rs_6ae69d7abe5df8ac6df34992:rs_e5c67108-820e-46dc-a187-79612444b40f",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"diagnosis\":{\"action\":{\"method\":\"connectorInstances.patch\",\"patch\":{\"parameters\":[{\"advanced\":false,\"description\":\"\",\"displayName\":\"Tenant ID\",\"mandatory\":true,\"type\":\"STRING\",\"value\":\"00000000-0000-4000-a000-0000000000a1\"},{\"advanced\":false,\"description\":\"\",\"displayName\":\"Client ID\",\"mandatory\":true,\"type\":\"STRING\",\"value\":\"00000000-0000-4000-b000-0000000000a1\"},{\"advanced\":false,\"description\":\"\",\"displayName\":\"Client Secret\",\"mandatory\":true,\"type\":\"PASSWORD\",\"value\":\"********\"},{\"advanced\":false,\"description\":\"\",\"displayName\":\"Workspace Name\",\"mandatory\":true,\"type\":\"STRING\",\"value\":\"law-alpha\"},{\"advanced\":false,\"description\":\"\",\"displayName\":\"Max Incidents Per Cycle\",\"mandatory\":false,\"type\":\"INT\",\"value\":\"50\"},{\"advanced\":false,\"description\":\"\",\"displayName\":\"Unknown Severity Priority\",\"mandatory\":false,\"type\":\"INT\",\"value\":\"-1\"}]},\"resource\":\"projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel\",\"type\":\"propose\",\"updateMask\":[\"parameters\"]},\"category\":\"schema_drift\",\"component\":\"ingestion\",\"confidence\":\"medium\",\"deployment\":\"alert-ingestion/alpha\",\"evidence\":[\"E1\",\"E2\",\"E3\",\"E4\"],\"expectedVerification\":{\"condition\":\"recovers_within\",\"seconds\":2400,\"tripwire\":\"priority-shape\"},\"hypothesis\":\"H1\",\"incidentId\":\"inc-alert-ingestion-alpha-priority-shape-20261029T143200Z\",\"rollback\":\"Patch Unknown Severity Priority back to empty string via connectorInstances.patch\",\"summary\":\"Alpha ingested priority 'Critical' string violating integer enum; empty Unknown Severity Priority let it pass through. Setting fallback to -1 restores valid enum values.\"},\"rationale\":\"Propose fallback -1 for unknown severities to restore schema compliance\"}",
+          "call_id": "call_8f33b733-de70-4bef-b283-79b795c8e5ef",
+          "name": "submit_diagnosis",
+          "type": "function_call",
+          "id": "fc_8f33b733-de70-4bef-b283-79b795c8e5ef",
+          "status": "completed"
+        }
+      ],
+      "usage": {
+        "input_tokens": 32807,
+        "input_tokens_details": {
+          "cached_tokens": 31729
+        },
+        "output_tokens": 1547,
+        "output_tokens_details": {
+          "reasoning_tokens": 987
+        },
+        "total_tokens": 34354
+      }
+    }
+  ],
+  "transcript": [
+    {
+      "turn": 1,
+      "items": [
+        {
+          "id": "rs_6ae69d583c51d9aa1ab540f5:rs_990e778a-a754-4ce5-ab7d-fa6065d8e173",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "id": "rs_6a324027-305d-4a01-ab85-b50402d0fdc0",
+          "content": [
+            {
+              "annotations": [],
+              "text": "Investigating the priority-shape breach \u2014 setting hypotheses to guide the diagnosis.",
+              "type": "output_text",
+              "logprobs": []
+            }
+          ],
+          "role": "assistant",
+          "status": "completed",
+          "type": "message",
+          "phase": "commentary"
+        },
+        {
+          "arguments": "{\"items\":[{\"alternative\":false,\"id\":\"H1\",\"statement\":\"Upstream source for alpha changed priority format from integers to string labels like 'Critical', causing schema drift\",\"wouldConfirm\":\"Recent alert.ingested entries for alpha show string priority values, siblings remain integer\"},{\"alternative\":false,\"id\":\"H2\",\"statement\":\"Transient single malformed alert in alpha, not systematic drift\",\"wouldConfirm\":\"Only one bad entry among otherwise valid integer priorities in alpha\"},{\"alternative\":true,\"id\":\"H3\",\"statement\":\"Fleet-wide upstream change affecting all tenants, not alpha-specific\",\"wouldConfirm\":\"Siblings also show string priority values in recent ingested alerts\"}],\"rationale\":\"Set competing schema-drift vs transient vs fleet-wide hypotheses for priority field violation\"}",
+          "call_id": "call_f127656a-f263-4730-a837-750a6a884df7",
+          "name": "set_hypotheses",
+          "type": "function_call",
+          "id": "fc_f127656a-f263-4730-a837-750a6a884df7",
+          "status": "completed"
+        }
+      ],
+      "tool": "set_hypotheses",
+      "args": {
+        "items": [
+          {
+            "alternative": false,
+            "id": "H1",
+            "statement": "Upstream source for alpha changed priority format from integers to string labels like 'Critical', causing schema drift",
+            "wouldConfirm": "Recent alert.ingested entries for alpha show string priority values, siblings remain integer"
+          },
+          {
+            "alternative": false,
+            "id": "H2",
+            "statement": "Transient single malformed alert in alpha, not systematic drift",
+            "wouldConfirm": "Only one bad entry among otherwise valid integer priorities in alpha"
+          },
+          {
+            "alternative": true,
+            "id": "H3",
+            "statement": "Fleet-wide upstream change affecting all tenants, not alpha-specific",
+            "wouldConfirm": "Siblings also show string priority values in recent ingested alerts"
+          }
+        ],
+        "rationale": "Set competing schema-drift vs transient vs fleet-wide hypotheses for priority field violation"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_f127656a-f263-4730-a837-750a6a884df7",
+        "result": {
+          "ok": true,
+          "count": 3
+        }
+      },
+      "usage": {
+        "input_tokens": 5742,
+        "output_tokens": 395,
+        "cached_tokens": 5617,
+        "reasoning_tokens": 141
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 2,
+      "items": [
+        {
+          "id": "rs_6ae69d5956784263e3254ae6:rs_ba9ea3eb-ff9d-4fec-b5d9-281607d14d7a",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"deployment\":\"alert-ingestion/alpha\",\"filter\":{\"component\":\"ingestion\",\"event\":\"alert.ingested\"},\"rationale\":\"Check recent ingested alerts priority values for drift vs transient\",\"window\":{\"lastMinutes\":60}}",
+          "call_id": "call_217a0402-7558-4fcc-9125-121a62f2dea5",
+          "name": "query_logs",
+          "type": "function_call",
+          "id": "fc_217a0402-7558-4fcc-9125-121a62f2dea5",
+          "status": "completed"
+        }
+      ],
+      "tool": "query_logs",
+      "args": {
+        "deployment": "alert-ingestion/alpha",
+        "filter": {
+          "component": "ingestion",
+          "event": "alert.ingested"
+        },
+        "rationale": "Check recent ingested alerts priority values for drift vs transient",
+        "window": {
+          "lastMinutes": 60
+        }
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_217a0402-7558-4fcc-9125-121a62f2dea5",
+        "result": {
+          "entries": [
+            {
+              "insertId": "c167f617-00000155",
+              "timestamp": "2026-10-29T14:32:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "af9e71f1-1937-42b6-8258-b5994adf1212"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Brute force attempt alpha-inc-000062",
+                  "ticket_id": "alpha-inc-000062",
+                  "rule_generator": "Insider Risk",
+                  "priority": 80,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793284269112,
+                  "end_time": 1793284525112,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "75ecd103-00000156",
+              "timestamp": "2026-10-29T14:32:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "05d7d102-1f44-4842-8f9b-3ad1b17695f9"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Impossible travel alert alpha-inc-000063",
+                  "ticket_id": "alpha-inc-000063",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": "Critical",
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793284316064,
+                  "end_time": 1793284487064,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "e8089915-0000014b",
+              "timestamp": "2026-10-29T14:31:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "205131da-632a-4cae-86d5-42c67943b4e3"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Anomalous data exfiltration alpha-inc-000060",
+                  "ticket_id": "alpha-inc-000060",
+                  "rule_generator": "Insider Risk",
+                  "priority": 80,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793284232766,
+                  "end_time": 1793284360766,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "e2af3164-0000014c",
+              "timestamp": "2026-10-29T14:31:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "b667fd8b-0054-4bdf-819a-7513e3d24c3f"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Suspicious PowerShell activity alpha-inc-000061",
+                  "ticket_id": "alpha-inc-000061",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": 60,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793284259031,
+                  "end_time": 1793284505031,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "e1ce6841-00000142",
+              "timestamp": "2026-10-29T14:30:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "c7230c6f-c4f4-42f7-80a4-978b09a80280"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Impossible travel alert alpha-inc-000059",
+                  "ticket_id": "alpha-inc-000059",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": 40,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793284198184,
+                  "end_time": 1793284473184,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "c8924696-0000013d",
+              "timestamp": "2026-10-29T14:30:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "ae75a0a6-42e0-4b88-8f87-f95d443685b4"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Brute force attempt alpha-inc-000054",
+                  "ticket_id": "alpha-inc-000054",
+                  "rule_generator": "Insider Risk",
+                  "priority": 60,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793284143879,
+                  "end_time": 1793284218879,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "be4ef7a7-0000013e",
+              "timestamp": "2026-10-29T14:30:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "157d407b-fec5-4042-81f5-280969e1b193"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Anomalous data exfiltration alpha-inc-000055",
+                  "ticket_id": "alpha-inc-000055",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": -1,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793284146327,
+                  "end_time": 1793284267327,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "be0eae51-0000013f",
+              "timestamp": "2026-10-29T14:30:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "c74452d7-0497-46fc-85e6-6043b23cb04b"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Impossible travel alert alpha-inc-000056",
+                  "ticket_id": "alpha-inc-000056",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": 60,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793284176731,
+                  "end_time": 1793284334731,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "899fc97c-00000140",
+              "timestamp": "2026-10-29T14:30:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "08f82778-0513-4d0d-8235-ab180ebd4c5d"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Malware detected on host alpha-inc-000057",
+                  "ticket_id": "alpha-inc-000057",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": 40,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793284178292,
+                  "end_time": 1793284441292,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "43385bef-00000141",
+              "timestamp": "2026-10-29T14:30:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "ad7b32e0-a748-4690-885c-ab9df8a896ec"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Impossible travel alert alpha-inc-000058",
+                  "ticket_id": "alpha-inc-000058",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": -1,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793284186456,
+                  "end_time": 1793284405456,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "b16814e9-00000131",
+              "timestamp": "2026-10-29T14:29:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "47920b9f-461b-4877-8a07-d71b95df3fb7"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Brute force attempt alpha-inc-000052",
+                  "ticket_id": "alpha-inc-000052",
+                  "rule_generator": "Threat Protection",
+                  "priority": 40,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793284080257,
+                  "end_time": 1793284336257,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "05579b68-00000132",
+              "timestamp": "2026-10-29T14:29:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "0cb4cb9b-b40f-4121-850b-159afbf8cdf6"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Brute force attempt alpha-inc-000053",
+                  "ticket_id": "alpha-inc-000053",
+                  "rule_generator": "Insider Risk",
+                  "priority": 60,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793284102286,
+                  "end_time": 1793284129286,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "d9a931fd-00000126",
+              "timestamp": "2026-10-29T14:28:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "0459caab-e543-4f64-8908-556393256dd9"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Malware detected on host alpha-inc-000051",
+                  "ticket_id": "alpha-inc-000051",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": 80,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793284054601,
+                  "end_time": 1793284256601,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "ae8c5e1c-0000011c",
+              "timestamp": "2026-10-29T14:27:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "443db64a-de11-4b89-8c93-7f292e7e6f5e"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Suspicious PowerShell activity alpha-inc-000050",
+                  "ticket_id": "alpha-inc-000050",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": 80,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793284002037,
+                  "end_time": 1793284137037,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "497ba360-0000011b",
+              "timestamp": "2026-10-29T14:27:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "125f998f-b991-4efe-8d97-32465a5c54bd"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Suspicious sign-in alpha-inc-000049",
+                  "ticket_id": "alpha-inc-000049",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": 80,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283995973,
+                  "end_time": 1793284264973,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "b38bc15f-00000106",
+              "timestamp": "2026-10-29T14:25:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "37a34ce2-e78d-495c-82c3-53230de2920b"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Impossible travel alert alpha-inc-000046",
+                  "ticket_id": "alpha-inc-000046",
+                  "rule_generator": "Threat Protection",
+                  "priority": 80,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283880154,
+                  "end_time": 1793283928154,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "68c36c4d-00000107",
+              "timestamp": "2026-10-29T14:25:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "ffb793e1-c52c-478e-8cb0-7f18808121f8"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Brute force attempt alpha-inc-000047",
+                  "ticket_id": "alpha-inc-000047",
+                  "rule_generator": "Threat Protection",
+                  "priority": 40,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283884310,
+                  "end_time": 1793283911310,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "60e53b67-00000108",
+              "timestamp": "2026-10-29T14:25:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "61e1b2ca-cbfd-425a-8855-02daa590edc3"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Anomalous data exfiltration alpha-inc-000048",
+                  "ticket_id": "alpha-inc-000048",
+                  "rule_generator": "Threat Protection",
+                  "priority": 40,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283896631,
+                  "end_time": 1793284093631,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "5db0d76a-00000105",
+              "timestamp": "2026-10-29T14:25:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "9a3945b1-6aca-42e7-85d7-f61a0e431c73"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Anomalous data exfiltration alpha-inc-000045",
+                  "ticket_id": "alpha-inc-000045",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": 60,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283876799,
+                  "end_time": 1793283999799,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "060e8a63-00000104",
+              "timestamp": "2026-10-29T14:25:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "f100f24d-798d-4eb3-8d42-5e6c11521e5c"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Suspicious PowerShell activity alpha-inc-000044",
+                  "ticket_id": "alpha-inc-000044",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": 80,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283858076,
+                  "end_time": 1793284127076,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "37a9be66-000000f8",
+              "timestamp": "2026-10-29T14:24:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "b0ca72ed-cb91-4d37-823b-2e794147d806"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Impossible travel alert alpha-inc-000043",
+                  "ticket_id": "alpha-inc-000043",
+                  "rule_generator": "Insider Risk",
+                  "priority": 80,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283789870,
+                  "end_time": 1793283960870,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "fe759658-000000ed",
+              "timestamp": "2026-10-29T14:23:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "a735985b-57ef-4df3-853e-b4fae915011e"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Suspicious PowerShell activity alpha-inc-000042",
+                  "ticket_id": "alpha-inc-000042",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": 60,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283776012,
+                  "end_time": 1793284009012,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "7502015b-000000e4",
+              "timestamp": "2026-10-29T14:22:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "ea9f4dee-2be1-4588-8ad1-9bd8514ffcff"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Brute force attempt alpha-inc-000041",
+                  "ticket_id": "alpha-inc-000041",
+                  "rule_generator": "Insider Risk",
+                  "priority": 60,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283704557,
+                  "end_time": 1793283874557,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "4fede790-000000e2",
+              "timestamp": "2026-10-29T14:22:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "eda44f33-ffbd-4ca6-89fc-0402dff01227"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Malware detected on host alpha-inc-000039",
+                  "ticket_id": "alpha-inc-000039",
+                  "rule_generator": "Insider Risk",
+                  "priority": 60,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283672769,
+                  "end_time": 1793283783769,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "24099d09-000000e3",
+              "timestamp": "2026-10-29T14:22:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "c15d1fdf-2a62-4cb5-860f-070d851ce2cc"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Suspicious sign-in alpha-inc-000040",
+                  "ticket_id": "alpha-inc-000040",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": 80,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283699157,
+                  "end_time": 1793283897157,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "fe983dcc-000000d7",
+              "timestamp": "2026-10-29T14:21:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "4dca9832-8016-48d1-8a94-2403e93ecdf7"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Suspicious PowerShell activity alpha-inc-000038",
+                  "ticket_id": "alpha-inc-000038",
+                  "rule_generator": "Insider Risk",
+                  "priority": 40,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283648122,
+                  "end_time": 1793283752122,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "67d78f2f-000000cd",
+              "timestamp": "2026-10-29T14:20:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "85584558-50f7-4b3c-8565-58ac8e1301b7"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Brute force attempt alpha-inc-000037",
+                  "ticket_id": "alpha-inc-000037",
+                  "rule_generator": "Threat Protection",
+                  "priority": 40,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283543957,
+                  "end_time": 1793283749957,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "71dec719-000000c1",
+              "timestamp": "2026-10-29T14:19:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "ebd32c9b-a07e-413d-8ee0-e29822b90f80"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Suspicious sign-in alpha-inc-000035",
+                  "ticket_id": "alpha-inc-000035",
+                  "rule_generator": "Threat Protection",
+                  "priority": 80,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283487016,
+                  "end_time": 1793283723016,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "5329bfae-000000c2",
+              "timestamp": "2026-10-29T14:19:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "d6e387f4-015b-4abe-8a13-501e49d1c1d7"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Impossible travel alert alpha-inc-000036",
+                  "ticket_id": "alpha-inc-000036",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": 80,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283487898,
+                  "end_time": 1793283618898,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "aa2ad663-000000b6",
+              "timestamp": "2026-10-29T14:18:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "48e4317a-1738-496e-8bef-0dc8796af9d2"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Impossible travel alert alpha-inc-000033",
+                  "ticket_id": "alpha-inc-000033",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": 40,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283425390,
+                  "end_time": 1793283434390,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "9e5df3b9-000000b7",
+              "timestamp": "2026-10-29T14:18:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "9e535f6d-7c9d-4f9a-868c-ebefe5f30d74"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Impossible travel alert alpha-inc-000034",
+                  "ticket_id": "alpha-inc-000034",
+                  "rule_generator": "Insider Risk",
+                  "priority": 60,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283446777,
+                  "end_time": 1793283630777,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "9b89e08c-000000ab",
+              "timestamp": "2026-10-29T14:17:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "021ad4b1-4321-4ec8-8729-1333b54d6c2c"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Anomalous data exfiltration alpha-inc-000030",
+                  "ticket_id": "alpha-inc-000030",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": 60,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283394297,
+                  "end_time": 1793283430297,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "748e9a8e-000000ad",
+              "timestamp": "2026-10-29T14:17:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "605a882f-9938-4bb4-8aa9-8c908942f02c"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Malware detected on host alpha-inc-000032",
+                  "ticket_id": "alpha-inc-000032",
+                  "rule_generator": "Insider Risk",
+                  "priority": 80,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283419412,
+                  "end_time": 1793283608412,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "187bfafe-000000ac",
+              "timestamp": "2026-10-29T14:17:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "ac96a712-ce62-4b45-84d3-8f04fd78b37a"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Suspicious PowerShell activity alpha-inc-000031",
+                  "ticket_id": "alpha-inc-000031",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": 40,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283414263,
+                  "end_time": 1793283431263,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "e09ba3c4-000000a2",
+              "timestamp": "2026-10-29T14:16:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "45b4b9e3-e435-4f40-8985-1b0787d0ff6c"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Brute force attempt alpha-inc-000029",
+                  "ticket_id": "alpha-inc-000029",
+                  "rule_generator": "Threat Protection",
+                  "priority": 60,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283319873,
+                  "end_time": 1793283460873,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "330d3fad-000000a1",
+              "timestamp": "2026-10-29T14:16:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "f1b49527-572f-4dfc-8ca8-74eef140e78c"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Malware detected on host alpha-inc-000028",
+                  "ticket_id": "alpha-inc-000028",
+                  "rule_generator": "Insider Risk",
+                  "priority": 80,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283315056,
+                  "end_time": 1793283344056,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "d4f09d4f-00000096",
+              "timestamp": "2026-10-29T14:15:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "6c366b21-9285-4b1f-82bb-51e106358805"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Suspicious sign-in alpha-inc-000025",
+                  "ticket_id": "alpha-inc-000025",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": 60,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283276514,
+                  "end_time": 1793283497514,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "ca683256-00000097",
+              "timestamp": "2026-10-29T14:15:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "f6f20da7-1d7f-4553-897c-f75416ff3e87"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Suspicious PowerShell activity alpha-inc-000026",
+                  "ticket_id": "alpha-inc-000026",
+                  "rule_generator": "Threat Protection",
+                  "priority": 60,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283283242,
+                  "end_time": 1793283481242,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "844ff158-00000098",
+              "timestamp": "2026-10-29T14:15:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "846e7fc6-e87b-4c4c-8a74-3ab123ad1fe1"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Suspicious sign-in alpha-inc-000027",
+                  "ticket_id": "alpha-inc-000027",
+                  "rule_generator": "Threat Protection",
+                  "priority": 60,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283283307,
+                  "end_time": 1793283439307,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "61ce6f4e-00000094",
+              "timestamp": "2026-10-29T14:15:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "2cae7202-8bf3-4317-8028-24ba307dff83"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Impossible travel alert alpha-inc-000023",
+                  "ticket_id": "alpha-inc-000023",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": 80,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283251383,
+                  "end_time": 1793283333383,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "5d470fd5-00000095",
+              "timestamp": "2026-10-29T14:15:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "24bc27ab-e2c7-4cfe-85e2-4c4e7510bfed"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Anomalous data exfiltration alpha-inc-000024",
+                  "ticket_id": "alpha-inc-000024",
+                  "rule_generator": "Insider Risk",
+                  "priority": 40,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283275526,
+                  "end_time": 1793283358526,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "ce6cdd1d-00000080",
+              "timestamp": "2026-10-29T14:13:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "4ef2fe9f-2874-4071-84e7-703e89422bf1"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Brute force attempt alpha-inc-000022",
+                  "ticket_id": "alpha-inc-000022",
+                  "rule_generator": "Threat Protection",
+                  "priority": -1,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283167204,
+                  "end_time": 1793283309204,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "485dd949-0000007f",
+              "timestamp": "2026-10-29T14:13:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "f9160b57-1cc0-4829-8596-454df52c812f"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Suspicious sign-in alpha-inc-000021",
+                  "ticket_id": "alpha-inc-000021",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": 40,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283141209,
+                  "end_time": 1793283269209,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "e45eaa07-0000006d",
+              "timestamp": "2026-10-29T14:11:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "19634439-5156-4183-8d93-77b600d5949e"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Impossible travel alert alpha-inc-000019",
+                  "ticket_id": "alpha-inc-000019",
+                  "rule_generator": "Threat Protection",
+                  "priority": -1,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283029583,
+                  "end_time": 1793283273583,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "6851cc44-0000006e",
+              "timestamp": "2026-10-29T14:11:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "66416390-476d-425f-8e4c-10689e382a06"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Brute force attempt alpha-inc-000020",
+                  "ticket_id": "alpha-inc-000020",
+                  "rule_generator": "Insider Risk",
+                  "priority": -1,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793283048212,
+                  "end_time": 1793283257212,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "83085ae8-00000064",
+              "timestamp": "2026-10-29T14:10:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "c53862ec-a974-4a08-8614-50c70970c0ac"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Anomalous data exfiltration alpha-inc-000018",
+                  "ticket_id": "alpha-inc-000018",
+                  "rule_generator": "Insider Risk",
+                  "priority": 60,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793282948439,
+                  "end_time": 1793283027439,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "4144d06e-00000057",
+              "timestamp": "2026-10-29T14:09:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "d164c569-93f4-4c5a-8a9a-9f3d4e6974bf"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Suspicious sign-in alpha-inc-000016",
+                  "ticket_id": "alpha-inc-000016",
+                  "rule_generator": "Insider Risk",
+                  "priority": 60,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793282895474,
+                  "end_time": 1793283168474,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "311e142d-00000058",
+              "timestamp": "2026-10-29T14:09:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "8e4f4cf0-0c1f-4f97-8e23-0943543c181b"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Suspicious PowerShell activity alpha-inc-000017",
+                  "ticket_id": "alpha-inc-000017",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": 40,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793282938351,
+                  "end_time": 1793283012351,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "76fd6a16-00000045",
+              "timestamp": "2026-10-29T14:07:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "e61314ac-db75-4232-829d-9bb3448c0450"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Impossible travel alert alpha-inc-000015",
+                  "ticket_id": "alpha-inc-000015",
+                  "rule_generator": "Insider Risk",
+                  "priority": 60,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793282812368,
+                  "end_time": 1793283097368,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "fb06e129-00000037",
+              "timestamp": "2026-10-29T14:06:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "db72976e-226b-4d30-8565-fbd707f484b4"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "alpha",
+                "alert": {
+                  "name": "Malware detected on host alpha-inc-000010",
+                  "ticket_id": "alpha-inc-000010",
+                  "rule_generator": "Threat Protection",
+                  "priority": 60,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "alpha",
+                  "start_time": 1793282714757,
+                  "end_time": 1793282821757,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            }
+          ],
+          "total": 63,
+          "truncated": true
+        }
+      },
+      "usage": {
+        "input_tokens": 6204,
+        "output_tokens": 269,
+        "cached_tokens": 5745,
+        "reasoning_tokens": 142
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 3,
+      "items": [
+        {
+          "id": "rs_6ae69d5bbac1b0d244174b38:rs_57be8bf5-05da-426a-b3dc-905c57f87420",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"component\":\"ingestion\",\"rationale\":\"Check if siblings also show string priority drift or only alpha\",\"service\":\"alert-ingestion\",\"window\":{\"lastMinutes\":60}}",
+          "call_id": "call_10e624d0-05dd-44bb-ba2e-398257b5090b",
+          "name": "compare_siblings",
+          "type": "function_call",
+          "id": "fc_10e624d0-05dd-44bb-ba2e-398257b5090b",
+          "status": "completed"
+        }
+      ],
+      "tool": "compare_siblings",
+      "args": {
+        "component": "ingestion",
+        "rationale": "Check if siblings also show string priority drift or only alpha",
+        "service": "alert-ingestion",
+        "window": {
+          "lastMinutes": 60
+        }
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_10e624d0-05dd-44bb-ba2e-398257b5090b",
+        "result": {
+          "service": "alert-ingestion",
+          "component": "ingestion",
+          "window": {
+            "lastMinutes": 60
+          },
+          "deployments": {
+            "alert-ingestion/alpha": {
+              "runs": 63,
+              "warningRuns": 0,
+              "errorRuns": 0,
+              "alertsIngested": 63,
+              "lastHeartbeatAt": "2026-10-29T14:32:00Z",
+              "lastHeartbeatId": "c167f617-00000155",
+              "worstInsertId": "c167f617-00000155"
+            },
+            "alert-ingestion/bravo": {
+              "runs": 18,
+              "warningRuns": 0,
+              "errorRuns": 0,
+              "alertsIngested": 18,
+              "lastHeartbeatAt": "2026-10-29T14:32:00Z",
+              "lastHeartbeatId": "19dabf03-00000159",
+              "worstInsertId": "19dabf03-00000159"
+            },
+            "alert-ingestion/canary": {
+              "runs": 0,
+              "warningRuns": 0,
+              "errorRuns": 0,
+              "alertsIngested": 0,
+              "lastHeartbeatAt": null,
+              "lastHeartbeatId": null,
+              "worstInsertId": null
+            },
+            "alert-ingestion/charlie": {
+              "runs": 1,
+              "warningRuns": 0,
+              "errorRuns": 0,
+              "alertsIngested": 1,
+              "lastHeartbeatAt": "2026-10-29T14:04:00Z",
+              "lastHeartbeatId": "526f0be1-00000025",
+              "worstInsertId": "526f0be1-00000025"
+            }
+          }
+        }
+      },
+      "usage": {
+        "input_tokens": 16003,
+        "output_tokens": 307,
+        "cached_tokens": 6129,
+        "reasoning_tokens": 194
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 4,
+      "items": [
+        {
+          "id": "rs_6ae69d5c9e76bd2db5fd4664:rs_945dafcb-9f58-4d87-b066-bb9b2342bef9",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"deployment\":\"alert-ingestion/bravo\",\"filter\":{\"component\":\"ingestion\",\"event\":\"alert.ingested\"},\"rationale\":\"Check sibling bravo priority values to test fleet-wide hypothesis\",\"window\":{\"lastMinutes\":60}}",
+          "call_id": "call_f4348f5b-39b4-4296-9a20-f0ec45e8e9a6",
+          "name": "query_logs",
+          "type": "function_call",
+          "id": "fc_f4348f5b-39b4-4296-9a20-f0ec45e8e9a6",
+          "status": "completed"
+        }
+      ],
+      "tool": "query_logs",
+      "args": {
+        "deployment": "alert-ingestion/bravo",
+        "filter": {
+          "component": "ingestion",
+          "event": "alert.ingested"
+        },
+        "rationale": "Check sibling bravo priority values to test fleet-wide hypothesis",
+        "window": {
+          "lastMinutes": 60
+        }
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_f4348f5b-39b4-4296-9a20-f0ec45e8e9a6",
+        "result": {
+          "entries": [
+            {
+              "insertId": "19dabf03-00000159",
+              "timestamp": "2026-10-29T14:32:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "71527e0d-ea52-4835-8928-b71ebccc82e2"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "bravo",
+                "alert": {
+                  "name": "Suspicious sign-in bravo-inc-000018",
+                  "ticket_id": "bravo-inc-000018",
+                  "rule_generator": "Threat Protection",
+                  "priority": -1,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "bravo",
+                  "start_time": 1793284293421,
+                  "end_time": 1793284339421,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "2b56b559-0000012a",
+              "timestamp": "2026-10-29T14:28:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "7e3f2b8e-d438-4f43-8716-d0197453b400"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "bravo",
+                "alert": {
+                  "name": "Suspicious sign-in bravo-inc-000017",
+                  "ticket_id": "bravo-inc-000017",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": 60,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "bravo",
+                  "start_time": 1793284079655,
+                  "end_time": 1793284281655,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "1a03333b-00000129",
+              "timestamp": "2026-10-29T14:28:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "e4996e4a-4802-43df-87d9-05735145aeac"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "bravo",
+                "alert": {
+                  "name": "Malware detected on host bravo-inc-000016",
+                  "ticket_id": "bravo-inc-000016",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": 40,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "bravo",
+                  "start_time": 1793284067480,
+                  "end_time": 1793284280480,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "89fb9fa3-0000011f",
+              "timestamp": "2026-10-29T14:27:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "45dfcbf4-af07-4771-8802-258df3a63639"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "bravo",
+                "alert": {
+                  "name": "Malware detected on host bravo-inc-000015",
+                  "ticket_id": "bravo-inc-000015",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": 80,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "bravo",
+                  "start_time": 1793283994161,
+                  "end_time": 1793284145161,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "2cd2c6e3-00000113",
+              "timestamp": "2026-10-29T14:26:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "c038d800-227f-4b64-8850-4440b6061156"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "bravo",
+                "alert": {
+                  "name": "Anomalous data exfiltration bravo-inc-000013",
+                  "ticket_id": "bravo-inc-000013",
+                  "rule_generator": "Threat Protection",
+                  "priority": 40,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "bravo",
+                  "start_time": 1793283909068,
+                  "end_time": 1793283954068,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "2be4a3b6-00000114",
+              "timestamp": "2026-10-29T14:26:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "765a29d3-64dd-433c-8298-5ffca78dacbd"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "bravo",
+                "alert": {
+                  "name": "Brute force attempt bravo-inc-000014",
+                  "ticket_id": "bravo-inc-000014",
+                  "rule_generator": "Threat Protection",
+                  "priority": 40,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "bravo",
+                  "start_time": 1793283934417,
+                  "end_time": 1793284045417,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "f01e0944-000000fb",
+              "timestamp": "2026-10-29T14:24:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "90d571ae-f514-43a5-8e2e-2179b662bef0"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "bravo",
+                "alert": {
+                  "name": "Anomalous data exfiltration bravo-inc-000012",
+                  "ticket_id": "bravo-inc-000012",
+                  "rule_generator": "Threat Protection",
+                  "priority": 60,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "bravo",
+                  "start_time": 1793283808241,
+                  "end_time": 1793284080241,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "f8091360-000000f0",
+              "timestamp": "2026-10-29T14:23:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "09b41a34-42ec-430f-8e08-a7f00cfc48e4"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "bravo",
+                "alert": {
+                  "name": "Impossible travel alert bravo-inc-000010",
+                  "ticket_id": "bravo-inc-000010",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": 80,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "bravo",
+                  "start_time": 1793283743870,
+                  "end_time": 1793283894870,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "39eebcfd-000000f1",
+              "timestamp": "2026-10-29T14:23:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "2efd50a3-919e-424b-8e3d-ed2be5615e6c"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "bravo",
+                "alert": {
+                  "name": "Anomalous data exfiltration bravo-inc-000011",
+                  "ticket_id": "bravo-inc-000011",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": 60,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "bravo",
+                  "start_time": 1793283752657,
+                  "end_time": 1793284045657,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "94c95ac7-000000db",
+              "timestamp": "2026-10-29T14:21:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "3c601677-f155-4f4a-81e6-56c084c8bc5c"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "bravo",
+                "alert": {
+                  "name": "Suspicious sign-in bravo-inc-000009",
+                  "ticket_id": "bravo-inc-000009",
+                  "rule_generator": "Insider Risk",
+                  "priority": 40,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "bravo",
+                  "start_time": 1793283647873,
+                  "end_time": 1793283747873,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "6a2ef16f-000000da",
+              "timestamp": "2026-10-29T14:21:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "97b82422-7290-4316-8939-c318cafd2ce5"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "bravo",
+                "alert": {
+                  "name": "Suspicious PowerShell activity bravo-inc-000008",
+                  "ticket_id": "bravo-inc-000008",
+                  "rule_generator": "Threat Protection",
+                  "priority": 80,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "bravo",
+                  "start_time": 1793283617635,
+                  "end_time": 1793283851635,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "b98f67e0-000000d0",
+              "timestamp": "2026-10-29T14:20:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "1d9ca47f-02a1-431e-80fd-63ed905b019e"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "bravo",
+                "alert": {
+                  "name": "Brute force attempt bravo-inc-000007",
+                  "ticket_id": "bravo-inc-000007",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": 60,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "bravo",
+                  "start_time": 1793283559853,
+                  "end_time": 1793283587853,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "8031c336-000000ba",
+              "timestamp": "2026-10-29T14:18:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "681b26a9-7161-442f-8a39-c215d440a663"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "bravo",
+                "alert": {
+                  "name": "Anomalous data exfiltration bravo-inc-000006",
+                  "ticket_id": "bravo-inc-000006",
+                  "rule_generator": "Threat Protection",
+                  "priority": 40,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "bravo",
+                  "start_time": 1793283428724,
+                  "end_time": 1793283602724,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "9702795f-0000008b",
+              "timestamp": "2026-10-29T14:14:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "60de94b3-f168-4d5a-882a-9393ac74623b"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "bravo",
+                "alert": {
+                  "name": "Brute force attempt bravo-inc-000005",
+                  "ticket_id": "bravo-inc-000005",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": 40,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "bravo",
+                  "start_time": 1793283187559,
+                  "end_time": 1793283232559,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "1a17d2d5-0000005b",
+              "timestamp": "2026-10-29T14:09:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "041b4d4c-06fd-409a-8d9d-bca34b559149"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "bravo",
+                "alert": {
+                  "name": "Malware detected on host bravo-inc-000004",
+                  "ticket_id": "bravo-inc-000004",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": 40,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "bravo",
+                  "start_time": 1793282923696,
+                  "end_time": 1793283188696,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "157da98e-00000050",
+              "timestamp": "2026-10-29T14:08:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "84161ae2-af9f-409a-83bd-765f358112f6"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "bravo",
+                "alert": {
+                  "name": "Brute force attempt bravo-inc-000003",
+                  "ticket_id": "bravo-inc-000003",
+                  "rule_generator": "Sentinel Analytics",
+                  "priority": -1,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "bravo",
+                  "start_time": 1793282873960,
+                  "end_time": 1793283109960,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "29873362-0000003e",
+              "timestamp": "2026-10-29T14:06:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "80587c9a-4cf5-49d9-87f1-dad792e7550e"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "bravo",
+                "alert": {
+                  "name": "Suspicious sign-in bravo-inc-000002",
+                  "ticket_id": "bravo-inc-000002",
+                  "rule_generator": "Threat Protection",
+                  "priority": 40,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "bravo",
+                  "start_time": 1793282757860,
+                  "end_time": 1793282819860,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            },
+            {
+              "insertId": "23476db7-00000030",
+              "timestamp": "2026-10-29T14:05:00Z",
+              "severity": "INFO",
+              "labels": {
+                "correlation_id": "406312a8-ae42-4bc5-8161-e577655e786a"
+              },
+              "jsonPayload": {
+                "event": "alert.ingested",
+                "environment": "bravo",
+                "alert": {
+                  "name": "Malware detected on host bravo-inc-000001",
+                  "ticket_id": "bravo-inc-000001",
+                  "rule_generator": "Threat Protection",
+                  "priority": 80,
+                  "device_vendor": "Microsoft",
+                  "device_product": "Azure Sentinel",
+                  "environment": "bravo",
+                  "start_time": 1793282693696,
+                  "end_time": 1793282923696,
+                  "canary": false
+                }
+              },
+              "container": "etl"
+            }
+          ],
+          "total": 18,
+          "truncated": false
+        }
+      },
+      "usage": {
+        "input_tokens": 16720,
+        "output_tokens": 307,
+        "cached_tokens": 5745,
+        "reasoning_tokens": 179
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 5,
+      "items": [
+        {
+          "id": "rs_6ae69d5e9a1e178964a94d9a:rs_ee6ed64b-8684-43d1-a32d-fe18c0755d6c",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "id": "rs_7073def9-c619-4111-9dc7-3195acdcb952",
+          "content": [
+            {
+              "annotations": [],
+              "text": "Alpha shows an isolated string value while siblings look clean \u2014 now checking the connector configuration.",
+              "type": "output_text",
+              "logprobs": []
+            }
+          ],
+          "role": "assistant",
+          "status": "completed",
+          "type": "message",
+          "phase": "commentary"
+        },
+        {
+          "arguments": "{\"name\":\"projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel\",\"rationale\":\"Check connector settings for priority mapping control before escalate vs propose\"}",
+          "call_id": "call_859ed790-8efd-46d3-b91a-da9e2201c843",
+          "name": "get_resource",
+          "type": "function_call",
+          "id": "fc_859ed790-8efd-46d3-b91a-da9e2201c843",
+          "status": "completed"
+        }
+      ],
+      "tool": "get_resource",
+      "args": {
+        "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel",
+        "rationale": "Check connector settings for priority mapping control before escalate vs propose"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_859ed790-8efd-46d3-b91a-da9e2201c843",
+        "result": {
+          "name": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel",
+          "agent": "",
+          "environment": "projects/fleet-sre-demo/locations/us/instances/mock-soar/environments/alpha",
+          "displayName": "Mock Sentinel Incidents Connector",
+          "description": "",
+          "intervalSeconds": 60,
+          "documentationLink": "",
+          "allowList": [],
+          "productFieldName": "device_product",
+          "eventFieldName": "event_name",
+          "timeoutSeconds": 30,
+          "connectorDefinitionName": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents",
+          "integrationVersion": "1.0",
+          "version": 1,
+          "loggingEnabledUntilUnixMs": "0",
+          "statistics": {
+            "pastDayAlertsCount": 63,
+            "avgAlertsPerDay": 63
+          },
+          "parameters": [
+            {
+              "value": "00000000-0000-4000-a000-0000000000a1",
+              "displayName": "Tenant ID",
+              "description": "",
+              "mandatory": true,
+              "advanced": false,
+              "type": "STRING"
+            },
+            {
+              "value": "00000000-0000-4000-b000-0000000000a1",
+              "displayName": "Client ID",
+              "description": "",
+              "mandatory": true,
+              "advanced": false,
+              "type": "STRING"
+            },
+            {
+              "value": "********",
+              "displayName": "Client Secret",
+              "description": "",
+              "mandatory": true,
+              "advanced": false,
+              "type": "PASSWORD"
+            },
+            {
+              "value": "law-alpha",
+              "displayName": "Workspace Name",
+              "description": "",
+              "mandatory": true,
+              "advanced": false,
+              "type": "STRING"
+            },
+            {
+              "value": "50",
+              "displayName": "Max Incidents Per Cycle",
+              "description": "",
+              "mandatory": false,
+              "advanced": false,
+              "type": "INT"
+            },
+            {
+              "value": "",
+              "displayName": "Unknown Severity Priority",
+              "description": "",
+              "mandatory": false,
+              "advanced": false,
+              "type": "INT"
+            }
+          ],
+          "connectorId": "alpha-sentinel",
+          "identifier": "alpha-sentinel",
+          "id": "alpha-sentinel",
+          "updateAvailable": false,
+          "custom": true,
+          "enabled": true,
+          "remote": false,
+          "status": "LIVE",
+          "integration": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel"
+        }
+      },
+      "usage": {
+        "input_tokens": 20569,
+        "output_tokens": 432,
+        "cached_tokens": 16625,
+        "reasoning_tokens": 295
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 6,
+      "items": [
+        {
+          "id": "rs_6ae69d6546e2efc3147145f5:rs_aa1eb148-b73c-4bba-9316-93bf6d192c6d",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"rationale\":\"Check expected priority contract and mapping context\",\"service\":\"alert-ingestion\"}",
+          "call_id": "call_d3d9ae1b-97e3-479e-9972-2723fc1b06a3",
+          "name": "get_contract",
+          "type": "function_call",
+          "id": "fc_d3d9ae1b-97e3-479e-9972-2723fc1b06a3",
+          "status": "completed"
+        }
+      ],
+      "tool": "get_contract",
+      "args": {
+        "rationale": "Check expected priority contract and mapping context",
+        "service": "alert-ingestion"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_d3d9ae1b-97e3-479e-9972-2723fc1b06a3",
+        "result": {
+          "service": "alert-ingestion",
+          "contract": {
+            "service": "alert-ingestion",
+            "version": "1.0.0",
+            "description": "Sentinel incidents polled by a SOAR connector instance and ingested as alerts by the ETL flow.",
+            "parameters": {
+              "expectedAlertsPerHour": {
+                "type": "number",
+                "required": true,
+                "default": null,
+                "description": "Organic upstream volume for this tenant. Informational: no tripwire uses it, because volume cannot tell quiet from broken."
+              },
+              "intervalSeconds": {
+                "type": "integer",
+                "required": true,
+                "default": null,
+                "description": "Connector run interval."
+              }
+            },
+            "components": [
+              {
+                "id": "connector",
+                "kind": "connectorInstance",
+                "logs": {
+                  "container_name": "python",
+                  "match": [
+                    "connector_name",
+                    "connector_instance"
+                  ],
+                  "deploymentBy": "labels.connector_instance"
+                },
+                "description": null
+              },
+              {
+                "id": "ingestion",
+                "kind": "etlFlow",
+                "logs": {
+                  "container_name": "etl",
+                  "match": [
+                    "correlation_id"
+                  ],
+                  "deploymentBy": "jsonPayload.environment"
+                },
+                "description": null
+              }
+            ],
+            "tripwires": [
+              {
+                "id": "dead-connector",
+                "component": "connector",
+                "type": "cadence",
+                "spec": {
+                  "event": "connector.run.completed",
+                  "intervalSeconds": "${intervalSeconds}",
+                  "maxSilentIntervals": 3
+                }
+              },
+              {
+                "id": "canary",
+                "component": "ingestion",
+                "type": "synthetic",
+                "spec": {
+                  "everyMinutes": 10,
+                  "deadlineSeconds": 180
+                }
+              },
+              {
+                "id": "priority-shape",
+                "component": "ingestion",
+                "type": "schema",
+                "spec": {
+                  "event": "alert.ingested",
+                  "field": "jsonPayload.alert.priority",
+                  "type": "integer",
+                  "enum": [
+                    -1,
+                    40,
+                    60,
+                    80,
+                    100
+                  ],
+                  "required": true,
+                  "consecutive": 1,
+                  "recoverAfter": 20
+                }
+              },
+              {
+                "id": "connector-errors",
+                "component": "connector",
+                "type": "errorSignature",
+                "spec": {
+                  "minSeverity": "WARNING",
+                  "windowRuns": 10,
+                  "threshold": 8
+                }
+              }
+            ],
+            "changePoint": {
+              "durationSeconds": 1800,
+              "overrides": {
+                "dead-connector": {
+                  "maxSilentIntervals": 2
+                }
+              }
+            },
+            "provenance": {
+              "authoredBy": "human:rixon",
+              "scorecard": null,
+              "approvedBy": "rixon"
+            }
+          },
+          "scorecard": null
+        }
+      },
+      "usage": {
+        "input_tokens": 21590,
+        "output_tokens": 1349,
+        "cached_tokens": 15985,
+        "reasoning_tokens": 1276
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 7,
+      "items": [
+        {
+          "id": "rs_6ae69d66fa381058d0564b81:rs_1ba2dec8-7077-4511-bdc0-52144c9a9da3",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"deployment\":\"alert-ingestion/alpha\",\"rationale\":\"Check recent trips and approved changes for context\"}",
+          "call_id": "call_d6f1a4bb-f1a7-410c-b64c-bad24fde49b7",
+          "name": "tripwire_history",
+          "type": "function_call",
+          "id": "fc_d6f1a4bb-f1a7-410c-b64c-bad24fde49b7",
+          "status": "completed"
+        }
+      ],
+      "tool": "tripwire_history",
+      "args": {
+        "deployment": "alert-ingestion/alpha",
+        "rationale": "Check recent trips and approved changes for context"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_d6f1a4bb-f1a7-410c-b64c-bad24fde49b7",
+        "result": {
+          "deployment": "alert-ingestion/alpha",
+          "events": []
+        }
+      },
+      "usage": {
+        "input_tokens": 23520,
+        "output_tokens": 98,
+        "cached_tokens": 21489,
+        "reasoning_tokens": 18
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 8,
+      "items": [
+        {
+          "id": "rs_6ae69d68bca93f86cce34137:rs_224fda21-d9b9-41b6-aadf-d91c174b5cd3",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "id": "rs_a16c5f1d-a7b6-4468-b7ba-8f06af8dfbff",
+          "content": [
+            {
+              "annotations": [],
+              "text": "Contract and history show no recent changes \u2014 now examining connector activity around the violation.",
+              "type": "output_text",
+              "logprobs": []
+            }
+          ],
+          "role": "assistant",
+          "status": "completed",
+          "type": "message",
+          "phase": "commentary"
+        },
+        {
+          "arguments": "{\"deployment\":\"alert-ingestion/alpha\",\"filter\":{\"component\":\"connector\"},\"rationale\":\"Check connector runs for errors or severity handling clues\",\"window\":{\"lastMinutes\":60}}",
+          "call_id": "call_4f8e4596-33fb-4267-bd6a-bbad3306863d",
+          "name": "query_logs",
+          "type": "function_call",
+          "id": "fc_4f8e4596-33fb-4267-bd6a-bbad3306863d",
+          "status": "completed"
+        }
+      ],
+      "tool": "query_logs",
+      "args": {
+        "deployment": "alert-ingestion/alpha",
+        "filter": {
+          "component": "connector"
+        },
+        "rationale": "Check connector runs for errors or severity handling clues",
+        "window": {
+          "lastMinutes": 60
+        }
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_4f8e4596-33fb-4267-bd6a-bbad3306863d",
+        "result": {
+          "entries": [
+            {
+              "insertId": "6cf2b23a-00000157",
+              "timestamp": "2026-10-29T14:32:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000137",
+                "environment": "alpha",
+                "alertsFetched": 2
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "26319e8f-00000154",
+              "timestamp": "2026-10-29T14:32:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000137",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "b05dc34d-0000014a",
+              "timestamp": "2026-10-29T14:31:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000133",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "49aca953-0000014d",
+              "timestamp": "2026-10-29T14:31:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000133",
+                "environment": "alpha",
+                "alertsFetched": 2
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "9656e7a6-0000013c",
+              "timestamp": "2026-10-29T14:30:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000129",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "3bb46f71-00000143",
+              "timestamp": "2026-10-29T14:30:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000129",
+                "environment": "alpha",
+                "alertsFetched": 6
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "f8341012-00000133",
+              "timestamp": "2026-10-29T14:29:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000123",
+                "environment": "alpha",
+                "alertsFetched": 2
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "a0dc7dc9-00000130",
+              "timestamp": "2026-10-29T14:29:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000123",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "5b22040c-00000125",
+              "timestamp": "2026-10-29T14:28:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000119",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "0ace7008-00000127",
+              "timestamp": "2026-10-29T14:28:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000119",
+                "environment": "alpha",
+                "alertsFetched": 1
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "cbbb2e63-0000011d",
+              "timestamp": "2026-10-29T14:27:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000115",
+                "environment": "alpha",
+                "alertsFetched": 2
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "af9a5a54-0000011a",
+              "timestamp": "2026-10-29T14:27:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000115",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "bd7947fe-00000110",
+              "timestamp": "2026-10-29T14:26:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000111",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "2b7ebaa4-00000111",
+              "timestamp": "2026-10-29T14:26:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000111",
+                "environment": "alpha",
+                "alertsFetched": 0
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "6b7e0105-00000103",
+              "timestamp": "2026-10-29T14:25:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000107",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "29f12032-00000109",
+              "timestamp": "2026-10-29T14:25:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000107",
+                "environment": "alpha",
+                "alertsFetched": 5
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "61ff0ce5-000000f7",
+              "timestamp": "2026-10-29T14:24:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000101",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "5776ede5-000000f9",
+              "timestamp": "2026-10-29T14:24:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000101",
+                "environment": "alpha",
+                "alertsFetched": 1
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "8ddf1a3b-000000ee",
+              "timestamp": "2026-10-29T14:23:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000097",
+                "environment": "alpha",
+                "alertsFetched": 1
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "10fa2ab6-000000ec",
+              "timestamp": "2026-10-29T14:23:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000097",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "803d958d-000000e1",
+              "timestamp": "2026-10-29T14:22:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000093",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "67923104-000000e5",
+              "timestamp": "2026-10-29T14:22:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000093",
+                "environment": "alpha",
+                "alertsFetched": 3
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "74b4aca0-000000d6",
+              "timestamp": "2026-10-29T14:21:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000089",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "4d828a8c-000000d8",
+              "timestamp": "2026-10-29T14:21:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000089",
+                "environment": "alpha",
+                "alertsFetched": 1
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "eccf3201-000000cc",
+              "timestamp": "2026-10-29T14:20:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000085",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "bb788001-000000ce",
+              "timestamp": "2026-10-29T14:20:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000085",
+                "environment": "alpha",
+                "alertsFetched": 1
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "431cba00-000000c3",
+              "timestamp": "2026-10-29T14:19:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000079",
+                "environment": "alpha",
+                "alertsFetched": 2
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "2b7a7fca-000000c0",
+              "timestamp": "2026-10-29T14:19:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000079",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "efa7c2ae-000000b8",
+              "timestamp": "2026-10-29T14:18:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000075",
+                "environment": "alpha",
+                "alertsFetched": 2
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "b0521122-000000b5",
+              "timestamp": "2026-10-29T14:18:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000075",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "a7485b64-000000aa",
+              "timestamp": "2026-10-29T14:17:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000071",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "3c886755-000000ae",
+              "timestamp": "2026-10-29T14:17:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000071",
+                "environment": "alpha",
+                "alertsFetched": 3
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "6c24822e-000000a0",
+              "timestamp": "2026-10-29T14:16:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000067",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "104e168a-000000a3",
+              "timestamp": "2026-10-29T14:16:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000067",
+                "environment": "alpha",
+                "alertsFetched": 2
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "c039a6b0-00000093",
+              "timestamp": "2026-10-29T14:15:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000063",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "43753b5f-00000099",
+              "timestamp": "2026-10-29T14:15:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000063",
+                "environment": "alpha",
+                "alertsFetched": 5
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "8fec8bda-00000088",
+              "timestamp": "2026-10-29T14:14:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000057",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "85e599ab-00000089",
+              "timestamp": "2026-10-29T14:14:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000057",
+                "environment": "alpha",
+                "alertsFetched": 0
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "e35d2a9b-0000007e",
+              "timestamp": "2026-10-29T14:13:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000053",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "691b1ad4-00000081",
+              "timestamp": "2026-10-29T14:13:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000053",
+                "environment": "alpha",
+                "alertsFetched": 2
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "eb6bc3b5-00000077",
+              "timestamp": "2026-10-29T14:12:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000049",
+                "environment": "alpha",
+                "alertsFetched": 0
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "83d7e31f-00000076",
+              "timestamp": "2026-10-29T14:12:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000049",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "770ff334-0000006c",
+              "timestamp": "2026-10-29T14:11:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000045",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "7458f7c3-0000006f",
+              "timestamp": "2026-10-29T14:11:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000045",
+                "environment": "alpha",
+                "alertsFetched": 2
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "583e86cd-00000065",
+              "timestamp": "2026-10-29T14:10:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000041",
+                "environment": "alpha",
+                "alertsFetched": 1
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "4b6959c0-00000063",
+              "timestamp": "2026-10-29T14:10:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000041",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "f42c0826-00000059",
+              "timestamp": "2026-10-29T14:09:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000035",
+                "environment": "alpha",
+                "alertsFetched": 2
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "d3e014f7-00000056",
+              "timestamp": "2026-10-29T14:09:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000035",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "bd59a414-0000004d",
+              "timestamp": "2026-10-29T14:08:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.started",
+                "runId": "run-00000031",
+                "environment": "alpha"
+              },
+              "container": "python"
+            },
+            {
+              "insertId": "3d42653d-0000004e",
+              "timestamp": "2026-10-29T14:08:00Z",
+              "severity": "INFO",
+              "labels": {
+                "integration_name": "MockSentinel",
+                "integration_version": "1.0",
+                "connector_name": "Mock Sentinel Incidents Connector",
+                "connector_instance": "alpha-sentinel"
+              },
+              "jsonPayload": {
+                "event": "connector.run.completed",
+                "runId": "run-00000031",
+                "environment": "alpha",
+                "alertsFetched": 0
+              },
+              "container": "python"
+            }
+          ],
+          "total": 64,
+          "truncated": true
+        }
+      },
+      "usage": {
+        "input_tokens": 23695,
+        "output_tokens": 167,
+        "cached_tokens": 20465,
+        "reasoning_tokens": 28
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 9,
+      "items": [
+        {
+          "id": "rs_6ae69d6cc4096b0349d942c8:rs_234f3366-feb9-4330-ad81-61e1b4123585",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"items\":[{\"alternative\":false,\"id\":\"H1\",\"statement\":\"Alpha connector Unknown Severity Priority is empty, so unknown string severity 'Critical' passes through as priority violating integer enum\",\"wouldConfirm\":\"Violating entry shows string priority and connector param Unknown Severity Priority is empty\"},{\"alternative\":false,\"id\":\"H2\",\"statement\":\"Single transient malformed alert in alpha, surrounding alerts valid and no config cause\",\"wouldConfirm\":\"Only one violating entry among many valid integer priorities with no config gap\"},{\"alternative\":true,\"id\":\"H3\",\"statement\":\"Fleet-wide upstream severity format change affecting all tenants, not alpha-specific\",\"wouldConfirm\":\"Siblings bravo/charlie also show string priority values\"}],\"rationale\":\"Refine H1 to config cause found in connector params for propose fix\"}",
+          "call_id": "call_e23274b9-7a6c-45e0-8cec-55836c6a8a6a",
+          "name": "set_hypotheses",
+          "type": "function_call",
+          "id": "fc_e23274b9-7a6c-45e0-8cec-55836c6a8a6a",
+          "status": "completed"
+        }
+      ],
+      "tool": "set_hypotheses",
+      "args": {
+        "items": [
+          {
+            "alternative": false,
+            "id": "H1",
+            "statement": "Alpha connector Unknown Severity Priority is empty, so unknown string severity 'Critical' passes through as priority violating integer enum",
+            "wouldConfirm": "Violating entry shows string priority and connector param Unknown Severity Priority is empty"
+          },
+          {
+            "alternative": false,
+            "id": "H2",
+            "statement": "Single transient malformed alert in alpha, surrounding alerts valid and no config cause",
+            "wouldConfirm": "Only one violating entry among many valid integer priorities with no config gap"
+          },
+          {
+            "alternative": true,
+            "id": "H3",
+            "statement": "Fleet-wide upstream severity format change affecting all tenants, not alpha-specific",
+            "wouldConfirm": "Siblings bravo/charlie also show string priority values"
+          }
+        ],
+        "rationale": "Refine H1 to config cause found in connector params for propose fix"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_e23274b9-7a6c-45e0-8cec-55836c6a8a6a",
+        "result": {
+          "ok": true,
+          "count": 3
+        }
+      },
+      "usage": {
+        "input_tokens": 29977,
+        "output_tokens": 791,
+        "cached_tokens": 23409,
+        "reasoning_tokens": 552
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 10,
+      "items": [
+        {
+          "id": "rs_6ae69d70c3d2c8ba66234c0f:rs_42a9b293-9b53-49ca-8dc0-e4776c63b755",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"hypothesis\":\"H1\",\"rationale\":\"Cite violating string priority entry for schema drift\",\"source\":{\"insertId\":\"75ecd103-00000156\"},\"stance\":\"supports\",\"why\":\"Entry priority is string 'Critical' not integer enum [-1,40,60,80,100], violating priority-shape tripwire\"}",
+          "call_id": "call_5abd71a4-0f8b-408a-be20-c94cd186345a",
+          "name": "record_evidence",
+          "type": "function_call",
+          "id": "fc_5abd71a4-0f8b-408a-be20-c94cd186345a",
+          "status": "completed"
+        }
+      ],
+      "tool": "record_evidence",
+      "args": {
+        "hypothesis": "H1",
+        "rationale": "Cite violating string priority entry for schema drift",
+        "source": {
+          "insertId": "75ecd103-00000156"
+        },
+        "stance": "supports",
+        "why": "Entry priority is string 'Critical' not integer enum [-1,40,60,80,100], violating priority-shape tripwire"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_5abd71a4-0f8b-408a-be20-c94cd186345a",
+        "result": {
+          "ok": true,
+          "id": "E1",
+          "remaining": [
+            "H2",
+            "H3"
+          ]
+        }
+      },
+      "usage": {
+        "input_tokens": 30843,
+        "output_tokens": 901,
+        "cached_tokens": 29937,
+        "reasoning_tokens": 746
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 11,
+      "items": [
+        {
+          "id": "rs_6ae69d71696fc1e5ab4045f9:rs_dfc42ecf-f918-4c11-b87f-42ac8516f916",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"hypothesis\":\"H1\",\"rationale\":\"Cite empty Unknown Severity Priority setting enabling passthrough\",\"source\":{\"callId\":\"call_859ed790-8efd-46d3-b91a-da9e2201c843\",\"field\":\"parameters.5.value\",\"value\":\"\"},\"stance\":\"supports\",\"why\":\"Unknown Severity Priority is empty, so unknown severities have no integer fallback and pass through as strings\"}",
+          "call_id": "call_1b888585-d921-448a-ae35-e0c791275ff5",
+          "name": "record_evidence",
+          "type": "function_call",
+          "id": "fc_1b888585-d921-448a-ae35-e0c791275ff5",
+          "status": "completed"
+        }
+      ],
+      "tool": "record_evidence",
+      "args": {
+        "hypothesis": "H1",
+        "rationale": "Cite empty Unknown Severity Priority setting enabling passthrough",
+        "source": {
+          "callId": "call_859ed790-8efd-46d3-b91a-da9e2201c843",
+          "field": "parameters.5.value",
+          "value": ""
+        },
+        "stance": "supports",
+        "why": "Unknown Severity Priority is empty, so unknown severities have no integer fallback and pass through as strings"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_1b888585-d921-448a-ae35-e0c791275ff5",
+        "result": {
+          "ok": true,
+          "id": "E2",
+          "remaining": [
+            "H2",
+            "H3"
+          ]
+        }
+      },
+      "usage": {
+        "input_tokens": 31825,
+        "output_tokens": 192,
+        "cached_tokens": 23665,
+        "reasoning_tokens": 15
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 12,
+      "items": [
+        {
+          "id": "rs_6ae69d72c7eb8362694c425c:rs_50ce6f05-cd40-43a3-826c-e5690e14133e",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "id": "rs_e0781d85-3a3d-4b6c-b556-72d70fd7a36e",
+          "content": [
+            {
+              "annotations": [],
+              "text": "Core evidence for the alpha-specific drift is recorded \u2014 now gathering counter-evidence from siblings.",
+              "type": "output_text",
+              "logprobs": []
+            }
+          ],
+          "role": "assistant",
+          "status": "completed",
+          "type": "message",
+          "phase": "commentary"
+        },
+        {
+          "arguments": "{\"hypothesis\":\"H3\",\"rationale\":\"Cite sibling clean integer priority to refute fleet-wide change\",\"source\":{\"callId\":\"call_f4348f5b-39b4-4296-9a20-f0ec45e8e9a6\",\"field\":\"entries.0.jsonPayload.alert.priority\",\"value\":-1},\"stance\":\"refutes\",\"why\":\"Bravo latest ingested alert priority is integer -1 within enum, showing siblings unaffected and change is alpha-specific\"}",
+          "call_id": "call_60f999ca-bc40-489b-bc36-3ed8ecc7249b",
+          "name": "record_evidence",
+          "type": "function_call",
+          "id": "fc_60f999ca-bc40-489b-bc36-3ed8ecc7249b",
+          "status": "completed"
+        }
+      ],
+      "tool": "record_evidence",
+      "args": {
+        "hypothesis": "H3",
+        "rationale": "Cite sibling clean integer priority to refute fleet-wide change",
+        "source": {
+          "callId": "call_f4348f5b-39b4-4296-9a20-f0ec45e8e9a6",
+          "field": "entries.0.jsonPayload.alert.priority",
+          "value": -1
+        },
+        "stance": "refutes",
+        "why": "Bravo latest ingested alert priority is integer -1 within enum, showing siblings unaffected and change is alpha-specific"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_60f999ca-bc40-489b-bc36-3ed8ecc7249b",
+        "result": {
+          "ok": true,
+          "id": "E3",
+          "remaining": [
+            "H2"
+          ]
+        }
+      },
+      "usage": {
+        "input_tokens": 32096,
+        "output_tokens": 231,
+        "cached_tokens": 5745,
+        "reasoning_tokens": 12
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 13,
+      "items": [
+        {
+          "id": "rs_6ae69d7468a244a296fc4c35:rs_1bdfa4e4-256b-4d99-82e6-dd7013400d39",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"hypothesis\":\"H2\",\"rationale\":\"Refute transient-only claim by showing config gap allows recurrence\",\"source\":{\"callId\":\"call_859ed790-8efd-46d3-b91a-da9e2201c843\",\"field\":\"parameters.5.displayName\",\"value\":\"Unknown Severity Priority\"},\"stance\":\"refutes\",\"why\":\"Empty fallback setting exists at index 5, so future unknown severities will recur, not a one-off with no cause\"}",
+          "call_id": "call_aec56246-fc61-4d49-ad91-68e16b663f80",
+          "name": "record_evidence",
+          "type": "function_call",
+          "id": "fc_aec56246-fc61-4d49-ad91-68e16b663f80",
+          "status": "completed"
+        }
+      ],
+      "tool": "record_evidence",
+      "args": {
+        "hypothesis": "H2",
+        "rationale": "Refute transient-only claim by showing config gap allows recurrence",
+        "source": {
+          "callId": "call_859ed790-8efd-46d3-b91a-da9e2201c843",
+          "field": "parameters.5.displayName",
+          "value": "Unknown Severity Priority"
+        },
+        "stance": "refutes",
+        "why": "Empty fallback setting exists at index 5, so future unknown severities will recur, not a one-off with no cause"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_aec56246-fc61-4d49-ad91-68e16b663f80",
+        "result": {
+          "ok": true,
+          "id": "E4",
+          "remaining": []
+        }
+      },
+      "usage": {
+        "input_tokens": 32404,
+        "output_tokens": 330,
+        "cached_tokens": 31985,
+        "reasoning_tokens": 140
+      },
+      "cost_usd": 0.0
+    },
+    {
+      "turn": 14,
+      "items": [
+        {
+          "id": "rs_6ae69d7abe5df8ac6df34992:rs_e5c67108-820e-46dc-a187-79612444b40f",
+          "summary": [],
+          "type": "reasoning",
+          "encrypted_content": "<stripped>",
+          "status": "completed"
+        },
+        {
+          "arguments": "{\"diagnosis\":{\"action\":{\"method\":\"connectorInstances.patch\",\"patch\":{\"parameters\":[{\"advanced\":false,\"description\":\"\",\"displayName\":\"Tenant ID\",\"mandatory\":true,\"type\":\"STRING\",\"value\":\"00000000-0000-4000-a000-0000000000a1\"},{\"advanced\":false,\"description\":\"\",\"displayName\":\"Client ID\",\"mandatory\":true,\"type\":\"STRING\",\"value\":\"00000000-0000-4000-b000-0000000000a1\"},{\"advanced\":false,\"description\":\"\",\"displayName\":\"Client Secret\",\"mandatory\":true,\"type\":\"PASSWORD\",\"value\":\"********\"},{\"advanced\":false,\"description\":\"\",\"displayName\":\"Workspace Name\",\"mandatory\":true,\"type\":\"STRING\",\"value\":\"law-alpha\"},{\"advanced\":false,\"description\":\"\",\"displayName\":\"Max Incidents Per Cycle\",\"mandatory\":false,\"type\":\"INT\",\"value\":\"50\"},{\"advanced\":false,\"description\":\"\",\"displayName\":\"Unknown Severity Priority\",\"mandatory\":false,\"type\":\"INT\",\"value\":\"-1\"}]},\"resource\":\"projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel\",\"type\":\"propose\",\"updateMask\":[\"parameters\"]},\"category\":\"schema_drift\",\"component\":\"ingestion\",\"confidence\":\"medium\",\"deployment\":\"alert-ingestion/alpha\",\"evidence\":[\"E1\",\"E2\",\"E3\",\"E4\"],\"expectedVerification\":{\"condition\":\"recovers_within\",\"seconds\":2400,\"tripwire\":\"priority-shape\"},\"hypothesis\":\"H1\",\"incidentId\":\"inc-alert-ingestion-alpha-priority-shape-20261029T143200Z\",\"rollback\":\"Patch Unknown Severity Priority back to empty string via connectorInstances.patch\",\"summary\":\"Alpha ingested priority 'Critical' string violating integer enum; empty Unknown Severity Priority let it pass through. Setting fallback to -1 restores valid enum values.\"},\"rationale\":\"Propose fallback -1 for unknown severities to restore schema compliance\"}",
+          "call_id": "call_8f33b733-de70-4bef-b283-79b795c8e5ef",
+          "name": "submit_diagnosis",
+          "type": "function_call",
+          "id": "fc_8f33b733-de70-4bef-b283-79b795c8e5ef",
+          "status": "completed"
+        }
+      ],
+      "tool": "submit_diagnosis",
+      "args": {
+        "diagnosis": {
+          "action": {
+            "method": "connectorInstances.patch",
+            "patch": {
+              "parameters": [
+                {
+                  "advanced": false,
+                  "description": "",
+                  "displayName": "Tenant ID",
+                  "mandatory": true,
+                  "type": "STRING",
+                  "value": "00000000-0000-4000-a000-0000000000a1"
+                },
+                {
+                  "advanced": false,
+                  "description": "",
+                  "displayName": "Client ID",
+                  "mandatory": true,
+                  "type": "STRING",
+                  "value": "00000000-0000-4000-b000-0000000000a1"
+                },
+                {
+                  "advanced": false,
+                  "description": "",
+                  "displayName": "Client Secret",
+                  "mandatory": true,
+                  "type": "PASSWORD",
+                  "value": "********"
+                },
+                {
+                  "advanced": false,
+                  "description": "",
+                  "displayName": "Workspace Name",
+                  "mandatory": true,
+                  "type": "STRING",
+                  "value": "law-alpha"
+                },
+                {
+                  "advanced": false,
+                  "description": "",
+                  "displayName": "Max Incidents Per Cycle",
+                  "mandatory": false,
+                  "type": "INT",
+                  "value": "50"
+                },
+                {
+                  "advanced": false,
+                  "description": "",
+                  "displayName": "Unknown Severity Priority",
+                  "mandatory": false,
+                  "type": "INT",
+                  "value": "-1"
+                }
+              ]
+            },
+            "resource": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel",
+            "type": "propose",
+            "updateMask": [
+              "parameters"
+            ]
+          },
+          "category": "schema_drift",
+          "component": "ingestion",
+          "confidence": "medium",
+          "deployment": "alert-ingestion/alpha",
+          "evidence": [
+            "E1",
+            "E2",
+            "E3",
+            "E4"
+          ],
+          "expectedVerification": {
+            "condition": "recovers_within",
+            "seconds": 2400,
+            "tripwire": "priority-shape"
+          },
+          "hypothesis": "H1",
+          "incidentId": "inc-alert-ingestion-alpha-priority-shape-20261029T143200Z",
+          "rollback": "Patch Unknown Severity Priority back to empty string via connectorInstances.patch",
+          "summary": "Alpha ingested priority 'Critical' string violating integer enum; empty Unknown Severity Priority let it pass through. Setting fallback to -1 restores valid enum values."
+        },
+        "rationale": "Propose fallback -1 for unknown severities to restore schema compliance"
+      },
+      "verdict": "accepted",
+      "problems": [],
+      "output": {
+        "callId": "call_8f33b733-de70-4bef-b283-79b795c8e5ef",
+        "result": {
+          "ok": true,
+          "status": "accepted",
+          "action": "propose"
+        }
+      },
+      "usage": {
+        "input_tokens": 32807,
+        "output_tokens": 1547,
+        "cached_tokens": 31729,
+        "reasoning_tokens": 987
+      },
+      "cost_usd": 0.0
+    }
+  ],
+  "diagnosis": {
+    "action": {
+      "method": "connectorInstances.patch",
+      "patch": {
+        "parameters": [
+          {
+            "advanced": false,
+            "description": "",
+            "displayName": "Tenant ID",
+            "mandatory": true,
+            "type": "STRING",
+            "value": "00000000-0000-4000-a000-0000000000a1"
+          },
+          {
+            "advanced": false,
+            "description": "",
+            "displayName": "Client ID",
+            "mandatory": true,
+            "type": "STRING",
+            "value": "00000000-0000-4000-b000-0000000000a1"
+          },
+          {
+            "advanced": false,
+            "description": "",
+            "displayName": "Client Secret",
+            "mandatory": true,
+            "type": "PASSWORD",
+            "value": "********"
+          },
+          {
+            "advanced": false,
+            "description": "",
+            "displayName": "Workspace Name",
+            "mandatory": true,
+            "type": "STRING",
+            "value": "law-alpha"
+          },
+          {
+            "advanced": false,
+            "description": "",
+            "displayName": "Max Incidents Per Cycle",
+            "mandatory": false,
+            "type": "INT",
+            "value": "50"
+          },
+          {
+            "advanced": false,
+            "description": "",
+            "displayName": "Unknown Severity Priority",
+            "mandatory": false,
+            "type": "INT",
+            "value": "-1"
+          }
+        ]
+      },
+      "resource": "projects/fleet-sre-demo/locations/us/instances/mock-soar/integrations/MockSentinel/connectors/mock-sentinel-incidents/connectorInstances/alpha-sentinel",
+      "type": "propose",
+      "updateMask": [
+        "parameters"
+      ]
+    },
+    "category": "schema_drift",
+    "component": "ingestion",
+    "confidence": "medium",
+    "deployment": "alert-ingestion/alpha",
+    "evidence": [
+      "E1",
+      "E2",
+      "E3",
+      "E4"
+    ],
+    "expectedVerification": {
+      "condition": "recovers_within",
+      "seconds": 2400,
+      "tripwire": "priority-shape"
+    },
+    "hypothesis": "H1",
+    "incidentId": "inc-alert-ingestion-alpha-priority-shape-20261029T143200Z",
+    "rollback": "Patch Unknown Severity Priority back to empty string via connectorInstances.patch",
+    "summary": "Alpha ingested priority 'Critical' string violating integer enum; empty Unknown Severity Priority let it pass through. Setting fallback to -1 restores valid enum values."
+  }
+}
