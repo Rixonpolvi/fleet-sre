@@ -262,6 +262,8 @@ def render_incident(incident: Incident, registry: Any) -> str:
         f"Incident {incident.id}",
         f"Deployment: {incident.deployment}",
         f"Tripwire: {incident.tripwire}",
+        f"Component: {incident.component} "
+        "(the tripped tripwire's component)",
         f"Tripwire type: {tripwire.type}",
         f"Tripwire spec: {json.dumps(spec, sort_keys=True)}",
         f"Trip reason: {reason}",
@@ -273,6 +275,17 @@ def render_incident(incident: Incident, registry: Any) -> str:
         *[
             f"- {comp}: {name}"
             for comp, name in sorted(incident.resources.items())
+        ],
+        "Components:",
+        *[
+            f"- {comp.id} ({comp.kind}): "
+            f"{incident.resources.get(comp.id, 'none')}"
+            for comp in contract.components
+        ],
+        "Tripwires:",
+        *[
+            f"- {tw.id} ({tw.component})"
+            for tw in contract.tripwires
         ],
         "Sibling deployments: "
         + (", ".join(incident.siblings) if incident.siblings else "none"),

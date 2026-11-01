@@ -298,6 +298,34 @@ _NAME_PATTERNS = {
 }
 
 
+def _misnested_hint(
+    spec: dict[str, Any], path: list[Any], exc: Any
+) -> str | None:
+    """Hint for expectedVerification nested inside action (live mistake).
+
+    Returns the full diagnosis.schema problem, or None when the error
+    is anything else.
+    """
+    if exc.validator != "additionalProperties" or path != [
+        "diagnosis", "action",
+    ]:
+        return None
+    try:
+        action_spec = spec["parameters"]["properties"]["diagnosis"][
+            "properties"
+        ]["action"]
+        allowed = set(action_spec["properties"])
+        extras = sorted(set(exc.instance) - allowed)
+    except (KeyError, TypeError):
+        return None
+    if extras != ["expectedVerification"]:
+        return None
+    return (
+        "diagnosis.schema: action: additional property "
+        "'expectedVerification' (it belongs beside action)"
+    )
+
+
 def _iso_z(value: datetime) -> str:
     if value.tzinfo is not None:
         value = value.astimezone(timezone.utc)
@@ -396,9 +424,15 @@ class ToolSet:
         except jsonschema.ValidationError as exc:
             path = list(exc.absolute_path)
             if name == "submit_diagnosis" and path[:1] == ["diagnosis"]:
-                problems = [f"diagnosis.schema: {exc.message}"]
+                hint = _misnested_hint(spec, path, exc)
+                if hint is not None:
+                    problems = [hint]
+                else:
+                    disp = ".".join(str(p) for p in path[1:]) or "(root)"
+                    problems = [f"diagnosis.schema: {disp}: {exc.message}"]
             else:
-                problems = [f"args.schema: {exc.message}"]
+                disp = ".".join(str(p) for p in path) or "(root)"
+                problems = [f"args.schema: {disp}: {exc.message}"]
             return {"error": f"{name} refused", "problems": problems}, \
                 "refused", problems
         handler = getattr(self, f"_tool_{name}", None)
@@ -434,6 +468,23 @@ class ToolSet:
         deployment = args["deployment"]
         minutes = int(args["window"]["lastMinutes"])
         filt = args.get("filter", {})
+        want_comp = filt.get("component")
+        if want_comp is not None:
+            service = deployment.split("/", 1)[0]
+            try:
+                contract = self.registry.contract(service)
+            except KeyError:
+                contract = None
+            if contract is not None:
+                valid = [c.id for c in contract.components]
+                if want_comp not in valid:
+                    problems = [
+                        f"tool.name: unknown component {want_comp!r} "
+                        f"for service {service!r}; valid components: "
+                        + ", ".join(valid)
+                    ]
+                    return {"error": "query_logs refused",
+                            "problems": problems}, "refused", problems
         now = self.clock.now()
         start = now - timedelta(seconds=minutes * 60)
         matched: list[Any] = []
@@ -442,7 +493,6 @@ class ToolSet:
             deployments = {dep for dep, _comp in routed}
             if deployment not in deployments:
                 continue
-            want_comp = filt.get("component")
             if want_comp is not None and (
                 deployment, want_comp
             ) not in routed:
@@ -556,6 +606,15 @@ class ToolSet:
             contract = self.registry.contract(service)
         except KeyError:
             problems = [f"tool.name: unknown service: {service!r}"]
+            return {"error": "compare_siblings refused",
+                    "problems": problems}, "refused", problems
+        valid = [c.id for c in contract.components]
+        if component not in valid:
+            problems = [
+                f"tool.name: unknown component {component!r} "
+                f"for service {service!r}; valid components: "
+                + ", ".join(valid)
+            ]
             return {"error": "compare_siblings refused",
                     "problems": problems}, "refused", problems
         heartbeat: str | None = None

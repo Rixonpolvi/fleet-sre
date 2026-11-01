@@ -111,6 +111,89 @@ def test_bad_condition_enum_reported_as_diagnosis_schema():
     assert any(p.startswith("diagnosis.schema:") for p in problems), out
 
 
+def test_schema_problem_carries_json_path():
+    tools, incident = _tools()
+    session = Session(incident_id=incident.id)
+    _set_ok(tools, session)
+    diag = _full_diagnosis(incident)
+    del diag["action"]["type"]
+    out = tools.call(
+        "submit_diagnosis", {"diagnosis": diag, "rationale": "t"}, session
+    )
+    assert out["result"].get("problems", []) == [
+        "diagnosis.schema: action: 'type' is a required property"
+    ], out
+
+
+def test_misnested_expected_verification_hint():
+    tools, incident = _tools()
+    session = Session(incident_id=incident.id)
+    _set_ok(tools, session)
+    diag = _full_diagnosis(incident)
+    diag["action"]["expectedVerification"] = diag.pop(
+        "expectedVerification"
+    )
+    out = tools.call(
+        "submit_diagnosis", {"diagnosis": diag, "rationale": "t"}, session
+    )
+    assert out["result"].get("problems", []) == [
+        "diagnosis.schema: action: additional property "
+        "'expectedVerification' (it belongs beside action)"
+    ], out
+
+
+def test_gate_side_misnested_hint():
+    from fleetsre.sre.gates import check_diagnosis
+
+    tools, incident = _tools()
+    session = Session(incident_id=incident.id)
+    _set_ok(tools, session)
+    diag = _full_diagnosis(incident)
+    diag["action"]["expectedVerification"] = {
+        "tripwire": "t", "condition": "c", "seconds": 1,
+    }
+    problems = check_diagnosis(
+        diag, session, incident, tools.registry.contract(
+            "alert-ingestion"
+        ), tools.log_query, tools.registry,
+    )
+    assert (
+        "diagnosis.schema: action: additional property "
+        "'expectedVerification' (it belongs beside action)"
+    ) in problems, problems
+
+
+def test_args_schema_names_path():
+    tools, incident = _tools()
+    session = Session(incident_id=incident.id)
+    out = tools.call("query_logs", {
+        "deployment": "alert-ingestion/alpha",
+        "window": {"lastMinutes": 0}, "filter": {},
+        "rationale": "t",
+    }, session)
+    assert out["result"].get("problems", []) == [
+        "args.schema: window.lastMinutes: "
+        "0 is less than the minimum of 1"
+    ], out
+
+
+def test_component_problem_lists_valid_ids():
+    tools, incident = _tools()
+    session = Session(incident_id=incident.id)
+    _set_ok(tools, session)
+    diag = _full_diagnosis(incident)
+    diag["component"] = "nope"
+    out = tools.call(
+        "submit_diagnosis", {"diagnosis": diag, "rationale": "t"}, session
+    )
+    matches = [
+        p for p in out["result"].get("problems", [])
+        if p.startswith("diagnosis.component:")
+    ]
+    assert len(matches) == 1, out
+    assert "connector" in matches[0] and "ingestion" in matches[0]
+
+
 def test_spec_valid_diagnosis_reaches_gate_rules():
     tools, incident = _tools()
     session = Session(incident_id=incident.id)

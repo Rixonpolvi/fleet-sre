@@ -474,6 +474,14 @@ def check_diagnosis(
         diag = Diagnosis.model_validate(d)
     except ValidationError as exc:
         for err in exc.errors():
+            if err["type"] == "extra_forbidden" and tuple(
+                err["loc"]
+            ) == ("action", "expectedVerification"):
+                problems.append(
+                    "diagnosis.schema: action: additional property "
+                    "'expectedVerification' (it belongs beside action)"
+                )
+                continue
             loc = ".".join(str(x) for x in err["loc"]) or "(root)"
             problems.append(f"diagnosis.schema: {loc}: {err['msg']}")
         return problems
@@ -497,10 +505,12 @@ def check_diagnosis(
             f"diagnosis.incident: deployment {diag.deployment!r} is not "
             "the incident's"
         )
-    component_ids = {c.id for c in getattr(contract, "components", [])}
-    if diag.component not in component_ids:
+    components = list(getattr(contract, "components", []))
+    if diag.component not in {c.id for c in components}:
+        valid = ", ".join(c.id for c in components)
         problems.append(
-            f"diagnosis.component: unknown component: {diag.component!r}"
+            f"diagnosis.component: unknown component "
+            f"{diag.component!r}; valid components: {valid}"
         )
     hypotheses = getattr(session, "hypotheses", {})
     if diag.hypothesis not in hypotheses:

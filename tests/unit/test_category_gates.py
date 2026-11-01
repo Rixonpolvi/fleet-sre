@@ -244,6 +244,58 @@ def test_sibling_violation_refused_for_schema_drift():
         refused
 
 
+def test_query_logs_unknown_component_refused():
+    tools, registry, _clock = _harness([
+        _entry("hb-own", NOW, "alpha", "connector.run.completed",
+               instance="alpha-sentinel"),
+    ])
+    incident = _incident(registry, "alert-ingestion/alpha", "dead-connector")
+    session = _session_with_hypotheses(tools, incident)
+    out = tools.call("query_logs", {
+        "deployment": "alert-ingestion/alpha",
+        "window": {"lastMinutes": 60},
+        "filter": {"component": "nope"},
+        "rationale": "t",
+    }, session)
+    assert session.calls[out["callId"]].verdict == "refused"
+    problems = out["result"].get("problems", [])
+    assert len(problems) == 1
+    assert problems[0].startswith("tool.name:"), problems
+    assert "connector" in problems[0] and "ingestion" in problems[0]
+
+
+def test_compare_siblings_unknown_component_refused():
+    tools, registry, _clock = _harness([])
+    incident = _incident(registry, "alert-ingestion/alpha", "dead-connector")
+    session = _session_with_hypotheses(tools, incident)
+    out = tools.call("compare_siblings", {
+        "service": "alert-ingestion", "component": "nope",
+        "window": {"lastMinutes": 60}, "rationale": "t",
+    }, session)
+    assert session.calls[out["callId"]].verdict == "refused"
+    problems = out["result"].get("problems", [])
+    assert len(problems) == 1
+    assert problems[0].startswith("tool.name:"), problems
+    assert "connector" in problems[0] and "ingestion" in problems[0]
+
+
+def test_query_logs_known_component_accepted():
+    tools, registry, _clock = _harness([
+        _entry("hb-own", NOW, "alpha", "connector.run.completed",
+               instance="alpha-sentinel"),
+    ])
+    incident = _incident(registry, "alert-ingestion/alpha", "dead-connector")
+    session = _session_with_hypotheses(tools, incident)
+    out = tools.call("query_logs", {
+        "deployment": "alert-ingestion/alpha",
+        "window": {"lastMinutes": 60},
+        "filter": {"component": "connector"},
+        "rationale": "t",
+    }, session)
+    assert "error" not in out["result"], out
+    assert out["result"]["total"] == 1
+
+
 def test_heartbeat_refused_for_schema_drift():
     tools, registry, _clock = _harness([
         _entry("hb-own", NOW, "alpha", "connector.run.completed",
