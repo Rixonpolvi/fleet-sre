@@ -70,6 +70,36 @@ At most 3 evidence items per hypothesis. Each accepted item gets an ID (`E1`, `E
 
 Three refused submissions pause the investigation for a human. Before you resubmit, fix every listed problem, not just the first.
 
+The shape of a submission, with placeholders in angle brackets:
+
+```json
+{
+  "diagnosis": {
+    "incidentId": "<the incident ID>",
+    "deployment": "<the incident deployment>",
+    "component": "<the tripped tripwire's component ID>",
+    "category": "<one category from the table above>",
+    "hypothesis": "H1",
+    "summary": "<one or two sentences>",
+    "evidence": ["E1", "E3"],
+    "openQuestions": [{"hypothesis": "H2", "why": "<why it is still open>"}],
+    "action": {
+      "type": "propose",
+      "method": "<a method from the list below>",
+      "resource": "<full resource name from the incident message>",
+      "updateMask": ["parameters"],
+      "patch": {"parameters": ["<the full list, one value changed>"]}
+    },
+    "expectedVerification": {"tripwire": "<tripwire ID>", "condition": "recovers_within", "seconds": 900},
+    "rollback": "<how to undo the change>",
+    "confidence": "medium"
+  },
+  "rationale": "<one line>"
+}
+```
+
+`expectedVerification` and `rollback` sit beside `action`, never inside it. A restart or a run has `"updateMask": []` and `"patch": {}`. For an escalation, `action` is `{"type": "escalate", "escalationSummary": "<what you found and what a human must do>"}`. Leave out `openQuestions` when every other hypothesis has a recorded `refutes` item.
+
 ### Actions
 
 **`propose`**: one change for a human to approve.
