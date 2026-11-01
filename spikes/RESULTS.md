@@ -183,3 +183,55 @@ and estimated cost here.
 - latency: 27.8s
 - final status: accepted
 - estimated cost: $0.0000 (rates FLEETSRE_PRICE_IN=0.0/M, FLEETSRE_PRICE_OUT=0.0/M; preview pricing is unconfirmed)
+
+## 2026-11-01T00:43:55Z model muse-spark-1.3 run 1
+- date: 2026-11-01T00:43:55Z
+- model: muse-spark-1.3
+- tokens in: 98400 (cached: 49401)
+- tokens out: 3113 (reasoning: 1289)
+- turns: 11
+- read calls: 4
+- refusals by gate: {"record_evidence": 1}
+- multiCallTurns: 0
+- latency: 18.5s
+- final status: accepted
+- estimated cost: $0.0000 (rates FLEETSRE_PRICE_IN=0.0/M, FLEETSRE_PRICE_OUT=0.0/M; preview pricing is unconfirmed)
+
+## 2026-11-01T00:44:10Z model muse-spark-1.3 run 2
+- date: 2026-11-01T00:44:10Z
+- model: muse-spark-1.3
+- tokens in: 140835 (cached: 94442)
+- tokens out: 3022 (reasoning: 1230)
+- turns: 11
+- read calls: 4
+- refusals by gate: {"record_evidence": 1}
+- multiCallTurns: 0
+- latency: 15.3s
+- final status: accepted
+- estimated cost: $0.0000 (rates FLEETSRE_PRICE_IN=0.0/M, FLEETSRE_PRICE_OUT=0.0/M; preview pricing is unconfirmed)
+
+## 2026-11-01T00:44:23Z model muse-spark-1.3 run 3
+- date: 2026-11-01T00:44:23Z
+- model: muse-spark-1.3
+- tokens in: 62438 (cached: 39161)
+- tokens out: 2839 (reasoning: 1244)
+- turns: 9
+- read calls: 3
+- refusals by gate: {}
+- multiCallTurns: 0
+- latency: 12.7s
+- final status: accepted
+- estimated cost: $0.0000 (rates FLEETSRE_PRICE_IN=0.0/M, FLEETSRE_PRICE_OUT=0.0/M; preview pricing is unconfirmed)
+
+## 2026-11-01T00:44:37Z model muse-spark-1.3 run 1
+- date: 2026-11-01T00:44:37Z
+- model: muse-spark-1.3
+- tokens in: 67170 (cached: 49642)
+- tokens out: 2804 (reasoning: 1131)
+- turns: 10
+- read calls: 3
+- refusals by gate: {}
+- multiCallTurns: 0
+- latency: 13.8s
+- final status: accepted
+- estimated cost: $0.0000 (rates FLEETSRE_PRICE_IN=0.0/M, FLEETSRE_PRICE_OUT=0.0/M; preview pricing is unconfirmed)
