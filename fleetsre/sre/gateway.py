@@ -60,13 +60,20 @@ class OpenAITransport:
         from openai import OpenAI
 
         self._client = OpenAI(
-            api_key=api_key, base_url=base_url or None, max_retries=0
+            api_key=api_key, base_url=base_url or None, max_retries=0,
+            timeout=120,
         )
 
     def create(self, request: dict[str, Any]) -> dict[str, Any]:
         try:
             response = self._client.responses.create(**request)
         except Exception as exc:
+            from openai import APITimeoutError
+
+            if isinstance(exc, APITimeoutError):
+                raise TransportError(
+                    504, str(exc) or "request timed out"
+                ) from exc
             status = getattr(exc, "status_code", None)
             if status is None:
                 status = getattr(
