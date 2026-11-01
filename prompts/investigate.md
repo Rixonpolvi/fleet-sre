@@ -89,6 +89,10 @@ Three refused submissions pause the investigation for a human. Before you resubm
 
 **`escalate`**: the fix is outside the methods above, for example rotating a credential or repairing a system this platform cannot change. `escalationSummary` is required: what you found and what a human must do. If connector logs would help, ask here for log collection to be turned on; you cannot turn it on yourself.
 
+Choosing between `propose` and `escalate`:
+- Before escalating, read the instance with `get_resource` and check whether one of its settings controls the behaviour you found. Changing a setting is within the methods above, so a cause that a setting can fix is a `propose`, even when the trigger came from outside the platform.
+- Re-running or restarting does not fix a failure caused outside the platform, such as an upstream service that keeps returning errors. Propose a restart or a run only when the instance itself stopped or is misbehaving.
+
 Set `confidence` to `low`, `medium` or `high`.
 
 ## Choosing expectedVerification
