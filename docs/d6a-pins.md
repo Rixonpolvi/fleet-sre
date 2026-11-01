@@ -221,7 +221,7 @@ Interfaces and semantics for D6a, the fix loop: `deliverables.md` Â§D6 rows T1â€
 
 21. **Messages (exact text).** Timestamps are ISO 8601 UTC with `Z`. Tests may assert these strings appear in the next model request's input.
     - Tripwire change: `Tripwire state changed since the pause at {paused_at}: {changes}. Current: {current}.`
-      - `changes` is `; `-joined `{tw} {old} -> {new}`, with `old` set to `none` for a tripwire attached since the pause.
+      - `changes` is `; `-joined: `{tw} {old} -> {new}` for each tripwire in `paused_snapshot` whose status changed, then `{tw} none -> tripped` for each tripwire attached since the pause, whatever its status now.
       - `current` is `; `-joined `{tw} {status}` over all of `tripwires`.
     - Reply: `Reply from {by}: {message}`
     - Rejection: `Rejected by {by}: {notes} Revise the proposal or escalate.`
@@ -243,6 +243,7 @@ Interfaces and semantics for D6a, the fix loop: `deliverables.md` Â§D6 rows T1â€
 
 23. **Scripted fixtures.** Incident IDs depend on the first trip.
     - For each fault, find the first trip with the implemented D4 replay loop on the D5 scripted fixture's seed, t0 and schedule, and confirm it matches that fixture's incident before reusing the fixture.
+    - Every scripted segment must pass the gates when run through the D6 runtime loop (canary scheduler on), not only in a D5-style world. Log `insertId`s are global counters and the scheduler's canary entries shift them, so a D5 script that cites log entries gets a scheduler-on copy at `fixtures/scripted/d6/<fault>.json` with only those `insertId`s remapped; `primary_fixture` prefers it. (Added 2026-11-01: F1-F3 and F3-reject cited scheduler-off IDs.)
     - Where it differs, or a later segment is needed, write `fixtures/scripted/d6/<name>.json` (Session A). Never edit D5's fixtures.
     - Expected new scripts:
       - **`F2-resume`**, after the rotation:

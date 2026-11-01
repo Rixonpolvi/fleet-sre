@@ -46,7 +46,14 @@ def load_d6(name: str) -> dict[str, Any]:
 
 
 def primary_fixture(name: str) -> dict[str, Any]:
-    """Segment-1 fixture: a D5 fault, or F3-reject from fixtures/scripted/d6."""
+    """Segment-1 fixture: fixtures/scripted/d6/<name>.json when it exists, else D5's.
+
+    The D6 loop runs the canary scheduler, which shifts the global insertId
+    counter, so D5 scripts that cite log entries have scheduler-on copies
+    under fixtures/scripted/d6/ (d6a-pins 23). F4 cites none and uses D5's.
+    """
+    if (ROOT / "fixtures" / "scripted" / "d6" / f"{name}.json").is_file():
+        return load_d6(name)
     if name in D5_FAULTS:
         return load_d5(name)
     return load_d6(name)

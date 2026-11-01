@@ -79,7 +79,7 @@
           "type": "function_call",
           "call_id": "call_003",
           "name": "record_evidence",
-          "arguments": "{\"hypothesis\": \"H1\", \"stance\": \"supports\", \"source\": {\"insertId\": \"75ecd103-00000156\"}, \"why\": \"key trip signal from the incident deployment\", \"rationale\": \"Pin the trip signal to the tenant hypothesis.\"}"
+          "arguments": "{\"hypothesis\": \"H1\", \"stance\": \"supports\", \"source\": {\"insertId\": \"f022f769-00000162\"}, \"why\": \"key trip signal from the incident deployment\", \"rationale\": \"Pin the trip signal to the tenant hypothesis.\"}"
         }
       ],
       "usage": {
@@ -154,7 +154,7 @@
           "type": "function_call",
           "call_id": "call_006",
           "name": "record_evidence",
-          "arguments": "{\"hypothesis\": \"H2\", \"stance\": \"refutes\", \"source\": {\"insertId\": \"52491d04-0000015a\"}, \"why\": \"sibling runs healthy on schedule\", \"rationale\": \"Healthy sibling refutes the fleet-wide hypothesis.\"}"
+          "arguments": "{\"hypothesis\": \"H2\", \"stance\": \"refutes\", \"source\": {\"insertId\": \"042dee08-00000166\"}, \"why\": \"sibling runs healthy on schedule\", \"rationale\": \"Healthy sibling refutes the fleet-wide hypothesis.\"}"
         }
       ],
       "usage": {
