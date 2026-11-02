@@ -16,6 +16,8 @@ Revised 2026-10-31 (night) after D5: §D5 points to `docs/d5-pins.md` for the in
 
 Revised 2026-11-01 before D6: re-plan (`spec.md` §9). D6 splits into D6a (fix loop) and D6b (authoring), both in `tests/acceptance/d6/`; the amendment row and the cut D7 and D8 rows move to §Cut at the end; the schedule moves (§3). D6a interfaces and semantics are in `docs/d6a-pins.md`.
 
+Revised 2026-11-01 (night) before D6b: D6b interfaces and semantics are in `docs/d6b-pins.md`; D6a recorded as built.
+
 Nine deliverables, D0–D8. Each one is **two merges**: a tests PR, then an implementation PR. The acceptance tests below are the definition of done. The coding agent translates them into code; it does not decide them.
 
 ---
@@ -540,7 +542,7 @@ The interface block above is the original plan. [`docs/d5-pins.md`](d5-pins.md) 
 
 **Goal.** The full loop of `spec.md` §3: incident lifecycle with NEEDS_INPUT pauses, approval or rejection, journaled apply, verify, postmortem; contract authoring against the scorecard with held-out scenarios; amendments that apply fleet-wide.
 
-**Re-plan (2026-11-01).** D6 is split into two tests/implementation pairs, both in `tests/acceptance/d6/`. **D6a, fix loop:** rows T1–T10 and T16–T20; `docs/d6a-pins.md` holds its interfaces and semantics and wins over the interface block below. **D6b, authoring:** rows T11–T13, T15 and T21; until D6b's tests PR they are `pytest.skip` placeholders, so the trace check passes. The amendment row, `fleetsre/authoring/amend.py` and `Registry.apply_contract` are cut (`spec.md` §9; the row is in §Cut). The postmortem is built from the incident record; no model writes it.
+**Re-plan (2026-11-01).** D6 is split into two tests/implementation pairs, both in `tests/acceptance/d6/`. **D6a, fix loop:** rows T1–T10 and T16–T20; `docs/d6a-pins.md` holds its interfaces and semantics and wins over the interface block below. **D6b, authoring:** rows T11–T13, T15 and T21; `docs/d6b-pins.md` holds its interfaces and semantics and wins over the interface block below. The amendment row, `fleetsre/authoring/amend.py` and `Registry.apply_contract` are cut (`spec.md` §9; the row is in §Cut). The postmortem is built from the incident record; no model writes it.
 
 **Interfaces.**
 ```python
@@ -597,6 +599,13 @@ Concurrency: when a proposal is created, the platform records the target resourc
 | D6-T19 | Crash-safe apply | An executor stopped after `intent` and before `terminal`, then `recover()`: if the resource already shows the change, it is marked terminal without an API call; otherwise it is applied once. In both cases the patch lands exactly once |
 | D6-T20 | Gates always on | `IncidentManager` raises when given an investigator whose ToolSet has `verification=False` |
 | D6-T21 | Held-out scenarios | Authoring prompts never contain a holdout scenario's ID, fault schedule or result; `passed` requires the holdouts to pass; when only a holdout fails, the feedback says a held-out scenario failed and nothing more |
+
+**Settled in D6a.** [`docs/d6a-pins.md`](d6a-pins.md) records the interfaces and semantics as built (#30 and the two PRs after it). In short:
+- Only running a pending segment calls the model. A paused incident resumes on a tripwire change only when a tripwire that was tripped at the pause is now `ok`; a trip while paused just attaches (pin 13).
+- The executor checks the approval and the resource version before it journals anything, merges parameters by `displayName` onto the full list, and sends `integrationVersion` on every connector patch. `recover()` follows per-method rules (pins 18, 19).
+- Verification checks status, not events; `none` verifies at once if its target is already `ok` (pin 15). The postmortem is built by code from the incident record.
+- Scripted segments are generated in the D6 runtime loop with the canary scheduler on (pin 23).
+- Accepted MVP limits: incident records are in memory only, and the verifier accepts a target tripwire the incident never tripped.
 
 **Out of scope:** UI, GCP.
 

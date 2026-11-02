@@ -18,6 +18,8 @@ Revised 2026-10-31 (night) after D5: budgets, stuck detection, refusal rule code
 
 Revised 2026-11-01 before D6: re-plan (§9). All four cuts are taken; D6 splits into D6a (fix loop) and D6b (authoring); the postmortem is built from the incident record, not by a model (§3, §8); there is no live instance (§10). D6a detail in `docs/d6a-pins.md`.
 
+Revised 2026-11-01 (night) before D6b: Muse Wonder's model ID confirmed (§8); authoring detail in `docs/d6b-pins.md`.
+
 ---
 
 ## 1. Summary
@@ -320,7 +322,7 @@ One gateway, per-role config. Assignments are provisional until the D2 spike and
 
 | Role | Frequency | Starting model | Reasoning effort |
 | --- | --- | --- | --- |
-| Author / amend contracts | Rare | Muse Wonder via Meta Model API (model ID to confirm on the dashboard) | `high` |
+| Author / amend contracts | Rare | `muse-wonder-1.0` via Meta Model API | `high` |
 | Investigate / propose | Per incident | `muse-spark-1.3` via Meta Model API | `medium` |
 | Postmortem | — | None: built from the incident record (D6a) | — |
 | Fallback | On rate limits | Muse Spark Open from a partner, if credits arrive: Baseten `meta-models/muse-spark-open` (base URL `https://inference.baseten.co/v1`) or Fireworks `accounts/fireworks/models/muse-spark-open` | `medium` |
@@ -330,9 +332,9 @@ One gateway, per-role config. Assignments are provisional until the D2 spike and
 
 - **Endpoint and key.** Base URL `https://api.meta.ai/v1`. The key lives in `MODEL_API_KEY` and is passed explicitly; the OpenAI SDK does not read that variable on its own.
 - **Investigation loop.** Responses API with `store=False` and the full history sent every turn, `include=["reasoning.encrypted_content"]` so reasoning is replayed between turns, `parallel_tool_calls=False`, and `reasoning={"effort": ...}` per role. Effort levels: `none` < `minimal` < `low` < `medium` < `high` (`xhigh` is the same as `high`).
-- **JSON outside tools** (authoring). On the Responses API use `text.format` with a JSON schema; `response_format` returns HTTP 400 there. A recursive `$ref` also returns 400, so the schema given to the authoring model must be flattened.
+- **JSON outside tools** (authoring). On the Responses API use `text.format` with a JSON schema; `response_format` returns HTTP 400 there. A recursive `$ref` also returns 400, so the schema given to the authoring model must be flattened. `strict: true` returns 400 on keywords the contract schema uses (`minProperties`), so `strict` is omitted and the contract loader is the real check (D6b P1).
 - **Prompt caching.** Keep the stable prefix first (system prompt, tool specs, contract) and record `usage.input_tokens_details.cached_tokens` and `usage.output_tokens_details.reasoning_tokens` in the transcript (field names confirmed in D2).
-- **Cost.** Muse Spark is billed against the $150 credit on this account (D2: about $0.08 per investigation at ~120k input tokens, ~70% cached; D5: at most about $0.10 per investigation at ~130k input tokens, ~74% cached). Baseten, Modal and Fireworks each offer $100 to select participants for open-weights models.
+- **Cost.** Muse Spark is billed against the $150 credit on this account (D2: about $0.08 per investigation at ~120k input tokens, ~70% cached; D5: at most about $0.10 per investigation at ~130k input tokens, ~74% cached). Muse Wonder (authoring, effort `high`): about $0.13 and 48 s for a first version at ~7k input and ~5k output tokens (D6b P1). Baseten, Modal and Fireworks each offer $100 to select participants for open-weights models.
 
 Muse Code bills the same $150 credit (verified by usage delta).
 
@@ -389,7 +391,7 @@ No live instance (cut 2026-11-01, §9): the demo is recorded from `make demo`.
 | The model does not follow the gated protocol (one call per turn, hypotheses first) | D2 passed with the full protocol (`spikes/RESULTS.md`); the D5 live eval scored 18/18 (`evals/d5-2026-11-01.json`). If a later model fails it, fallback order: drop `update_plan`; then drop `set_hypotheses` (rule 3 of §6.5 becomes report-only); then pre-computed evidence in the incident |
 | Authoring fits the visible scenarios | Held-out scenarios (§5.1) |
 
-Open: partner credits for the fallback; Muse Wonder's model ID; model per role after evals; escalation channel (UI only or email).
+Open: partner credits for the fallback; model per role after evals; escalation channel (UI only or email).
 
 ## Sources
 
