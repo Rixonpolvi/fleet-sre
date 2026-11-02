@@ -1,0 +1,83 @@
+# Service brief for contract authoring (D6b). Human-owned: drafted by Claude, reviewed by Rixon.
+# Must not contain any scenario content or fault type identifier (d6b-pins 11, T12).
+service: alert-ingestion
+version: 1.0.0
+summary: >-
+  Ingests security incidents from each tenant's Microsoft Sentinel workspace into Google SecOps SOAR.
+  One deployment per tenant. A connector instance in the SOAR python container polls the tenant's
+  workspace every intervalSeconds, maps each new incident to an AlertInfo and hands it to ingestion
+  in the etl container, which writes one alert.ingested entry per alert. Tenants differ widely in
+  volume: some ingest over a hundred alerts an hour, others only a few. The connector's API status
+  stays LIVE while the instance is enabled, whether or not it is working.
+components:
+  - id: connector
+    kind: connectorInstance
+    description: The tenant's Sentinel connector instance, running in the python container.
+    logs:
+      container_name: python
+      match: [connector_name, connector_instance]
+      deploymentBy: labels.connector_instance
+  - id: ingestion
+    kind: etlFlow
+    description: Ingestion of the connector's alerts, in the etl container. One entry per alert.
+    logs:
+      container_name: etl
+      match: [correlation_id]
+      deploymentBy: jsonPayload.environment
+parameters:
+  expectedAlertsPerHour:
+    type: number
+    description: The tenant's typical alert volume. Supplied per deployment.
+  intervalSeconds:
+    type: integer
+    description: The connector's polling interval in seconds. Supplied per deployment.
+events:
+  - event: connector.run.started
+    container: python
+    description: A connector run began.
+  - event: connector.run.completed
+    container: python
+    description: >-
+      A connector run ended. Every run ends with this entry, including a run that failed, so it is
+      the connector's heartbeat. jsonPayload.alertsFetched is the number of alerts fetched.
+  - event: connector.run.warning
+    container: python
+    description: The run hit a problem it worked around (severity WARNING). Written before connector.run.completed.
+  - event: connector.run.error
+    container: python
+    description: The run failed (severity ERROR). Written before connector.run.completed.
+  - event: alert.ingested
+    container: etl
+    description: >-
+      One alert reached SOAR. jsonPayload.alert holds name, ticket_id, rule_generator, priority,
+      device_vendor, device_product, environment, start_time, end_time and canary.
+checks:
+  - id: dead-connector
+    component: connector
+    detects: >-
+      The connector stops running. The API keeps reporting LIVE; only the missing runs show it.
+  - id: canary
+    component: ingestion
+    detects: >-
+      Alerts stop reaching SOAR end to end while every connector run looks normal. The platform can
+      plant a canary incident upstream on a schedule; it is seen when an alert.ingested entry has
+      alert.canary true and alert.ticket_id equal to the planted incident's ID.
+  - id: priority-shape
+    component: ingestion
+    detects: >-
+      Ingested alerts whose priority is not on Google's scale: a string, a missing value or an
+      unlisted number. Healthy priorities are the integers -1 (Informational), 40 (Low), 60 (Medium),
+      80 (High) and 100 (Critical). One malformed alert matters.
+  - id: connector-errors
+    component: connector
+    detects: >-
+      The connector keeps running on schedule but most of its runs fail, for example because the
+      upstream rejects its credential; it then fetches nothing while still reporting LIVE. Occasional
+      failed runs are normal on a healthy connector and must not page.
+notes:
+  - Connector runs happen every intervalSeconds regardless of alert volume. A quiet tenant can go an hour or more without ingesting an alert.
+  - A failed connector run writes connector.run.warning or connector.run.error first and still ends with connector.run.completed.
+  - After an approved fix to a component, the platform applies the contract's changePoint overrides to that component's tripwires for changePoint.durationSeconds.
+sample_files:
+  - fixtures/logs/samples/connector.jsonl
+  - fixtures/logs/samples/etl.jsonl

@@ -1,0 +1,24 @@
+{
+  "output": [
+    {
+      "type": "message",
+      "role": "assistant",
+      "content": [
+        {
+          "type": "output_text",
+          "text": "{\n  \"service\": \"alert-ingestion\",\n  \"version\": \"1.0.0\",\n  \"description\": \"Sentinel incidents polled by a SOAR connector instance and ingested as alerts by the ETL flow.\",\n  \"parameters\": {\n    \"expectedAlertsPerHour\": { \"type\": \"number\", \"required\": true, \"description\": \"Organic upstream volume for this tenant. Informational: no tripwire uses it, because volume cannot tell quiet from broken.\" },\n    \"intervalSeconds\": { \"type\": \"integer\", \"required\": true, \"description\": \"Connector run interval.\" }\n  },\n  \"components\": [\n    { \"id\": \"connector\", \"kind\": \"connectorInstance\",\n      \"logs\": { \"container_name\": \"python\", \"match\": [\"connector_name\", \"connector_instance\"], \"deploymentBy\": \"labels.connector_instance\" } },\n    { \"id\": \"ingestion\", \"kind\": \"etlFlow\",\n      \"logs\": { \"container_name\": \"etl\", \"match\": [\"correlation_id\"], \"deploymentBy\": \"jsonPayload.environment\" } }\n  ],\n  \"tripwires\": [\n    { \"id\": \"dead-connector\", \"component\": \"connector\", \"type\": \"cadence\",\n      \"description\": \"The connector stopped running. Runs happen on schedule regardless of alert volume, so quiet tenants stay green.\",\n      \"spec\": { \"event\": \"connector.run.completed\", \"intervalSeconds\": \"${intervalSeconds}\", \"maxSilentIntervals\": 3 } },\n    { \"id\": \"canary\", \"component\": \"ingestion\", \"type\": \"synthetic\",\n      \"description\": \"A planted canary incident did not come out of ingestion in time.\",\n      \"spec\": { \"everyMinutes\": 10, \"deadlineSeconds\": 180 } },\n    { \"id\": \"priority-shape\", \"component\": \"ingestion\", \"type\": \"schema\",\n      \"description\": \"An ingested alert's priority is not one of Google's documented integer values.\",\n      \"spec\": { \"event\": \"alert.ingested\", \"field\": \"jsonPayload.alert.priority\", \"type\": \"integer\", \"enum\": [-1, 40, 60, 80, 100], \"required\": true, \"consecutive\": 1, \"recoverAfter\": 20 } },\n    { \"id\": \"connector-errors\", \"component\": \"connector\", \"type\": \"errorSignature\",\n      \"description\": \"Too many connector runs logged WARNING or worse. Catches swallowed failures (Green Liar) while status stays LIVE.\",\n      \"spec\": { \"minSeverity\": \"WARNING\", \"windowRuns\": 10, \"threshold\": 8 } }\n  ],\n  \"changePoint\": { \"durationSeconds\": 1800, \"overrides\": { \"dead-connector\": { \"maxSilentIntervals\": 2 } } },\n  \"provenance\": { \"authoredBy\": \"human:rixon\", \"scorecard\": null, \"approvedBy\": \"rixon\" }\n}\n"
+        }
+      ]
+    }
+  ],
+  "usage": {
+    "input_tokens": 12145,
+    "output_tokens": 5012,
+    "input_tokens_details": {
+      "cached_tokens": 6500
+    },
+    "output_tokens_details": {
+      "reasoning_tokens": 4100
+    }
+  }
+}
