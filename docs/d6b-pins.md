@@ -1,6 +1,6 @@
 # D6b pins
 
-Interfaces and semantics for D6b, authoring: `deliverables.md` §D6 rows T11, T12, T13, T15 and T21. Written before the tests PR. This file wins over the §D6 interface block where they differ. D5 and D6a behaviour is unchanged, except that pin 4 adds to the gateway.
+Interfaces and semantics for D6b, authoring: `deliverables.md` §D6 rows T11, T12, T13, T15 and T21. Written before the tests PR; §Settled in D6b and §Results were added after the implementation (#33, #34) and the live eval. This file wins over the §D6 interface block where they differ. D5 and D6a behaviour is unchanged, except that pin 4 adds to the gateway.
 
 ## Scope
 
@@ -191,13 +191,43 @@ The model chooses each tripwire's type and spec: fields, enums, thresholds, wind
 
 ## Time-box and demo
 
-- **The live authoring eval is time-boxed** to two eval rounds, with at most one revision of `prompts/author.md` between them. That is about $6 and two hours.
+- **The live authoring eval is time-boxed** to two eval rounds, with at most one revision of `prompts/author.md` between them. That is about $6 and two hours. (One round was run; §Results says why the second was not.)
 - If T15 still misses, the impl PR merges with the offline tests green. The live result is committed in `evals/` and reported as it is, in the README and in the video. A run that passes every visible scenario and then fails a holdout shows the holdouts working.
 - "Never cut the authoring loop" (spec §9) covers the loop and its offline tests, not the live pass rate.
 - **The video's authoring beat (0:20–0:50)** uses a recorded live run where version 1 really failed and a later version passed. It is introduced as one of the three eval runs, next to the T15 pass rate.
   - Use `fixtures/scripted/d6b/demo.json` only for `make demo` and the tests. If it ever appears in the video, it is labelled as scripted.
   - If no live run revises and passes, the beat shows the real runs as they are.
 - **Cut order if Monday slips:** D6b first, then D8, then D7. D7 feeds only the IAM part of the 2:30–2:50 beat; D3-T27 and D6-T3 already show the mock API's 403s under dev auth.
+
+## Settled in D6b
+
+Decided in the implementation (#34) and accepted in review:
+
+- **Scripted runs.** With `--script`, each run gets a fresh `ScriptedTransport` loaded from the file, so `--runs N` replays the same sequence N times. No key is needed, and cost is 0 unless the author model has a price.
+- **Progress and durability.** `author_contract(..., on_version=None)` calls `on_version` once per version as soon as it is final (after its feedback is set, or as the last version). The CLI uses it to print each `VERSION` line with `flush=True` as the version finishes. The eval file is rewritten after every run, through a temp file in the same directory and `os.replace`, so a crash keeps the finished runs.
+- **CLI exit codes.** 0 when every run completes, whatever the outcomes; 2 for a configuration error (no key, no price for the author model, no scenarios, a bad script file). An exception propagates.
+- **Transports without `timeout`.** The gateway passes `timeout` only if `transport.create` accepts it (checked by signature), so test doubles written against the D5 interface keep working. Every transport in `fleetsre/` and `scripts/` accepts it. Accepted for the MVP; the cleaner fix is updating those doubles.
+- **`parse_contract`** holds every loader check; `load_contract` keeps its `schema_invalid` code for a file that is not JSON.
+
+## Results (live, 2026-11-02)
+
+**T15 failed: 0 of 3 runs passed.** `muse-wonder-1.0`, effort `high`, `prompts/author.md` v1, 4 versions per run. $1.46 for all three runs (about $0.06–0.23 per call). File: `evals/d6-2026-11-02.json`.
+
+| Run | v1 | v2 | v3 | v4 | Final `connector-errors` |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 2 visible fail + holdout | 1 visible + holdout | holdout only | 1 visible + holdout | 5 of 11 |
+| 2 | 2 visible fail + holdout | 3 failing | holdout only | holdout only | 6 of 14 |
+| 3 | 2 visible fail + holdout | 3 failing | holdout only | holdout only | 9 of 20 |
+
+- **Version 1 failed the same way in every run:** `severity-drift` (`priority-shape` flapping with a low `recoverAfter`, 110–130 events) and `flap-severe` (`connector-errors` recovering and re-tripping), plus the `flap-mild` holdout. The feedback fixed both visible failures: every run passed all six visible scenarios by version 3.
+- **Every run then stalled on `flap-mild`.** To stop `flap-severe` recovering mid-fault, the model asked for more clean runs before recovery by lowering `threshold` relative to `windowRuns`, so the tripwire fired on 20% noise. "A held-out scenario failed" gave it nothing further.
+- **The scorecard is over-constrained on one seed.** A sweep of `connector-errors` (`threshold` from half to all of `windowRuns`, windows 5–20, everything else the reference contract) found 7 settings of about 200 that pass all eight scenarios: 8/10, 9/11, 9/12, 10/12, 10/13, 10/16, 10/17.
+  - `flap-severe`'s seeded stream has a run of 6 clean runs ending near +2940 s, at a 70% fault rate. A contract that trips before it and needs 6 or fewer clean runs to recover fails.
+  - 8/10 (the reference contract), 9/11, 9/12, 10/12 and 10/13 pass because they trip after the streak: luck, as D4 semantics 12 warned.
+  - 10/16 and 10/17 pass on the merits, at the edge of three constraints: at least 7 clean runs to recover, no trip on 20% noise, and a trip within `green-liar`'s 600 s (10 failing runs).
+- **Round 2 was not run.** A prompt change could only steer the model toward this seed's narrow band, not toward better judgement. The time-box's fallback applies: the loop merged with offline tests green, and the result is reported as it is.
+- **After the hackathon:** score each scenario over several seeds, and adopt D4's deferred symmetric recovery rule for `errorSignature`. Both remove the luck.
+- **Demo (0:20–0:50):** a recorded live run where version 1 fails three scenarios, the model revises until every visible scenario passes, and the held-out scenario catches that the contract would page on a healthy connector's noise, so a human does not approve it.
 
 ## Tests (Session A)
 
@@ -328,7 +358,7 @@ Deliverables:
   - tests/acceptance/d6/: replace the five pytest.skip("D6b") placeholders in place, one function
     per ID, names unchanged (d6b-pins 16-17).
   - tests/acceptance/d6/d6_helpers.py: the d6 helpers moved out of conftest.py; in the D6a test
-    files change only the import lines (d6b-pins 19).
+    files change only the import lines (d6b-pins 20).
   - fixtures/scripted/d6b/*.json (d6b-pins 18).
   - Stubs raising NotImplementedError: fleetsre/authoring/brief.py, schema.py, loop.py (every
     name in d6b-pins 1, 3, 5) and contracts.parse_contract. Leave fleetsre/sre/gateway.py alone.

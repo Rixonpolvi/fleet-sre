@@ -20,6 +20,8 @@ Revised 2026-11-01 before D6: re-plan (§9). All four cuts are taken; D6 splits 
 
 Revised 2026-11-01 (night) before D6b: Muse Wonder's model ID confirmed (§8); authoring detail in `docs/d6b-pins.md`.
 
+Revised 2026-11-02 after D6b: the live authoring result reshapes the 0:20–0:50 demo beat (§10) and adds a risk (§12); detail in `docs/d6b-pins.md` §Results.
+
 ---
 
 ## 1. Summary
@@ -361,7 +363,7 @@ Two merges per deliverable: a tests PR, then an implementation PR. Details and f
 | Time | Beat |
 | --- | --- |
 | 0:00–0:20 | The MSSP problem: tenants × services, silent failures, `LIVE` while nothing arrives |
-| 0:20–0:50 | SRE authors a contract; scorecard fails a scenario; it revises and passes, including held-out scenarios it never saw; human approves |
+| 0:20–0:50 | SRE authors a contract from a brief; the scorecard fails three scenarios; it revises until every visible scenario passes; a held-out scenario it never saw catches that the contract would page on a healthy connector's noise, so the human does not approve it (a recorded live run, D6-T15) |
 | 0:50–1:05 | Fleet grid: two services, three tenants, one low-volume, all green |
 | 1:05–2:15 | Stall trips cadence while the quiet tenant stays green. Credential Green Liar trips errorSignature and canary; the timeline shows each turn's rationale, tool call and gate verdict: hypotheses (credential versus fleet-wide), `compare_siblings`, `test_integration_instance`, escalation. The incident waits with no model calls; "mark rotated"; the same incident resumes and the tripwires confirm recovery. Severity drift trips schema; SRE proposes a parameter patch |
 | 2:15–2:30 | Reject with notes on the severity-drift proposal: both F3 recordings set `Unknown Severity Priority` to `-1`, so `Critical` would become Informational. The human rejects with "unknown severities should map to 100"; the SRE revises in the same session; approval; tripwires confirm recovery |
@@ -390,6 +392,7 @@ No live instance (cut 2026-11-01, §9): the demo is recorded from `make demo`.
 | SRE wanders or fabricates evidence | Budgets, stuck detection, evidence checked when recorded, category evidence rules |
 | The model does not follow the gated protocol (one call per turn, hypotheses first) | D2 passed with the full protocol (`spikes/RESULTS.md`); the D5 live eval scored 18/18 (`evals/d5-2026-11-01.json`). If a later model fails it, fallback order: drop `update_plan`; then drop `set_hypotheses` (rule 3 of §6.5 becomes report-only); then pre-computed evidence in the incident |
 | Authoring fits the visible scenarios | Held-out scenarios (§5.1) |
+| The scorecard grades one seed, not a contract: a seeded stream can fail a sound contract or pass a weak one (D6b: 7 of about 200 `connector-errors` settings pass every scenario, the reference contract by luck) | Reported, not fixed: after the hackathon, score each scenario over several seeds and adopt the symmetric `errorSignature` recovery rule (`deliverables.md` D4 semantics 12) |
 
 Open: partner credits for the fallback; model per role after evals; escalation channel (UI only or email).
 
