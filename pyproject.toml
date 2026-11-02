@@ -6,7 +6,13 @@ build-backend = "setuptools.build_meta"
 name = "fleetsre"
 version = "0.0.0"
 requires-python = ">=3.12"
-dependencies = ["openai"]
+dependencies = [
+  "openai",
+  "google-cloud-logging",
+  "google-cloud-pubsub",
+  "google-cloud-iam",
+  "google-auth",
+]
 
 [project.optional-dependencies]
 dev = [
