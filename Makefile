@@ -1,4 +1,4 @@
-.PHONY: check lint test test-live test-gcp demo record
+.PHONY: check lint test test-live test-gcp demo record author
 
 check: lint
 	python scripts/check_trace.py --doc docs/deliverables.md --tests tests/acceptance
@@ -24,3 +24,6 @@ demo:
 record:
 	if [ -z "$(FAULT)" ]; then echo "usage: make record FAULT=<F>" >&2; exit 2; fi
 	python scripts/record.py --fault $(FAULT)
+
+author:
+	python -m fleetsre.authoring --brief fixtures/briefs/alert-ingestion.yaml --runs 1

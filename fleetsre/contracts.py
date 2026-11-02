@@ -117,19 +117,14 @@ def _find_param_refs(value: Any) -> list[str]:
     return []
 
 
-def load_contract(path: str | Path) -> Contract:
-    """Validate a contract file against contracts/schema.json plus the referential
-    rules in the ContractError codes table order (deliverables.md §D1).
+def parse_contract(data: dict[str, Any]) -> Contract:
+    """Validate a contract dict: schema first, then the referential rules in
+    the ContractError codes table order (deliverables.md §D1).
 
     Raises ContractError(code) on the first failure. Top-level keys starting
     with "_" are allowed by the schema and ignored by the loader.
     """
-    with open(path, encoding="utf-8") as fh:
-        try:
-            raw: dict[str, Any] = json.load(fh)
-        except json.JSONDecodeError as exc:
-            raise ContractError("schema_invalid", f"invalid JSON: {exc}") from exc
-
+    raw = data
     schema = _load_schema()
     validator = jsonschema.Draft202012Validator(schema)
     try:
@@ -222,9 +217,14 @@ def load_contract(path: str | Path) -> Contract:
     return contract
 
 
-def parse_contract(data: dict[str, Any]) -> Contract:
-    """Run load_contract's checks on a dict (d6b-pins 2). Stub: raises."""
-    raise NotImplementedError
+def load_contract(path: str | Path) -> Contract:
+    """Read a contract file and validate it via parse_contract (d6b-pins 2)."""
+    with open(path, encoding="utf-8") as fh:
+        try:
+            raw: dict[str, Any] = json.load(fh)
+        except json.JSONDecodeError as exc:
+            raise ContractError("schema_invalid", f"invalid JSON: {exc}") from exc
+    return parse_contract(raw)
 
 
 class SchemaSpec(BaseModel):

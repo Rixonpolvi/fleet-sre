@@ -44,8 +44,10 @@ class RecordingTransport:
         self._inner = inner
         self.responses: list[dict[str, Any]] = []
 
-    def create(self, request: dict[str, Any]) -> dict[str, Any]:
-        response = self._inner.create(request)
+    def create(
+        self, request: dict[str, Any], *, timeout: float
+    ) -> dict[str, Any]:
+        response = self._inner.create(request, timeout=timeout)
         self.responses.append(copy.deepcopy(response))
         return response
 
