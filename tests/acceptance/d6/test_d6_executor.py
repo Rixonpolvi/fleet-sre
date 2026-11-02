@@ -2,7 +2,7 @@
 
 import pytest
 
-from conftest import (
+from d6_helpers import (
     T0,
     TICK,
     at_offset,
@@ -242,7 +242,7 @@ def test_d6_t4_restart_macro():
     Connector and job restarts on a bare world, observed with a recording
     wrapper around the deployer client (d6a-pins 25). No D4 numbers needed.
     """
-    from conftest import RecordingChronicle
+    from d6_helpers import RecordingChronicle
 
     from fleetsre.control.approvals import ApprovalStore
     from fleetsre.control.executor import Executor
@@ -299,7 +299,7 @@ def test_d6_t18_executor_journal():
     journal must hold intent, started, step(s), terminal in order, with
     every API write happening after its intent (d6a-pins 18).
     """
-    from conftest import RecordingChronicle
+    from d6_helpers import RecordingChronicle
 
     from fleetsre.control.approvals import ApprovalStore
     from fleetsre.control.executor import Executor
@@ -383,7 +383,7 @@ def test_d6_t19_crash_safe_apply(tmp_path):
     its first step (both outcomes). Patch calls are counted with a wrapper
     around the deployer client.
     """
-    from conftest import RecordingChronicle
+    from d6_helpers import RecordingChronicle
 
     from fleetsre.control.approvals import ApprovalStore
     from fleetsre.control.executor import Executor

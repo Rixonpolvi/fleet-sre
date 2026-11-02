@@ -222,6 +222,11 @@ def load_contract(path: str | Path) -> Contract:
     return contract
 
 
+def parse_contract(data: dict[str, Any]) -> Contract:
+    """Run load_contract's checks on a dict (d6b-pins 2). Stub: raises."""
+    raise NotImplementedError
+
+
 class SchemaSpec(BaseModel):
     """D4: resolved schema tripwire spec (no ${param} strings). Data model only."""
 

@@ -2,7 +2,7 @@
 
 import pytest
 
-from conftest import (
+from d6_helpers import (
     TICK,
     at_offset,
     build_e2e,
@@ -526,7 +526,7 @@ def test_d6_t20_gates_always_on():
     from fleetsre.sre.session import MemorySessionStore
     from fleetsre.sre.tools import ToolSet
 
-    from conftest import T0, contract, fleet, gateway_config
+    from d6_helpers import T0, contract, fleet, gateway_config
 
     flt = fleet()
     cont = contract("alert-ingestion")

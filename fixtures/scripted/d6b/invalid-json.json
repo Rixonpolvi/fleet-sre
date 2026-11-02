@@ -1,0 +1,24 @@
+{
+  "output": [
+    {
+      "type": "message",
+      "role": "assistant",
+      "content": [
+        {
+          "type": "output_text",
+          "text": "{\n  \"service\": \"alert-ingestion\",\n  \"version\": \"1.0.0\",\n  \"description\": \"Sentinel incidents polled by a SOAR connector instance and ingested as alerts by the ETL flow.\",\n  \"parameters\": {\n    \"expectedAlertsPerHour\": { \"type\": \"number\", \"required\": true, \"description\": \"Organic upstream volume for this tenant. Informational: no tripwire uses it, because volume cannot tell quiet from broken.\" },\n    \"intervalSeconds\": { \"type\": \"integer\", \"required\": true, \"description\": \"Connector run interval.\" }\n  },\n  \"components\": [\n    { \"id\": \"connector\", \"kind\": \"connectorInstance\",\n      \"logs\": { \"container_name\": \"python\","
+        }
+      ]
+    }
+  ],
+  "usage": {
+    "input_tokens": 6977,
+    "output_tokens": 5268,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens_details": {
+      "reasoning_tokens": 4660
+    }
+  }
+}

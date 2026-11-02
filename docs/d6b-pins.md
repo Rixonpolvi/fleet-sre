@@ -136,8 +136,8 @@ The model chooses each tripwire's type and spec: fields, enums, thresholds, wind
    5. **Score.** Call `scorer(contract, scenarios)`. The version is `passed` if and only if `Scorecard.passed` (every scenario, holdouts included); otherwise it is `failed`.
 
 10. **Feedback (exact text).** `{n}` is the version number. A scenario is visible when its `holdout` is false. The lines are joined by `\n`.
-    - **`invalid_json`:** `Version {n} is not valid JSON: {error}. Return the whole contract as one JSON object.`
-    - **`invalid_contract`:** `Version {n} was rejected by the contract loader: {code}: {message}`
+    - **`invalid_json`:** `Version {n} is not valid JSON: {error}. Return the whole contract as one JSON object.` Here `{error}` is `str()` of the `json.JSONDecodeError` from step 2, and the problem is `json: {error}`.
+    - **`invalid_contract`:** `Version {n} was rejected by the contract loader: {code}: {message}`. Here `{code}` is `ContractError.code` and `{message}` is `str()` of the error; the problem is `contract.{code}: {message}`.
     - **`failed`, with at least one visible scenario failing:**
       ```
       Version {n} failed the scorecard. {p} of {v} visible scenarios passed.
@@ -175,10 +175,16 @@ The model chooses each tripwire's type and spec: fields, enums, thresholds, wind
     - Stdout:
       - one line per version: `VERSION {"run","version","status","visiblePassed","visibleTotal","holdoutsPassed","falsePositives","problems","costUsd"}`;
       - one line per run: `RESULT {"run","passed","stopReason","versions","costUsd"}`.
-    - Output file (default `evals/authoring/<UTC timestamp>.json`) holds, per run:
-      - the versions: status, problems, feedback, every scenario's `passed`/`missing`/`unexpected` (holdouts included; the file never reaches the model), usage and cost;
-      - the final contract;
-      - the totals.
+    - Output file (default `evals/authoring/<UTC timestamp>.json`), keys as T15 asserts them:
+      ```
+      {"runs": [{"run", "passed", "stop_reason", "contract", "tokens", "cost_usd",
+                 "versions": [{"version", "status", "problems", "feedback", "usage", "cost_usd",
+                               "scenarios": [{"scenario_id", "holdout", "passed", "missing", "unexpected"}]}]}]}
+      ```
+      - `scenarios` lists every scenario, holdouts included, with `holdout` marking them. The file never reaches the model. It is empty for an unscored version.
+      - `missing` and `unexpected` are rendered as in pin 10, uncapped.
+      - `contract` is the final contract's JSON, or `null`.
+    - The CLI exits 0 when every run completes, whatever their outcomes, and non-zero only on an error (no key, no price, a crash).
     - No output file contains `encrypted_content` or request bodies.
 
 15. **T15.** It runs the CLI's code path with three runs against alert-ingestion and writes `evals/d6-<UTC date>.json` in the pin 14 format. It passes when at least 2 of the 3 runs pass. Expect about $0.15–0.25 per call (P1: $0.13 for version 1, with later versions carrying the history), so at most about $1 per run and $3 per eval.
@@ -232,7 +238,15 @@ The model chooses each tripwire's type and spec: fields, enums, thresholds, wind
     - **`invalid-contract.json`:** a contract that fails `parse_contract` with `duplicate_tripwire` after pin 9's overwrites.
     - Pre-flight every contract file with the real scorer (P4) and paste the outcomes into the PR description.
 
-19. **Conftest collision.**
+19. **Session B unit tests** (`tests/unit/`), for behaviour no acceptance row reaches:
+    - the 10-item cap and its `, and {k} more` tail (pin 10);
+    - `flatten_schema` raising on a recursive `$ref` and inlining `#/definitions/…` (pin 3);
+    - `retry_timeouts=False`: one call on a timeout, while 429 still retries (pin 4);
+    - `model_unavailable` keeping the versions already made (pin 12);
+    - code-fence stripping and the `json: not an object` problem (pin 9);
+    - per-version cost and the summed tokens (pin 13).
+
+20. **Conftest collision.**
     - Move the d6 helpers into `tests/acceptance/d6/d6_helpers.py`, imported as `from d6_helpers import ...`. The D6a test files change only their import lines.
     - `python -m pytest tests/acceptance/d5 tests/acceptance/d6 --co -q` must collect.
 
@@ -263,7 +277,12 @@ The model chooses each tripwire's type and spec: fields, enums, thresholds, wind
   - whether reasoning items come back.
 
   This settles pin 7's `strict` and pin 4's effort.
-- **P2 (Session A, outside the tests).** Print one real `ScenarioResult`'s `missing` and `unexpected` elements (type and fields) for the fail-visible candidate, and time a full alert-ingestion scorecard.
+- **P2 (settled by Session A).** `ScenarioResult.missing` items are `(kind, deployment, tripwire)` tuples with no deadline; `withinSeconds` comes from the scenario's `expected.trips` (a missing trip) or `expected.recoveries` (a missing recovery), matched by environment and tripwire. `unexpected` items are `TripEvent`s. A full alert-ingestion scorecard takes 0.3 s.
+- **P4 (settled by Session A).** The reference contract passes all 8 scenarios.
+  - `fail-visible` is the `lazy-canary` mutant (canary `deadlineSeconds` 1800). It fails `green-liar` and `stall` (visible) and `recovery` (holdout).
+  - `fail-holdout` is the reference with `connector-errors` `threshold` 8 → 3. It passes every visible scenario and fails only `flap-mild`. Thresholds 2–6 trip `flap-mild`; 7 passes it.
+  - `invalid-contract` raises `duplicate_tripwire` (a second `canary`). `invalid-json` is cut inside the first component.
+- **P5 (settled by Session A).** `render_brief` is 25,226 characters: brief 3,835, samples 9,144, schema 12,067.
 - **P3 (settled 2026-11-01).**
   - `provenance` requires only `authoredBy` (a string); `scorecard` and `approvedBy` are `string | null`. Pin 9 uses `null` for `approvedBy`.
   - The flattened `authoring_schema()` is 5,483 characters with no `$ref`. Its keywords are `additionalProperties` (including as a schema, for `parameters`), `const`, `default`, `description`, `enum`, `items`, `minItems`, `minProperties`, `minimum`, `oneOf`, `pattern`, `properties`, `propertyNames`, `required`, `title`, `type` and `uniqueItems`.
