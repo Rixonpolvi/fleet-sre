@@ -1,0 +1,1704 @@
+{
+  "runs": [
+    {
+      "run": 1,
+      "passed": false,
+      "stop_reason": "max_revisions",
+      "contract": {
+        "service": "alert-ingestion",
+        "version": "1.0.0",
+        "description": null,
+        "parameters": {
+          "intervalSeconds": {
+            "type": "integer",
+            "required": true,
+            "default": null,
+            "description": "The connector's polling interval in seconds. Supplied per deployment."
+          }
+        },
+        "components": [
+          {
+            "id": "connector",
+            "kind": "connectorInstance",
+            "logs": {
+              "container_name": "python",
+              "match": [
+                "connector_name",
+                "connector_instance"
+              ],
+              "deploymentBy": "labels.connector_instance"
+            },
+            "description": "The tenant's Sentinel connector instance, running in the python container."
+          },
+          {
+            "id": "ingestion",
+            "kind": "etlFlow",
+            "logs": {
+              "container_name": "etl",
+              "match": [
+                "correlation_id"
+              ],
+              "deploymentBy": "jsonPayload.environment"
+            },
+            "description": "Ingestion of the connector's alerts, in the etl container. One entry per alert."
+          }
+        ],
+        "tripwires": [
+          {
+            "id": "dead-connector",
+            "component": "connector",
+            "type": "cadence",
+            "spec": {
+              "event": "connector.run.completed",
+              "intervalSeconds": "${intervalSeconds}",
+              "maxSilentIntervals": 2
+            },
+            "description": "Catches a connector that stops running when its run.completed heartbeat goes silent for more than two polling intervals."
+          },
+          {
+            "id": "canary",
+            "component": "ingestion",
+            "type": "synthetic",
+            "spec": {
+              "deadlineSeconds": 240,
+              "everyMinutes": 1
+            },
+            "description": "Catches alerts stopping reaching SOAR end to end by expecting each planted canary alert within its deadline."
+          },
+          {
+            "id": "priority-shape",
+            "component": "ingestion",
+            "type": "schema",
+            "spec": {
+              "consecutive": 1,
+              "enum": [
+                -1,
+                40,
+                60,
+                80,
+                100
+              ],
+              "event": "alert.ingested",
+              "field": "jsonPayload.alert.priority",
+              "recoverAfter": 10,
+              "required": true,
+              "type": "integer"
+            },
+            "description": "Catches any ingested alert whose priority is missing, not an integer, or not one of Google's healthy priority values."
+          },
+          {
+            "id": "connector-errors",
+            "component": "connector",
+            "type": "errorSignature",
+            "spec": {
+              "minSeverity": "WARNING",
+              "threshold": 5,
+              "windowRuns": 11
+            },
+            "description": "Catches a connector that keeps running but fails at least five of its last eleven runs, while tolerating occasional failed runs."
+          }
+        ],
+        "changePoint": {
+          "durationSeconds": 1800,
+          "overrides": {
+            "canary": {
+              "deadlineSeconds": 180,
+              "everyMinutes": 1
+            },
+            "connector-errors": {
+              "threshold": 4,
+              "windowRuns": 6
+            },
+            "dead-connector": {
+              "maxSilentIntervals": 1
+            },
+            "priority-shape": {
+              "consecutive": 1,
+              "recoverAfter": 3
+            }
+          }
+        },
+        "provenance": {
+          "authoredBy": "muse-wonder-1.0",
+          "scorecard": "author-v4",
+          "approvedBy": null
+        }
+      },
+      "tokens": {
+        "input_tokens": 53910,
+        "output_tokens": 20864,
+        "cached_tokens": 18408,
+        "reasoning_tokens": 18501
+      },
+      "cost_usd": 0.5629696,
+      "versions": [
+        {
+          "version": 1,
+          "status": "failed",
+          "problems": [],
+          "feedback": "Version 1 failed the scorecard. 4 of 6 visible scenarios passed.\nflap-severe: missing none; unexpected recovery connector-errors on alert-ingestion/alpha at +2760 s, trip connector-errors on alert-ingestion/alpha at +3120 s\nseverity-drift: missing none; unexpected recovery priority-shape on alert-ingestion/alpha at +2040 s, trip priority-shape on alert-ingestion/alpha at +2100 s, recovery priority-shape on alert-ingestion/alpha at +2100 s, trip priority-shape on alert-ingestion/alpha at +2100 s, recovery priority-shape on alert-ingestion/alpha at +2100 s, trip priority-shape on alert-ingestion/alpha at +2280 s, recovery priority-shape on alert-ingestion/alpha at +2400 s, trip priority-shape on alert-ingestion/alpha at +2400 s, recovery priority-shape on alert-ingestion/alpha at +2520 s, trip priority-shape on alert-ingestion/alpha at +2520 s, and 105 more",
+          "usage": {
+            "input_tokens": 6949,
+            "output_tokens": 4366,
+            "cached_tokens": 0,
+            "reasoning_tokens": 3780
+          },
+          "cost_usd": 0.115116,
+          "scenarios": [
+            {
+              "scenario_id": "clean",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "flap-mild",
+              "holdout": true,
+              "passed": false,
+              "missing": [],
+              "unexpected": [
+                "trip connector-errors on alert-ingestion/alpha at +1500 s",
+                "recovery connector-errors on alert-ingestion/alpha at +1740 s",
+                "trip connector-errors on alert-ingestion/alpha at +4020 s",
+                "recovery connector-errors on alert-ingestion/alpha at +5040 s",
+                "trip connector-errors on alert-ingestion/alpha at +6960 s",
+                "recovery connector-errors on alert-ingestion/alpha at +7140 s"
+              ]
+            },
+            {
+              "scenario_id": "flap-severe",
+              "holdout": false,
+              "passed": false,
+              "missing": [],
+              "unexpected": [
+                "recovery connector-errors on alert-ingestion/alpha at +2760 s",
+                "trip connector-errors on alert-ingestion/alpha at +3120 s"
+              ]
+            },
+            {
+              "scenario_id": "green-liar",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "quiet-tenant",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "recovery",
+              "holdout": true,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "severity-drift",
+              "holdout": false,
+              "passed": false,
+              "missing": [],
+              "unexpected": [
+                "recovery priority-shape on alert-ingestion/alpha at +2040 s",
+                "trip priority-shape on alert-ingestion/alpha at +2100 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2100 s",
+                "trip priority-shape on alert-ingestion/alpha at +2100 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2100 s",
+                "trip priority-shape on alert-ingestion/alpha at +2280 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2400 s",
+                "trip priority-shape on alert-ingestion/alpha at +2400 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2520 s",
+                "trip priority-shape on alert-ingestion/alpha at +2520 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2580 s",
+                "trip priority-shape on alert-ingestion/alpha at +2580 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2640 s",
+                "trip priority-shape on alert-ingestion/alpha at +2640 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2700 s",
+                "trip priority-shape on alert-ingestion/alpha at +2820 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2820 s",
+                "trip priority-shape on alert-ingestion/alpha at +2880 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3000 s",
+                "trip priority-shape on alert-ingestion/alpha at +3000 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3120 s",
+                "trip priority-shape on alert-ingestion/alpha at +3300 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3360 s",
+                "trip priority-shape on alert-ingestion/alpha at +3360 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3360 s",
+                "trip priority-shape on alert-ingestion/alpha at +3360 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3360 s",
+                "trip priority-shape on alert-ingestion/alpha at +3420 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3480 s",
+                "trip priority-shape on alert-ingestion/alpha at +3480 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3540 s",
+                "trip priority-shape on alert-ingestion/alpha at +3660 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3720 s",
+                "trip priority-shape on alert-ingestion/alpha at +3780 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3840 s",
+                "trip priority-shape on alert-ingestion/alpha at +3900 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3960 s",
+                "trip priority-shape on alert-ingestion/alpha at +3960 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3960 s",
+                "trip priority-shape on alert-ingestion/alpha at +4020 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4020 s",
+                "trip priority-shape on alert-ingestion/alpha at +4080 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4140 s",
+                "trip priority-shape on alert-ingestion/alpha at +4320 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4320 s",
+                "trip priority-shape on alert-ingestion/alpha at +4380 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4380 s",
+                "trip priority-shape on alert-ingestion/alpha at +4380 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4440 s",
+                "trip priority-shape on alert-ingestion/alpha at +4440 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4440 s",
+                "trip priority-shape on alert-ingestion/alpha at +4440 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4500 s",
+                "trip priority-shape on alert-ingestion/alpha at +4620 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4680 s",
+                "trip priority-shape on alert-ingestion/alpha at +4680 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4680 s",
+                "trip priority-shape on alert-ingestion/alpha at +4740 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4800 s",
+                "trip priority-shape on alert-ingestion/alpha at +4800 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4800 s",
+                "trip priority-shape on alert-ingestion/alpha at +5040 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5100 s",
+                "trip priority-shape on alert-ingestion/alpha at +5100 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5160 s",
+                "trip priority-shape on alert-ingestion/alpha at +5160 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5160 s",
+                "trip priority-shape on alert-ingestion/alpha at +5220 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5220 s",
+                "trip priority-shape on alert-ingestion/alpha at +5280 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5280 s",
+                "trip priority-shape on alert-ingestion/alpha at +5400 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5400 s",
+                "trip priority-shape on alert-ingestion/alpha at +5400 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5460 s",
+                "trip priority-shape on alert-ingestion/alpha at +5520 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5520 s",
+                "trip priority-shape on alert-ingestion/alpha at +5580 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5580 s",
+                "trip priority-shape on alert-ingestion/alpha at +5640 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5700 s",
+                "trip priority-shape on alert-ingestion/alpha at +5700 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5700 s",
+                "trip priority-shape on alert-ingestion/alpha at +5760 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5820 s",
+                "trip priority-shape on alert-ingestion/alpha at +5820 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5820 s",
+                "trip priority-shape on alert-ingestion/alpha at +5880 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6000 s",
+                "trip priority-shape on alert-ingestion/alpha at +6120 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6180 s",
+                "trip priority-shape on alert-ingestion/alpha at +6180 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6240 s",
+                "trip priority-shape on alert-ingestion/alpha at +6240 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6240 s",
+                "trip priority-shape on alert-ingestion/alpha at +6360 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6420 s",
+                "trip priority-shape on alert-ingestion/alpha at +6540 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6540 s",
+                "trip priority-shape on alert-ingestion/alpha at +6600 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6660 s",
+                "trip priority-shape on alert-ingestion/alpha at +6660 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6660 s",
+                "trip priority-shape on alert-ingestion/alpha at +6720 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6780 s",
+                "trip priority-shape on alert-ingestion/alpha at +6840 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6900 s",
+                "trip priority-shape on alert-ingestion/alpha at +6960 s",
+                "recovery priority-shape on alert-ingestion/alpha at +7080 s",
+                "trip priority-shape on alert-ingestion/alpha at +7080 s",
+                "recovery priority-shape on alert-ingestion/alpha at +7140 s",
+                "trip priority-shape on alert-ingestion/alpha at +7140 s",
+                "recovery priority-shape on alert-ingestion/alpha at +7200 s",
+                "trip priority-shape on alert-ingestion/alpha at +7200 s",
+                "recovery priority-shape on alert-ingestion/alpha at +7200 s"
+              ]
+            },
+            {
+              "scenario_id": "stall",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            }
+          ]
+        },
+        {
+          "version": 2,
+          "status": "failed",
+          "problems": [],
+          "feedback": "Version 2 failed the scorecard. 5 of 6 visible scenarios passed.\nflap-severe: missing none; unexpected recovery connector-errors on alert-ingestion/alpha at +2880 s, trip connector-errors on alert-ingestion/alpha at +3240 s",
+          "usage": {
+            "input_tokens": 11540,
+            "output_tokens": 4781,
+            "cached_tokens": 0,
+            "reasoning_tokens": 4195
+          },
+          "cost_usd": 0.14178,
+          "scenarios": [
+            {
+              "scenario_id": "clean",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "flap-mild",
+              "holdout": true,
+              "passed": false,
+              "missing": [],
+              "unexpected": [
+                "trip connector-errors on alert-ingestion/alpha at +1560 s",
+                "recovery connector-errors on alert-ingestion/alpha at +1860 s",
+                "trip connector-errors on alert-ingestion/alpha at +4020 s",
+                "recovery connector-errors on alert-ingestion/alpha at +5160 s"
+              ]
+            },
+            {
+              "scenario_id": "flap-severe",
+              "holdout": false,
+              "passed": false,
+              "missing": [],
+              "unexpected": [
+                "recovery connector-errors on alert-ingestion/alpha at +2880 s",
+                "trip connector-errors on alert-ingestion/alpha at +3240 s"
+              ]
+            },
+            {
+              "scenario_id": "green-liar",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "quiet-tenant",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "recovery",
+              "holdout": true,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "severity-drift",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "stall",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            }
+          ]
+        },
+        {
+          "version": 3,
+          "status": "failed",
+          "problems": [],
+          "feedback": "Version 3 failed the scorecard: a held-out scenario failed.",
+          "usage": {
+            "input_tokens": 16383,
+            "output_tokens": 2634,
+            "cached_tokens": 11508,
+            "reasoning_tokens": 2048
+          },
+          "cost_usd": 0.07448160000000001,
+          "scenarios": [
+            {
+              "scenario_id": "clean",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "flap-mild",
+              "holdout": true,
+              "passed": false,
+              "missing": [],
+              "unexpected": [
+                "trip connector-errors on alert-ingestion/alpha at +1560 s",
+                "recovery connector-errors on alert-ingestion/alpha at +1980 s",
+                "trip connector-errors on alert-ingestion/alpha at +4020 s",
+                "recovery connector-errors on alert-ingestion/alpha at +6120 s"
+              ]
+            },
+            {
+              "scenario_id": "flap-severe",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "green-liar",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "quiet-tenant",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "recovery",
+              "holdout": true,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "severity-drift",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "stall",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            }
+          ]
+        },
+        {
+          "version": 4,
+          "status": "failed",
+          "problems": [],
+          "feedback": null,
+          "usage": {
+            "input_tokens": 19038,
+            "output_tokens": 9083,
+            "cached_tokens": 6900,
+            "reasoning_tokens": 8478
+          },
+          "cost_usd": 0.231592,
+          "scenarios": [
+            {
+              "scenario_id": "clean",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "flap-mild",
+              "holdout": true,
+              "passed": false,
+              "missing": [],
+              "unexpected": [
+                "trip connector-errors on alert-ingestion/alpha at +1560 s",
+                "recovery connector-errors on alert-ingestion/alpha at +1980 s",
+                "trip connector-errors on alert-ingestion/alpha at +4020 s",
+                "recovery connector-errors on alert-ingestion/alpha at +6120 s"
+              ]
+            },
+            {
+              "scenario_id": "flap-severe",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "green-liar",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "quiet-tenant",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "recovery",
+              "holdout": true,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "severity-drift",
+              "holdout": false,
+              "passed": false,
+              "missing": [],
+              "unexpected": [
+                "recovery priority-shape on alert-ingestion/alpha at +3300 s",
+                "trip priority-shape on alert-ingestion/alpha at +3300 s"
+              ]
+            },
+            {
+              "scenario_id": "stall",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "run": 2,
+      "passed": false,
+      "stop_reason": "max_revisions",
+      "contract": {
+        "service": "alert-ingestion",
+        "version": "1.0.0",
+        "description": null,
+        "parameters": {
+          "expectedAlertsPerHour": {
+            "type": "number",
+            "required": true,
+            "default": null,
+            "description": "The tenant's typical alert volume. Supplied per deployment."
+          },
+          "intervalSeconds": {
+            "type": "integer",
+            "required": true,
+            "default": null,
+            "description": "The connector's polling interval in seconds. Supplied per deployment."
+          }
+        },
+        "components": [
+          {
+            "id": "connector",
+            "kind": "connectorInstance",
+            "logs": {
+              "container_name": "python",
+              "match": [
+                "connector_name",
+                "connector_instance"
+              ],
+              "deploymentBy": "labels.connector_instance"
+            },
+            "description": "The tenant's Sentinel connector instance, running in the python container."
+          },
+          {
+            "id": "ingestion",
+            "kind": "etlFlow",
+            "logs": {
+              "container_name": "etl",
+              "match": [
+                "correlation_id"
+              ],
+              "deploymentBy": "jsonPayload.environment"
+            },
+            "description": "Ingestion of the connector's alerts, in the etl container. One entry per alert."
+          }
+        ],
+        "tripwires": [
+          {
+            "id": "dead-connector",
+            "component": "connector",
+            "type": "cadence",
+            "spec": {
+              "event": "connector.run.completed",
+              "intervalSeconds": "${intervalSeconds}",
+              "maxSilentIntervals": 3
+            },
+            "description": "Trips when connector.run.completed heartbeats stop arriving on the polling schedule, showing a dead connector despite LIVE API status."
+          },
+          {
+            "id": "canary",
+            "component": "ingestion",
+            "type": "synthetic",
+            "spec": {
+              "deadlineSeconds": 300,
+              "everyMinutes": 1
+            },
+            "description": "Trips when planted canary incidents stop appearing as ingested alerts, showing end-to-end ingestion failure while connector runs look normal."
+          },
+          {
+            "id": "priority-shape",
+            "component": "ingestion",
+            "type": "schema",
+            "spec": {
+              "consecutive": 1,
+              "enum": [
+                -1,
+                40,
+                60,
+                80,
+                100
+              ],
+              "event": "alert.ingested",
+              "field": "jsonPayload.alert.priority",
+              "recoverAfter": 30,
+              "required": true,
+              "type": "integer"
+            },
+            "description": "Trips on a single ingested alert whose priority is missing, not an integer, or not one of Google's -1, 40, 60, 80, 100 values, and stays tripped through isolated valid alerts."
+          },
+          {
+            "id": "connector-errors",
+            "component": "connector",
+            "type": "errorSignature",
+            "spec": {
+              "minSeverity": "WARNING",
+              "threshold": 6,
+              "windowRuns": 14
+            },
+            "description": "Trips when at least six of the last fourteen connector runs end with a WARNING or ERROR, showing sustained run failure rather than occasional noise."
+          }
+        ],
+        "changePoint": {
+          "durationSeconds": 1200,
+          "overrides": {
+            "canary": {
+              "deadlineSeconds": 240,
+              "everyMinutes": 1
+            },
+            "connector-errors": {
+              "threshold": 3,
+              "windowRuns": 5
+            },
+            "dead-connector": {
+              "maxSilentIntervals": 2
+            }
+          }
+        },
+        "provenance": {
+          "authoredBy": "muse-wonder-1.0",
+          "scorecard": "author-v4",
+          "approvedBy": null
+        }
+      },
+      "tokens": {
+        "input_tokens": 55086,
+        "output_tokens": 18560,
+        "cached_tokens": 25308,
+        "reasoning_tokens": 15956
+      },
+      "cost_usd": 0.49537359999999997,
+      "versions": [
+        {
+          "version": 1,
+          "status": "failed",
+          "problems": [],
+          "feedback": "Version 1 failed the scorecard. 4 of 6 visible scenarios passed.\nflap-severe: missing none; unexpected recovery connector-errors on alert-ingestion/alpha at +2760 s, trip connector-errors on alert-ingestion/alpha at +3120 s\nseverity-drift: missing none; unexpected recovery priority-shape on alert-ingestion/alpha at +1980 s, trip priority-shape on alert-ingestion/alpha at +1980 s, recovery priority-shape on alert-ingestion/alpha at +2040 s, trip priority-shape on alert-ingestion/alpha at +2100 s, recovery priority-shape on alert-ingestion/alpha at +2100 s, trip priority-shape on alert-ingestion/alpha at +2100 s, recovery priority-shape on alert-ingestion/alpha at +2100 s, trip priority-shape on alert-ingestion/alpha at +2280 s, recovery priority-shape on alert-ingestion/alpha at +2340 s, trip priority-shape on alert-ingestion/alpha at +2400 s, and 121 more",
+          "usage": {
+            "input_tokens": 6949,
+            "output_tokens": 4352,
+            "cached_tokens": 6900,
+            "reasoning_tokens": 3708
+          },
+          "cost_usd": 0.088616,
+          "scenarios": [
+            {
+              "scenario_id": "clean",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "flap-mild",
+              "holdout": true,
+              "passed": false,
+              "missing": [],
+              "unexpected": [
+                "trip connector-errors on alert-ingestion/alpha at +1500 s",
+                "recovery connector-errors on alert-ingestion/alpha at +1740 s",
+                "trip connector-errors on alert-ingestion/alpha at +4020 s",
+                "recovery connector-errors on alert-ingestion/alpha at +5040 s",
+                "trip connector-errors on alert-ingestion/alpha at +6960 s",
+                "recovery connector-errors on alert-ingestion/alpha at +7140 s"
+              ]
+            },
+            {
+              "scenario_id": "flap-severe",
+              "holdout": false,
+              "passed": false,
+              "missing": [],
+              "unexpected": [
+                "recovery connector-errors on alert-ingestion/alpha at +2760 s",
+                "trip connector-errors on alert-ingestion/alpha at +3120 s"
+              ]
+            },
+            {
+              "scenario_id": "green-liar",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "quiet-tenant",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "recovery",
+              "holdout": true,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "severity-drift",
+              "holdout": false,
+              "passed": false,
+              "missing": [],
+              "unexpected": [
+                "recovery priority-shape on alert-ingestion/alpha at +1980 s",
+                "trip priority-shape on alert-ingestion/alpha at +1980 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2040 s",
+                "trip priority-shape on alert-ingestion/alpha at +2100 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2100 s",
+                "trip priority-shape on alert-ingestion/alpha at +2100 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2100 s",
+                "trip priority-shape on alert-ingestion/alpha at +2280 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2340 s",
+                "trip priority-shape on alert-ingestion/alpha at +2400 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2460 s",
+                "trip priority-shape on alert-ingestion/alpha at +2460 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2520 s",
+                "trip priority-shape on alert-ingestion/alpha at +2520 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2580 s",
+                "trip priority-shape on alert-ingestion/alpha at +2580 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2640 s",
+                "trip priority-shape on alert-ingestion/alpha at +2640 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2700 s",
+                "trip priority-shape on alert-ingestion/alpha at +2700 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2700 s",
+                "trip priority-shape on alert-ingestion/alpha at +2820 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2820 s",
+                "trip priority-shape on alert-ingestion/alpha at +2880 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2940 s",
+                "trip priority-shape on alert-ingestion/alpha at +2940 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3000 s",
+                "trip priority-shape on alert-ingestion/alpha at +3000 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3060 s",
+                "trip priority-shape on alert-ingestion/alpha at +3300 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3360 s",
+                "trip priority-shape on alert-ingestion/alpha at +3360 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3360 s",
+                "trip priority-shape on alert-ingestion/alpha at +3360 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3360 s",
+                "trip priority-shape on alert-ingestion/alpha at +3420 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3480 s",
+                "trip priority-shape on alert-ingestion/alpha at +3480 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3540 s",
+                "trip priority-shape on alert-ingestion/alpha at +3660 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3720 s",
+                "trip priority-shape on alert-ingestion/alpha at +3780 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3840 s",
+                "trip priority-shape on alert-ingestion/alpha at +3900 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3960 s",
+                "trip priority-shape on alert-ingestion/alpha at +3960 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3960 s",
+                "trip priority-shape on alert-ingestion/alpha at +4020 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4020 s",
+                "trip priority-shape on alert-ingestion/alpha at +4080 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4140 s",
+                "trip priority-shape on alert-ingestion/alpha at +4320 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4320 s",
+                "trip priority-shape on alert-ingestion/alpha at +4380 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4380 s",
+                "trip priority-shape on alert-ingestion/alpha at +4380 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4440 s",
+                "trip priority-shape on alert-ingestion/alpha at +4440 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4440 s",
+                "trip priority-shape on alert-ingestion/alpha at +4440 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4500 s",
+                "trip priority-shape on alert-ingestion/alpha at +4620 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4680 s",
+                "trip priority-shape on alert-ingestion/alpha at +4680 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4680 s",
+                "trip priority-shape on alert-ingestion/alpha at +4740 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4800 s",
+                "trip priority-shape on alert-ingestion/alpha at +4800 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4800 s",
+                "trip priority-shape on alert-ingestion/alpha at +5040 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5100 s",
+                "trip priority-shape on alert-ingestion/alpha at +5100 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5160 s",
+                "trip priority-shape on alert-ingestion/alpha at +5160 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5160 s",
+                "trip priority-shape on alert-ingestion/alpha at +5220 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5220 s",
+                "trip priority-shape on alert-ingestion/alpha at +5280 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5280 s",
+                "trip priority-shape on alert-ingestion/alpha at +5400 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5400 s",
+                "trip priority-shape on alert-ingestion/alpha at +5400 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5460 s",
+                "trip priority-shape on alert-ingestion/alpha at +5520 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5520 s",
+                "trip priority-shape on alert-ingestion/alpha at +5580 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5580 s",
+                "trip priority-shape on alert-ingestion/alpha at +5640 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5700 s",
+                "trip priority-shape on alert-ingestion/alpha at +5700 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5700 s",
+                "trip priority-shape on alert-ingestion/alpha at +5700 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5700 s",
+                "trip priority-shape on alert-ingestion/alpha at +5760 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5820 s",
+                "trip priority-shape on alert-ingestion/alpha at +5820 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5820 s",
+                "trip priority-shape on alert-ingestion/alpha at +5880 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5940 s",
+                "trip priority-shape on alert-ingestion/alpha at +5940 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6000 s",
+                "trip priority-shape on alert-ingestion/alpha at +6120 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6180 s",
+                "trip priority-shape on alert-ingestion/alpha at +6180 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6240 s",
+                "trip priority-shape on alert-ingestion/alpha at +6240 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6240 s",
+                "trip priority-shape on alert-ingestion/alpha at +6360 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6420 s",
+                "trip priority-shape on alert-ingestion/alpha at +6540 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6540 s",
+                "trip priority-shape on alert-ingestion/alpha at +6600 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6660 s",
+                "trip priority-shape on alert-ingestion/alpha at +6660 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6660 s",
+                "trip priority-shape on alert-ingestion/alpha at +6720 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6780 s",
+                "trip priority-shape on alert-ingestion/alpha at +6840 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6900 s",
+                "trip priority-shape on alert-ingestion/alpha at +6900 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6900 s",
+                "trip priority-shape on alert-ingestion/alpha at +6960 s",
+                "recovery priority-shape on alert-ingestion/alpha at +7020 s",
+                "trip priority-shape on alert-ingestion/alpha at +7020 s",
+                "recovery priority-shape on alert-ingestion/alpha at +7080 s",
+                "trip priority-shape on alert-ingestion/alpha at +7080 s",
+                "recovery priority-shape on alert-ingestion/alpha at +7140 s",
+                "trip priority-shape on alert-ingestion/alpha at +7140 s",
+                "recovery priority-shape on alert-ingestion/alpha at +7200 s",
+                "trip priority-shape on alert-ingestion/alpha at +7200 s",
+                "recovery priority-shape on alert-ingestion/alpha at +7200 s"
+              ]
+            },
+            {
+              "scenario_id": "stall",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            }
+          ]
+        },
+        {
+          "version": 2,
+          "status": "failed",
+          "problems": [],
+          "feedback": "Version 2 failed the scorecard. 4 of 6 visible scenarios passed.\nflap-severe: missing none; unexpected recovery connector-errors on alert-ingestion/alpha at +2880 s, trip connector-errors on alert-ingestion/alpha at +3240 s\nseverity-drift: missing none; unexpected recovery priority-shape on alert-ingestion/alpha at +3300 s, trip priority-shape on alert-ingestion/alpha at +3300 s",
+          "usage": {
+            "input_tokens": 11526,
+            "output_tokens": 5214,
+            "cached_tokens": 0,
+            "reasoning_tokens": 4561
+          },
+          "cost_usd": 0.150384,
+          "scenarios": [
+            {
+              "scenario_id": "clean",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "flap-mild",
+              "holdout": true,
+              "passed": false,
+              "missing": [],
+              "unexpected": [
+                "trip connector-errors on alert-ingestion/alpha at +1560 s",
+                "recovery connector-errors on alert-ingestion/alpha at +1860 s",
+                "trip connector-errors on alert-ingestion/alpha at +4020 s",
+                "recovery connector-errors on alert-ingestion/alpha at +5160 s"
+              ]
+            },
+            {
+              "scenario_id": "flap-severe",
+              "holdout": false,
+              "passed": false,
+              "missing": [],
+              "unexpected": [
+                "recovery connector-errors on alert-ingestion/alpha at +2880 s",
+                "trip connector-errors on alert-ingestion/alpha at +3240 s"
+              ]
+            },
+            {
+              "scenario_id": "green-liar",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "quiet-tenant",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "recovery",
+              "holdout": true,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "severity-drift",
+              "holdout": false,
+              "passed": false,
+              "missing": [],
+              "unexpected": [
+                "recovery priority-shape on alert-ingestion/alpha at +3300 s",
+                "trip priority-shape on alert-ingestion/alpha at +3300 s"
+              ]
+            },
+            {
+              "scenario_id": "stall",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            }
+          ]
+        },
+        {
+          "version": 3,
+          "status": "failed",
+          "problems": [],
+          "feedback": "Version 3 failed the scorecard: a held-out scenario failed.",
+          "usage": {
+            "input_tokens": 16840,
+            "output_tokens": 2910,
+            "cached_tokens": 11508,
+            "reasoning_tokens": 2257
+          },
+          "cost_usd": 0.0818296,
+          "scenarios": [
+            {
+              "scenario_id": "clean",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "flap-mild",
+              "holdout": true,
+              "passed": false,
+              "missing": [],
+              "unexpected": [
+                "trip connector-errors on alert-ingestion/alpha at +1560 s",
+                "recovery connector-errors on alert-ingestion/alpha at +6180 s"
+              ]
+            },
+            {
+              "scenario_id": "flap-severe",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "green-liar",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "quiet-tenant",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "recovery",
+              "holdout": true,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "severity-drift",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "stall",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            }
+          ]
+        },
+        {
+          "version": 4,
+          "status": "failed",
+          "problems": [],
+          "feedback": null,
+          "usage": {
+            "input_tokens": 19771,
+            "output_tokens": 6084,
+            "cached_tokens": 6900,
+            "reasoning_tokens": 5430
+          },
+          "cost_usd": 0.174544,
+          "scenarios": [
+            {
+              "scenario_id": "clean",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "flap-mild",
+              "holdout": true,
+              "passed": false,
+              "missing": [],
+              "unexpected": [
+                "trip connector-errors on alert-ingestion/alpha at +1560 s"
+              ]
+            },
+            {
+              "scenario_id": "flap-severe",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "green-liar",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "quiet-tenant",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "recovery",
+              "holdout": true,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "severity-drift",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "stall",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "run": 3,
+      "passed": false,
+      "stop_reason": "max_revisions",
+      "contract": {
+        "service": "alert-ingestion",
+        "version": "1.0.0",
+        "description": null,
+        "parameters": {
+          "expectedAlertsPerHour": {
+            "type": "number",
+            "required": true,
+            "default": null,
+            "description": "The tenant's typical alert volume. Supplied per deployment."
+          },
+          "intervalSeconds": {
+            "type": "integer",
+            "required": true,
+            "default": null,
+            "description": "The connector's polling interval in seconds. Supplied per deployment."
+          }
+        },
+        "components": [
+          {
+            "id": "connector",
+            "kind": "connectorInstance",
+            "logs": {
+              "container_name": "python",
+              "match": [
+                "connector_name",
+                "connector_instance"
+              ],
+              "deploymentBy": "labels.connector_instance"
+            },
+            "description": "The tenant's Sentinel connector instance, running in the python container."
+          },
+          {
+            "id": "ingestion",
+            "kind": "etlFlow",
+            "logs": {
+              "container_name": "etl",
+              "match": [
+                "correlation_id"
+              ],
+              "deploymentBy": "jsonPayload.environment"
+            },
+            "description": "Ingestion of the connector's alerts, in the etl container. One entry per alert."
+          }
+        ],
+        "tripwires": [
+          {
+            "id": "dead-connector",
+            "component": "connector",
+            "type": "cadence",
+            "spec": {
+              "event": "connector.run.completed",
+              "intervalSeconds": "${intervalSeconds}",
+              "maxSilentIntervals": 2
+            },
+            "description": "Catches a connector that stops running by detecting missing connector.run.completed heartbeats."
+          },
+          {
+            "id": "canary",
+            "component": "ingestion",
+            "type": "synthetic",
+            "spec": {
+              "deadlineSeconds": 360,
+              "everyMinutes": 2
+            },
+            "description": "Catches alerts stopping reaching SOAR end to end by detecting a planted canary alert that does not arrive in time."
+          },
+          {
+            "id": "priority-shape",
+            "component": "ingestion",
+            "type": "schema",
+            "spec": {
+              "consecutive": 1,
+              "enum": [
+                -1,
+                40,
+                60,
+                80,
+                100
+              ],
+              "event": "alert.ingested",
+              "field": "jsonPayload.alert.priority",
+              "recoverAfter": 12,
+              "required": true,
+              "type": "integer"
+            },
+            "description": "Catches a single ingested alert whose priority is missing, not an integer, or not one of the healthy Google scale values."
+          },
+          {
+            "id": "connector-errors",
+            "component": "connector",
+            "type": "errorSignature",
+            "spec": {
+              "minSeverity": "WARNING",
+              "threshold": 9,
+              "windowRuns": 20
+            },
+            "description": "Catches a connector where many recent runs fail with a warning or error while runs continue on schedule."
+          }
+        ],
+        "changePoint": {
+          "durationSeconds": 900,
+          "overrides": {
+            "canary": {
+              "deadlineSeconds": 180,
+              "everyMinutes": 1
+            },
+            "connector-errors": {
+              "threshold": 5,
+              "windowRuns": 10
+            },
+            "dead-connector": {
+              "maxSilentIntervals": 1
+            }
+          }
+        },
+        "provenance": {
+          "authoredBy": "muse-wonder-1.0",
+          "scorecard": "author-v4",
+          "approvedBy": null
+        }
+      },
+      "tokens": {
+        "input_tokens": 48082,
+        "output_tokens": 16335,
+        "cached_tokens": 30800,
+        "reasoning_tokens": 13883
+      },
+      "cost_usd": 0.401988,
+      "versions": [
+        {
+          "version": 1,
+          "status": "failed",
+          "problems": [],
+          "feedback": "Version 1 failed the scorecard. 4 of 6 visible scenarios passed.\nflap-severe: missing none; unexpected recovery connector-errors on alert-ingestion/alpha at +2760 s, trip connector-errors on alert-ingestion/alpha at +3120 s\nseverity-drift: missing none; unexpected recovery priority-shape on alert-ingestion/alpha at +2040 s, trip priority-shape on alert-ingestion/alpha at +2100 s, recovery priority-shape on alert-ingestion/alpha at +2100 s, trip priority-shape on alert-ingestion/alpha at +2100 s, recovery priority-shape on alert-ingestion/alpha at +2100 s, trip priority-shape on alert-ingestion/alpha at +2280 s, recovery priority-shape on alert-ingestion/alpha at +2400 s, trip priority-shape on alert-ingestion/alpha at +2400 s, recovery priority-shape on alert-ingestion/alpha at +2520 s, trip priority-shape on alert-ingestion/alpha at +2520 s, and 99 more",
+          "usage": {
+            "input_tokens": 6949,
+            "output_tokens": 2957,
+            "cached_tokens": 6900,
+            "reasoning_tokens": 2344
+          },
+          "cost_usd": 0.060716,
+          "scenarios": [
+            {
+              "scenario_id": "clean",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "flap-mild",
+              "holdout": true,
+              "passed": false,
+              "missing": [],
+              "unexpected": [
+                "trip connector-errors on alert-ingestion/alpha at +1500 s",
+                "recovery connector-errors on alert-ingestion/alpha at +1740 s",
+                "trip connector-errors on alert-ingestion/alpha at +4020 s",
+                "recovery connector-errors on alert-ingestion/alpha at +5040 s",
+                "trip connector-errors on alert-ingestion/alpha at +6960 s",
+                "recovery connector-errors on alert-ingestion/alpha at +7140 s"
+              ]
+            },
+            {
+              "scenario_id": "flap-severe",
+              "holdout": false,
+              "passed": false,
+              "missing": [],
+              "unexpected": [
+                "recovery connector-errors on alert-ingestion/alpha at +2760 s",
+                "trip connector-errors on alert-ingestion/alpha at +3120 s"
+              ]
+            },
+            {
+              "scenario_id": "green-liar",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "quiet-tenant",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "recovery",
+              "holdout": true,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "severity-drift",
+              "holdout": false,
+              "passed": false,
+              "missing": [],
+              "unexpected": [
+                "recovery priority-shape on alert-ingestion/alpha at +2040 s",
+                "trip priority-shape on alert-ingestion/alpha at +2100 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2100 s",
+                "trip priority-shape on alert-ingestion/alpha at +2100 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2100 s",
+                "trip priority-shape on alert-ingestion/alpha at +2280 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2400 s",
+                "trip priority-shape on alert-ingestion/alpha at +2400 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2520 s",
+                "trip priority-shape on alert-ingestion/alpha at +2520 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2580 s",
+                "trip priority-shape on alert-ingestion/alpha at +2580 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2700 s",
+                "trip priority-shape on alert-ingestion/alpha at +2700 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2700 s",
+                "trip priority-shape on alert-ingestion/alpha at +2820 s",
+                "recovery priority-shape on alert-ingestion/alpha at +2820 s",
+                "trip priority-shape on alert-ingestion/alpha at +2880 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3000 s",
+                "trip priority-shape on alert-ingestion/alpha at +3000 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3120 s",
+                "trip priority-shape on alert-ingestion/alpha at +3300 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3360 s",
+                "trip priority-shape on alert-ingestion/alpha at +3360 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3360 s",
+                "trip priority-shape on alert-ingestion/alpha at +3420 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3480 s",
+                "trip priority-shape on alert-ingestion/alpha at +3480 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3540 s",
+                "trip priority-shape on alert-ingestion/alpha at +3660 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3840 s",
+                "trip priority-shape on alert-ingestion/alpha at +3900 s",
+                "recovery priority-shape on alert-ingestion/alpha at +3960 s",
+                "trip priority-shape on alert-ingestion/alpha at +4020 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4020 s",
+                "trip priority-shape on alert-ingestion/alpha at +4080 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4140 s",
+                "trip priority-shape on alert-ingestion/alpha at +4320 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4320 s",
+                "trip priority-shape on alert-ingestion/alpha at +4380 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4380 s",
+                "trip priority-shape on alert-ingestion/alpha at +4380 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4440 s",
+                "trip priority-shape on alert-ingestion/alpha at +4440 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4500 s",
+                "trip priority-shape on alert-ingestion/alpha at +4620 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4680 s",
+                "trip priority-shape on alert-ingestion/alpha at +4740 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4800 s",
+                "trip priority-shape on alert-ingestion/alpha at +4800 s",
+                "recovery priority-shape on alert-ingestion/alpha at +4800 s",
+                "trip priority-shape on alert-ingestion/alpha at +5040 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5100 s",
+                "trip priority-shape on alert-ingestion/alpha at +5100 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5160 s",
+                "trip priority-shape on alert-ingestion/alpha at +5160 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5160 s",
+                "trip priority-shape on alert-ingestion/alpha at +5220 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5220 s",
+                "trip priority-shape on alert-ingestion/alpha at +5280 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5280 s",
+                "trip priority-shape on alert-ingestion/alpha at +5400 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5400 s",
+                "trip priority-shape on alert-ingestion/alpha at +5400 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5460 s",
+                "trip priority-shape on alert-ingestion/alpha at +5520 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5520 s",
+                "trip priority-shape on alert-ingestion/alpha at +5580 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5580 s",
+                "trip priority-shape on alert-ingestion/alpha at +5640 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5700 s",
+                "trip priority-shape on alert-ingestion/alpha at +5700 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5700 s",
+                "trip priority-shape on alert-ingestion/alpha at +5700 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5700 s",
+                "trip priority-shape on alert-ingestion/alpha at +5760 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5820 s",
+                "trip priority-shape on alert-ingestion/alpha at +5820 s",
+                "recovery priority-shape on alert-ingestion/alpha at +5820 s",
+                "trip priority-shape on alert-ingestion/alpha at +5880 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6000 s",
+                "trip priority-shape on alert-ingestion/alpha at +6120 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6180 s",
+                "trip priority-shape on alert-ingestion/alpha at +6180 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6240 s",
+                "trip priority-shape on alert-ingestion/alpha at +6240 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6240 s",
+                "trip priority-shape on alert-ingestion/alpha at +6360 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6420 s",
+                "trip priority-shape on alert-ingestion/alpha at +6540 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6540 s",
+                "trip priority-shape on alert-ingestion/alpha at +6600 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6660 s",
+                "trip priority-shape on alert-ingestion/alpha at +6660 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6660 s",
+                "trip priority-shape on alert-ingestion/alpha at +6720 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6780 s",
+                "trip priority-shape on alert-ingestion/alpha at +6840 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6900 s",
+                "trip priority-shape on alert-ingestion/alpha at +6900 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6900 s",
+                "trip priority-shape on alert-ingestion/alpha at +6960 s",
+                "recovery priority-shape on alert-ingestion/alpha at +7080 s",
+                "trip priority-shape on alert-ingestion/alpha at +7080 s",
+                "recovery priority-shape on alert-ingestion/alpha at +7140 s",
+                "trip priority-shape on alert-ingestion/alpha at +7140 s",
+                "recovery priority-shape on alert-ingestion/alpha at +7200 s",
+                "trip priority-shape on alert-ingestion/alpha at +7200 s",
+                "recovery priority-shape on alert-ingestion/alpha at +7200 s"
+              ]
+            },
+            {
+              "scenario_id": "stall",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            }
+          ]
+        },
+        {
+          "version": 2,
+          "status": "failed",
+          "problems": [],
+          "feedback": "Version 2 failed the scorecard. 4 of 6 visible scenarios passed.\nflap-severe: missing none; unexpected recovery connector-errors on alert-ingestion/alpha at +2880 s, trip connector-errors on alert-ingestion/alpha at +3300 s\nseverity-drift: missing none; unexpected recovery priority-shape on alert-ingestion/alpha at +3300 s, trip priority-shape on alert-ingestion/alpha at +3300 s, recovery priority-shape on alert-ingestion/alpha at +6060 s, trip priority-shape on alert-ingestion/alpha at +6120 s, recovery priority-shape on alert-ingestion/alpha at +6300 s, trip priority-shape on alert-ingestion/alpha at +6360 s",
+          "usage": {
+            "input_tokens": 10131,
+            "output_tokens": 3226,
+            "cached_tokens": 6900,
+            "reasoning_tokens": 2613
+          },
+          "cost_usd": 0.078824,
+          "scenarios": [
+            {
+              "scenario_id": "clean",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "flap-mild",
+              "holdout": true,
+              "passed": false,
+              "missing": [],
+              "unexpected": [
+                "trip connector-errors on alert-ingestion/alpha at +4380 s",
+                "recovery connector-errors on alert-ingestion/alpha at +5160 s"
+              ]
+            },
+            {
+              "scenario_id": "flap-severe",
+              "holdout": false,
+              "passed": false,
+              "missing": [],
+              "unexpected": [
+                "recovery connector-errors on alert-ingestion/alpha at +2880 s",
+                "trip connector-errors on alert-ingestion/alpha at +3300 s"
+              ]
+            },
+            {
+              "scenario_id": "green-liar",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "quiet-tenant",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "recovery",
+              "holdout": true,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "severity-drift",
+              "holdout": false,
+              "passed": false,
+              "missing": [],
+              "unexpected": [
+                "recovery priority-shape on alert-ingestion/alpha at +3300 s",
+                "trip priority-shape on alert-ingestion/alpha at +3300 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6060 s",
+                "trip priority-shape on alert-ingestion/alpha at +6120 s",
+                "recovery priority-shape on alert-ingestion/alpha at +6300 s",
+                "trip priority-shape on alert-ingestion/alpha at +6360 s"
+              ]
+            },
+            {
+              "scenario_id": "stall",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            }
+          ]
+        },
+        {
+          "version": 3,
+          "status": "failed",
+          "problems": [],
+          "feedback": "Version 3 failed the scorecard: a held-out scenario failed.",
+          "usage": {
+            "input_tokens": 13517,
+            "output_tokens": 3947,
+            "cached_tokens": 10100,
+            "reasoning_tokens": 3334
+          },
+          "cost_usd": 0.094628,
+          "scenarios": [
+            {
+              "scenario_id": "clean",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "flap-mild",
+              "holdout": true,
+              "passed": false,
+              "missing": [],
+              "unexpected": [
+                "trip connector-errors on alert-ingestion/alpha at +4200 s"
+              ]
+            },
+            {
+              "scenario_id": "flap-severe",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "green-liar",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "quiet-tenant",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "recovery",
+              "holdout": true,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "severity-drift",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "stall",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            }
+          ]
+        },
+        {
+          "version": 4,
+          "status": "failed",
+          "problems": [],
+          "feedback": null,
+          "usage": {
+            "input_tokens": 17485,
+            "output_tokens": 6205,
+            "cached_tokens": 6900,
+            "reasoning_tokens": 5592
+          },
+          "cost_usd": 0.16782,
+          "scenarios": [
+            {
+              "scenario_id": "clean",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "flap-mild",
+              "holdout": true,
+              "passed": false,
+              "missing": [],
+              "unexpected": [
+                "trip connector-errors on alert-ingestion/alpha at +4200 s"
+              ]
+            },
+            {
+              "scenario_id": "flap-severe",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "green-liar",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "quiet-tenant",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "recovery",
+              "holdout": true,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "severity-drift",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            },
+            {
+              "scenario_id": "stall",
+              "holdout": false,
+              "passed": true,
+              "missing": [],
+              "unexpected": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

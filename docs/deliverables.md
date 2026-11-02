@@ -18,6 +18,8 @@ Revised 2026-11-01 before D6: re-plan (`spec.md` §9). D6 splits into D6a (fix l
 
 Revised 2026-11-01 (night) before D6b: D6b interfaces and semantics are in `docs/d6b-pins.md`; D6a recorded as built.
 
+Revised 2026-11-02 after D6b: D6b recorded as built, with the live authoring result (§D6 "Settled in D6b").
+
 Nine deliverables, D0–D8. Each one is **two merges**: a tests PR, then an implementation PR. The acceptance tests below are the definition of done. The coding agent translates them into code; it does not decide them.
 
 ---
@@ -606,6 +608,12 @@ Concurrency: when a proposal is created, the platform records the target resourc
 - Verification checks status, not events; `none` verifies at once if its target is already `ok` (pin 15). The postmortem is built by code from the incident record.
 - Scripted segments are generated in the D6 runtime loop with the canary scheduler on (pin 23).
 - Accepted MVP limits: incident records are in memory only, and the verifier accepts a target tripwire the incident never tripped.
+
+**Settled in D6b.** [`docs/d6b-pins.md`](d6b-pins.md) records the interfaces and semantics as built (#33, #34) and the live result. In short:
+- The model authors the tripwire specs from a requirements brief (`fixtures/briefs/alert-ingestion.yaml`) that names the checks. JSON output uses `text.format` with the flattened schema and no `strict` key; `parse_contract` is the real check.
+- Feedback lists each failing visible scenario with its missing and unexpected events (the first 10 of each). A held-out scenario is mentioned only when every visible scenario passed, and then in one fixed sentence.
+- `python -m fleetsre.authoring` (`make author`) prints one `VERSION` line as each version finishes and rewrites the eval file after every run.
+- D6-T15 (live, 2026-11-02) failed: 0 of 3 runs passed. Every run passed all six visible scenarios by version 3, then failed the `flap-mild` holdout, with `connector-errors` tripping on 20% noise. A sweep found 7 of about 200 `connector-errors` settings that pass all eight scenarios; most, the reference contract among them, pass only because `flap-severe`'s seed puts a clean streak before they trip (D4 semantics 12). Scoring over several seeds is the fix, after the hackathon.
 
 **Out of scope:** UI, GCP.
 
