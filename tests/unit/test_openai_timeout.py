@@ -42,8 +42,9 @@ def test_timeout_surfaces_as_retryable_504() -> None:
     )
     transport._client = SimpleNamespace(responses=responses)
     with pytest.raises(TransportError) as excinfo:
-        transport.create({"model": "m", "input": []})
+        transport.create({"model": "m", "input": []}, timeout=120)
     assert excinfo.value.status == 504
+    assert excinfo.value.timeout is True
 
 
 def test_gateway_backs_off_and_retries_timeout() -> None:

@@ -54,4 +54,8 @@ class ServiceBrief(BaseModel):
 
 def load_brief(path: str | Path) -> ServiceBrief:
     """Read a service brief YAML file (d6b-pins 1)."""
-    raise NotImplementedError
+    import yaml
+
+    with open(path, encoding="utf-8") as fh:
+        data = yaml.safe_load(fh)
+    return ServiceBrief.model_validate(data)
