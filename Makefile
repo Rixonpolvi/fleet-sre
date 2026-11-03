@@ -1,4 +1,6 @@
-.PHONY: check lint test test-live test-gcp demo record author infra-up infra-down
+.PHONY: check lint test test-live test-gcp demo demo-check record author infra-up infra-down
+
+ACT ?= F1
 
 check: lint
 	python scripts/check_trace.py --doc docs/deliverables.md --tests tests/acceptance
@@ -25,7 +27,10 @@ infra-down:
 	infra/gcp.sh down
 
 demo:
-	@echo "not yet: D8"
+	python -m fleetsre.demo --act $(ACT)
+
+demo-check:
+	python -m fleetsre.demo --check
 
 record:
 	if [ -z "$(FAULT)" ]; then echo "usage: make record FAULT=<F>" >&2; exit 2; fi
