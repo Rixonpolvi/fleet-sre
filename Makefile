@@ -1,4 +1,4 @@
-.PHONY: check lint test test-live test-gcp demo record author
+.PHONY: check lint test test-live test-gcp demo record author infra-up infra-down
 
 check: lint
 	python scripts/check_trace.py --doc docs/deliverables.md --tests tests/acceptance
@@ -17,6 +17,12 @@ test-live:
 
 test-gcp:
 	python -m pytest -m gcp
+
+infra-up:
+	infra/gcp.sh up
+
+infra-down:
+	infra/gcp.sh down
 
 demo:
 	@echo "not yet: D8"
