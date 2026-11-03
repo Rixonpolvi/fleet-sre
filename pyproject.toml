@@ -14,6 +14,11 @@ dependencies = [
   "google-auth",
   "jinja2",
   "uvicorn",
+  "fastapi",
+  "pydantic",
+  "httpx",
+  "pyyaml",
+  "jsonschema",
 ]
 
 [project.optional-dependencies]
@@ -23,11 +28,6 @@ dev = [
   "ruff",
   "mypy",
   "import-linter",
-  "jsonschema",
-  "pyyaml",
-  "pydantic",
-  "fastapi",
-  "httpx",
 ]
 
 [tool.pytest.ini_options]

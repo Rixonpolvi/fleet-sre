@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Fleet SRE{% endblock %}</title>
+<style>
+:root {
+  --bg: #f4f5f7;
+  --card: #ffffff;
+  --ink: #1c1e21;
+  --muted: #5f6368;
+  --border: #d9dce1;
+  --link: #0b57d0;
+  --ok-fg: #1a7f37; --ok-bg: #e6f4ea;
+  --bad-fg: #b00020; --bad-bg: #fce8e6;
+  --wait-fg: #8a5a00; --wait-bg: #fdf0d5;
+  --tw-fg: #7c4a03; --tw-bg: #fdeecd;
+  --sre-fg: #3730a3; --sre-bg: #e0e7ff;
+  --you-fg: #0b6e5f; --you-bg: #d0f3ec;
+  --plat-fg: #334155; --plat-bg: #e4e7ec;
+}
+* { box-sizing: border-box; }
+body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 17px; line-height: 1.55; margin: 0; padding: 0 0 4rem; color: var(--ink); background: var(--bg); }
+main { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
+a { color: var(--link); }
+button { font: inherit; }
+h1 { font-size: 1.8rem; margin: 1.4rem 0 0.2rem; }
+h2 { font-size: 1.3rem; margin-top: 2rem; }
+.topbar { background: var(--card); border-bottom: 1px solid var(--border); }
+.topbar-main, .topbar-meta { max-width: 1100px; margin: 0 auto; padding-left: 1.5rem; padding-right: 1.5rem; }
+.topbar-main { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; padding-top: 0.6rem; padding-bottom: 0.6rem; }
+.topbar-meta { display: flex; gap: 0.4rem 1.2rem; flex-wrap: wrap; font-size: 0.85rem; color: var(--muted); border-top: 1px solid #eee; padding-top: 0.4rem; padding-bottom: 0.4rem; }
+.brand { font-weight: 700; font-size: 1.1rem; color: var(--ink); text-decoration: none; }
+.act-label { margin: 0; font-weight: 600; }
+.segments { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.seg { border: 0; background: var(--card); padding: 0.3rem 0.9rem; font-size: 0.95rem; cursor: pointer; color: var(--ink); }
+.seg + .seg { border-left: 1px solid var(--border); }
+.seg-current { background: var(--ink); color: #fff; font-weight: 700; }
+.seg:disabled { opacity: 0.6; cursor: default; }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.clock { font-variant-numeric: tabular-nums; font-weight: 600; }
+.pill { display: inline-block; padding: 0.1rem 0.6rem; border-radius: 999px; background: #eef0f3; color: var(--ink); font-size: 0.85rem; border: 1px solid var(--border); white-space: nowrap; }
+.pill-admin { background: var(--sre-bg); color: var(--sre-fg); border-color: transparent; font-weight: 600; }
+.pill-held { background: var(--wait-bg); color: var(--wait-fg); border-color: transparent; font-weight: 600; }
+.state-ok { background: var(--ok-bg); color: var(--ok-fg); border-color: transparent; }
+.state-tripped { background: var(--bad-bg); color: var(--bad-fg); border-color: transparent; }
+.state-waiting { background: var(--wait-bg); color: var(--wait-fg); border-color: transparent; }
+#stale { display: none; font-weight: 700; color: var(--wait-fg); }
+.meta-notice { font-weight: 700; color: var(--ink); }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; margin: 1rem 0; }
+.card.compact p { margin: 0.3rem 0; }
+.dep-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); gap: 1rem; }
+.dep-card { margin: 0; }
+.dep-card h3 { margin: 0 0 0.4rem; font-size: 1.05rem; font-weight: 600; }
+.quiet { font-size: 0.9rem; color: var(--muted); font-style: italic; margin: 0.2rem 0 0.5rem; }
+.comp { display: flex; align-items: baseline; gap: 0.5rem; flex-wrap: wrap; padding: 0.35rem 0; border-top: 1px solid #eee; }
+.comp-id { font-weight: 600; }
+.tw-list { display: flex; flex-wrap: wrap; gap: 0.15rem 0.9rem; font-size: 0.85rem; color: var(--muted); margin: 0 0 0.4rem; }
+.badge-link { display: inline-block; margin-top: 0.5rem; padding: 0.2rem 0.7rem; border-radius: 6px; font-weight: 600; text-decoration: none; font-size: 0.95rem; background: #eef0f3; color: var(--ink); }
+.badge-link.badge-resolved { background: var(--ok-bg); color: var(--ok-fg); }
+.badge-link.badge-escalated { background: var(--bad-bg); color: var(--bad-fg); }
+.badge-link.badge-awaiting_approval, .badge-link.badge-needs_input { background: var(--wait-bg); color: var(--wait-fg); }
+.inc-id { font-size: 0.85rem; color: var(--muted); }
+.inc-id code { font-size: 0.9rem; }
+.inc-meta { color: var(--muted); margin: 0.2rem 0; font-size: 0.95rem; }
+.banner { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.2rem 1.4rem; margin: 1.2rem 0; }
+.banner-top { margin-bottom: 0.4rem; }
+.next-text { font-size: 1.35rem; line-height: 1.4; margin: 0.4rem 0; }
+.actor-chip { display: inline-block; padding: 0.1rem 0.65rem; border-radius: 999px; font-weight: 700; font-size: 0.9rem; margin-right: 0.5rem; vertical-align: middle; white-space: nowrap; }
+.actor-tripwire { background: var(--tw-bg); color: var(--tw-fg); }
+.actor-sre { background: var(--sre-bg); color: var(--sre-fg); }
+.actor-you { background: var(--you-bg); color: var(--you-fg); }
+.actor-platform, .actor-done { background: var(--plat-bg); color: var(--plat-fg); }
+.state-chip { display: inline-block; padding: 0.1rem 0.6rem; border-radius: 6px; font-weight: 700; background: var(--ink); color: #fff; margin-right: 0.5rem; font-size: 0.9rem; vertical-align: middle; }
+.pause-info { display: block; margin-top: 0.6rem; font-size: 0.95rem; color: var(--muted); }
+.controls { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+.controls h2 { font-size: 1.05rem; margin: 0 0 0.5rem; }
+.controls button, .controls input { margin: 0.2rem 0.4rem 0.2rem 0; }
+.controls button { padding: 0.4rem 0.9rem; border: 1px solid #999; border-radius: 6px; background: var(--card); cursor: pointer; }
+.controls button:disabled { opacity: 0.6; cursor: default; }
+.controls input { padding: 0.3rem 0.5rem; border: 1px solid var(--border); border-radius: 6px; }
+#action-error { display: none; color: var(--bad-fg); font-weight: 700; border: 1px solid var(--bad-fg); background: var(--bad-bg); border-radius: 6px; padding: 0.6rem 0.8rem; margin: 0.6rem 0; font-size: 1rem; }
+ol.timeline { list-style: none; padding: 0; margin: 1rem 0; }
+.tl-entry { position: relative; padding: 0 0 1.2rem 2rem; border-left: 2px solid var(--border); margin-left: 0.5rem; }
+.tl-entry:last-child { padding-bottom: 0.2rem; }
+.tl-dot { position: absolute; left: -7px; top: 0.35rem; width: 12px; height: 12px; border-radius: 50%; background: #999; }
+.tl-entry.actor-tripwire .tl-dot { background: #b26a00; }
+.tl-entry.actor-sre .tl-dot { background: #4338ca; }
+.tl-entry.actor-you .tl-dot { background: #0d7d6c; }
+.tl-entry.actor-platform .tl-dot, .tl-entry.actor-done .tl-dot { background: #64748b; }
+.tl-meta { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; font-size: 0.9rem; color: var(--muted); }
+.tl-meta time, .t-rel { font-variant-numeric: tabular-nums; }
+.tl-text { margin: 0.3rem 0; font-size: 1.05rem; }
+ul.change { margin: 0.3rem 0; padding-left: 1.2rem; }
+ul.change code { font-size: 0.95rem; }
+.hyp-list, .ev-list { padding-left: 1.3rem; }
+.hyp-list > li { margin: 0.5rem 0; }
+.confirm { color: var(--muted); font-size: 0.95rem; }
+.stance { display: inline-block; padding: 0 0.5rem; border-radius: 999px; font-size: 0.85rem; font-weight: 700; }
+.stance-supports { background: var(--ok-bg); color: var(--ok-fg); }
+.stance-refutes { background: var(--bad-bg); color: var(--bad-fg); }
+table.diff { border-collapse: collapse; margin: 0.5rem 0; background: var(--card); }
+table.diff th, table.diff td { border: 1px solid var(--border); padding: 0.35rem 0.6rem; text-align: left; font-size: 0.95rem; }
+.res-short { font-weight: 600; }
+.proposal-meta { color: var(--muted); font-size: 0.9rem; }
+.turn-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 0.6rem 0.9rem; margin: 0.6rem 0; }
+.turn-row { display: flex; gap: 0.8rem; align-items: baseline; flex-wrap: wrap; }
+.turn-n { font-weight: 700; white-space: nowrap; }
+.turn-tool { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 0.9rem; white-space: nowrap; }
+.turn-think { color: var(--muted); font-size: 0.95rem; flex: 1 1 20rem; }
+.verdict { margin-left: auto; display: inline-block; padding: 0.1rem 0.6rem; border-radius: 999px; font-size: 0.85rem; font-weight: 700; background: #eef0f3; color: var(--ink); white-space: nowrap; }
+.verdict-accepted { background: var(--ok-bg); color: var(--ok-fg); }
+.verdict-refused { background: var(--bad-bg); color: var(--bad-fg); }
+.verdict-wouldRefuse { background: var(--wait-bg); color: var(--wait-fg); }
+.segment-divider { font-weight: 600; margin: 1rem 0 0.4rem; color: var(--muted); font-size: 0.95rem; }
+pre { white-space: pre-wrap; word-break: break-word; background: #f6f7f9; padding: 0.6rem; border-radius: 6px; font-size: 0.85rem; }
+details { margin: 0.5rem 0; }
+summary { cursor: pointer; font-weight: 600; }
+</style>
+</head>
+<body>
+<header class="topbar">
+<div class="topbar-main">
+<a class="brand" href="/">Fleet SRE</a>
+{% if admin %}
+<div class="segments" role="group" aria-label="Act">
+{% for name in demo.acts %}
+<button type="button" class="seg{% if name == demo.act %} seg-current{% endif %}" title="{{ demo.act_titles[name] }}" data-url="/api/demo/act" data-method="POST" data-act="{{ name }}"{% if name == demo.act %} aria-current="true"{% endif %}>{{ name }}</button>
+{% endfor %}
+</div>
+{% else %}
+<p class="act-label">Act {{ demo.act }} &mdash; {{ demo.title }}</p>
+{% endif %}
+<div class="topbar-right">
+<span class="clock" title="Sim time">{{ demo.now[11:19] }}</span>
+{% if demo.live %}<span class="pill">Live: {{ demo.model }}</span>{% else %}<span class="pill">Scripted replay</span>{% endif %}
+{% if admin %}<span class="pill pill-admin">Admin</span>{% endif %}
+{% if demo.held %}<span class="pill pill-held">Clock held</span>{% endif %}
+</div>
+</div>
+<div class="topbar-meta">
+{% if admin_error %}<span class="meta-notice">admin token not accepted</span>{% endif %}
+<span>Model calls: {{ demo.model_calls }}{% if demo.last_model_call_at %} (last {{ demo.last_model_call_at[11:19] }}){% endif %}</span>
+<span>Active faults:{% if demo.active_faults %} {% for f in demo.active_faults %}{{ f.id }} {{ f.type }} {{ f.environment }}{% if not loop.last %}; {% endif %}{% endfor %}{% else %} none{% endif %}</span>
+{% if demo.exhausted %}<span class="meta-notice">script ended: switch act to restart</span>{% endif %}
+<span id="stale">updated: reload</span>
+</div>
+</header>
+<main>
+{% block content %}{% endblock %}
+</main>
+<script>
+(function () {
+  function showError(message) {
+    var err = document.getElementById("action-error");
+    if (err) {
+      err.textContent = message;
+      err.style.display = "block";
+    }
+  }
+  document.addEventListener("click", function (event) {
+    var btn = null;
+    if (event.target && event.target.closest) {
+      btn = event.target.closest("button[data-url]");
+    }
+    if (!btn || btn.disabled) {
+      return;
+    }
+    var url = btn.getAttribute("data-url");
+    var method = btn.getAttribute("data-method") || "POST";
+    var body = {};
+    if (btn.hasAttribute("data-act")) {
+      body = {act: btn.getAttribute("data-act")};
+    } else {
+      var from = btn.getAttribute("data-body-from");
+      var fields = btn.getAttribute("data-field");
+      if (from && fields) {
+        var ids = from.split(",");
+        var keys = fields.split(",");
+        for (var i = 0; i < ids.length; i++) {
+          var inputId = ids[i].trim();
+          var key = (keys[i] || "").trim();
+          if (!inputId || !key) {
+            continue;
+          }
+          var input = document.getElementById(inputId);
+          if (!input) {
+            continue;
+          }
+          if (input.type === "number") {
+            var n = parseInt(input.value || "0", 10);
+            body[key] = isNaN(n) ? 0 : n;
+          } else {
+            body[key] = input.value;
+          }
+        }
+      }
+    }
+    var original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Sent\u2026";
+    function restore() {
+      btn.disabled = false;
+      btn.textContent = original;
+    }
+    fetch(url, {method: method, headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)}).then(function (resp) {
+      if (resp.ok) {
+        window.location.reload();
+      } else {
+        resp.json().then(function (data) {
+          var msg = (data && data.error) ? data.error : ("request failed: " + resp.status);
+          restore();
+          showError(msg);
+        }).catch(function () {
+          restore();
+          showError("request failed: " + resp.status);
+        });
+      }
+    }).catch(function (err) {
+      restore();
+      showError(String(err && err.message ? err.message : err));
+    });
+  });
+})();
+</script>
+<script>
+(function () {
+  var known = null;
+  function poll() {
+    fetch("/api/version").then(function (r) { return r.json(); }).then(function (data) {
+      if (known === null) { known = data.version; return; }
+      if (data.version !== known) {
+        if (document.querySelector("details[open]")) {
+          document.getElementById("stale").style.display = "block";
+          known = data.version;
+        } else { window.location.reload(); }
+      }
+    }).catch(function () {});
+  }
+  setInterval(poll, 2000);
+})();
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
