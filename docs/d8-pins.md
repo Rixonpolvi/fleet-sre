@@ -374,3 +374,22 @@ Stop: print the P1, P2 and P3 outputs, then a table of test ID -> function name 
 - The demo clock holds while awaiting approval (pin 9).
 - In live mode, a running segment blocks the UI until it ends; turns appear when the segment finishes.
 - Everything is in memory, and the app is localhost only.
+
+## Settled in D8
+
+As built in #39 (tests) and #40 (implementation).
+
+- **Pre-flight (Session A).**
+  - P1: F1 seed 102, F2 seed 103, F3 seed 104; t0 `2026-10-29T14:00:00Z`; each fault at +1830 s. The act world arms alert-ingestion on alpha, bravo, canary and charlie (registry order), and no intel-sync.
+  - P2: every act ended RESOLVED with its script fully used (F1 9 calls, F2 12, F3 12), F2 at all three delays.
+  - P3: F3's first proposal sets `Unknown Severity Priority` from `""` to `"-1"`. `jinja2` and `uvicorn` were added to the dependencies.
+  - F3's fault keeps `params: {rate: 0.5}`; the world's default rate (1.0) would shift the insertIds.
+- **Tests review (#39).** Before merge: T9 elides only the request side; the card match takes `turn-card` as a whole class token; T2 asserts the recorded `callId` and `value`; T10 asserts `rt.model_calls` is unchanged over the quiet hour. The transcript record's keys (`args`, `cost_usd`, `items`, `output`, `problems`, `tool`, `turn`, `usage`, `verdict`) and `output` as a dict were checked against a real D6 run.
+- **`acts.yaml` and YAML 1.1.** A bare `on:` key parses as `True`; `load_acts` renames it back to `on`.
+- **Turn input.** `turn_input` returns the runtime's request log entry for turn `n` (the scripted transport's `requests`, or the counting wrapper's in live mode), elided, and refuses any incident but `rt.act.incident`. Pin 14's rebuild from `Session.history` was not built. The log is the more literal "exact input", and each act has one incident, but D8-T9's exact-input check now compares the log with itself.
+- **Diff.** Rows whose before and after are equal are omitted (pin 13 asked for one row per proposed parameter). A `PASSWORD` row masks both sides, so it never shows.
+- **Scripted mode.** The investigate role's model is `demo-scripted`, priced at 0. Headers show `Model: scripted replay` or `Model: live (<model>)`, and the incident header shows `cost: n/a (scripted)` or a 4-decimal dollar cost.
+- **Locking.** POST handlers are `async` and take the runtime's `threading.RLock`. Scripted segments run in milliseconds; a live segment blocks the server until it ends (§Accepted limits). `/api/demo/act` switches without holding the old runtime's lock.
+- **Errors.** An unknown incident is 404 on the page, the API and turn input (`KeyError` from `manager.get`); `tests/unit/test_d8_web.py` covers it. A refused POST (409) just reloads the page.
+- **Results.** `make check`: 231 passed, 1 skipped. `make demo-check`: 9 of 9 RESOLVED, 0 refusals; F1 resolved at +2040 s, F2 at +2475, +3075 and +4275 s (delays 0, 600, 1800), F3 at +2520 s.
+- **Process.** Session B's rule "never run the demo with --live" also caught `--check --live`, the refusal test, which spends nothing. Later goals say "never serve the demo with --live".

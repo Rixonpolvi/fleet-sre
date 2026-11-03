@@ -22,6 +22,8 @@ Revised 2026-11-01 (night) before D6b: Muse Wonder's model ID confirmed (§8); a
 
 Revised 2026-11-02 after D6b: the live authoring result reshapes the 0:20–0:50 demo beat (§10) and adds a risk (§12); detail in `docs/d6b-pins.md` §Results.
 
+Revised 2026-11-03 after D8: the demo plays one act at a time and the grid shows alert-ingestion only (§10); detail in `docs/d8-pins.md`.
+
 ---
 
 ## 1. Summary
@@ -364,13 +366,13 @@ Two merges per deliverable: a tests PR, then an implementation PR. Details and f
 | --- | --- |
 | 0:00–0:20 | The MSSP problem: tenants × services, silent failures, `LIVE` while nothing arrives |
 | 0:20–0:50 | SRE authors a contract from a brief; the scorecard fails three scenarios; it revises until every visible scenario passes; a held-out scenario it never saw catches that the contract would page on a healthy connector's noise, so the human does not approve it (a recorded live run, D6-T15) |
-| 0:50–1:05 | Fleet grid: two services, three tenants, one low-volume, all green |
+| 0:50–1:05 | Fleet grid: alert-ingestion on four tenants (alpha, bravo, charlie and the MSSP canary tenant), charlie low-volume, all green |
 | 1:05–2:15 | Stall trips cadence while the quiet tenant stays green. Credential Green Liar trips errorSignature and canary; the timeline shows each turn's rationale, tool call and gate verdict: hypotheses (credential versus fleet-wide), `compare_siblings`, `test_integration_instance`, escalation. The incident waits with no model calls; "mark rotated"; the same incident resumes and the tripwires confirm recovery. Severity drift trips schema; SRE proposes a parameter patch |
 | 2:15–2:30 | Reject with notes on the severity-drift proposal: both F3 recordings set `Unknown Severity Priority` to `-1`, so `Critical` would become Informational. The human rejects with "unknown severities should map to 100"; the SRE revises in the same session; approval; tripwires confirm recovery |
 | 2:30–2:50 | Checks off versus on: the same live runs with gates off, and how many bad submissions the gates refused. Architecture; IAM tests showing reader and SRE get 403s |
 | 2:50–3:00 | What was built during the hackathon; repo link |
 
-No live instance (cut 2026-11-01, §9): the demo is recorded from `make demo`.
+No live instance (cut 2026-11-01, §9): the demo is recorded from `make demo`, one act at a time (F1, F2, F3), each replaying the world its scripted segments were recorded in (`docs/d8-pins.md`). The 0:20–0:50 beat is a recorded live `make author` run.
 
 ## 11. Hackathon compliance
 
