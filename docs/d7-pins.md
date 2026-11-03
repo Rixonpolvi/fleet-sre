@@ -191,3 +191,21 @@ Stop: print a table of test ID -> function name -> what it calls first, then sto
 ```
 
 After the tests PR merges, Rixon runs, once, with `FLEETSRE_GCP_PROJECT` exported: `python -m pytest -m gcp tests/acceptance/d7 -rs`. All four must fail with `NotImplementedError`, not with an auth or import error. That is this deliverable's red. It needs no infra (pin 5).
+
+## Settled in D7
+
+As built in #36 (tests) and #37 (implementation).
+
+- **Red.** The tests PR was green in CI (gcp deselected). The manual red run against the real project failed all four tests with `NotImplementedError` in 0.08 s, before any network call.
+- **Pin 4.** No mypy override was needed. `make lint` type-checks `fleetsre/` and `scripts/`, not `tests/`.
+- **Pin 7.** A synchronous pull on an empty subscription raises `google.api_core.exceptions.DeadlineExceeded` at the client timeout. The tests treat it as an empty pull: T7 keeps polling to its deadline, and T8's `_pull` returns normally, so `obs-reader`'s control passes and `deployer`'s negative still needs `PermissionDenied`.
+- **Pin 8.** The limit is recorded on `from_cloud_entry`'s docstring. The README (D8) lists it.
+- **T8 import check.** It reads every file under `fleetsre/sre/` with `ast.walk`, with no exemption for `TYPE_CHECKING` blocks.
+- **Adapters.** `CloudLoggingSink` and `CloudLoggingQuery` use `LoggingServiceV2Client` directly (`write_log_entries`; `list_log_entries` with `order_by="timestamp asc"`). Severities map to Cloud Logging's numbers and back by name; an unknown severity is sent as `DEFAULT`.
+- **Unit tests.** The `gcp.sh` test puts a fake `gcloud` first on `PATH` that leaves a marker if it is called, instead of stripping `gcloud` from `PATH`.
+
+## Results (live, 2026-11-02)
+
+- `make infra-up` created the three service accounts, the topic, the subscription, the sink and every binding in `fleet-sre-1029-9324` in one run.
+- After a ~5-minute wait, `python -m pytest -m gcp tests/acceptance/d7 -rs`: 4 passed in 65 s, on the first run (`evals/d7-2026-11-02.txt`).
+- The infrastructure stays up until after submission. Then: `FLEETSRE_GCP_PROJECT=fleet-sre-1029-9324 make infra-down`.

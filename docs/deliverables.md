@@ -20,6 +20,8 @@ Revised 2026-11-01 (night) before D6b: D6b interfaces and semantics are in `docs
 
 Revised 2026-11-02 after D6b: D6b recorded as built, with the live authoring result (§D6 "Settled in D6b").
 
+Revised 2026-11-03 after D7: D7 interfaces and semantics are in `docs/d7-pins.md`; D7 recorded as built, with the live result (§D7 "Settled in D7").
+
 Nine deliverables, D0–D8. Each one is **two merges**: a tests PR, then an implementation PR. The acceptance tests below are the definition of done. The coding agent translates them into code; it does not decide them.
 
 ---
@@ -627,6 +629,8 @@ Concurrency: when a proposal is created, the platform records the target resourc
 
 **Re-plan (2026-11-01).** In scope: rows T1, T7, T8 and T10; the rest are in §Cut. There is no live instance, so T7 and T8 cover Cloud Logging and Pub/Sub only: a gcloud script in `infra/` creates the three service accounts, the log sink, topic and subscription, and their bindings. The mock API's permission checks are shown under dev auth by D3-T27 and D6-T3.
 
+[`docs/d7-pins.md`](d7-pins.md) holds the D7 interfaces and semantics and wins over the interface block below.
+
 **Interfaces / files.** `fleetsre/adapters/cloud_logging.py` (`CloudLoggingSink`, `CloudLoggingQuery`), `fleetsre/adapters/pubsub_push.py` (`create_push_app(evaluator, *, audience, allowed_sa)`), `fleetsre/adapters/firestore_state.py`, `fleetsre/adapters/chronicle_http.py` (ID-token client), `infra/` (Terraform or gcloud scripts), `infra/expected_permissions.yaml`, `make infra-up`, `make infra-down`.
 
 | ID | Test | Pass condition |
@@ -635,6 +639,13 @@ Concurrency: when a proposal is created, the platform records the target resourc
 | D7-T7 (gcp) | IAM positive | Each identity completes its own path: mock-soar writes logs, obs-reader reads logs and pulls from the subscription and reads the mock API, deployer patches via the mock API |
 | D7-T8 (gcp) | IAM negative | obs-reader: mock write → 403, `logging.logEntries.create` → denied; deployer: subscription pull → denied; mock-soar: log read → denied; the SRE runtime has no credentials of its own |
 | D7-T10 (gcp) | No keys | No service account has user-managed keys |
+
+**Settled in D7.** [`docs/d7-pins.md`](d7-pins.md) records the interfaces and semantics as built (#36, #37) and the live result. In short:
+- Keyless: Rixon's account impersonates `mock-soar`, `obs-reader` and `deployer`, and no service account has a key. `deployer` has no GCP grants; its only path is the mock API under dev auth.
+- Each T8 negative runs after a positive control on the same API and resource, so a disabled API or a missing subscription cannot pass as "denied".
+- Muse wrote the adapters, `infra/gcp.sh` and the tests and never ran gcloud. Rixon ran `make infra-up` and the live tests.
+- Live (2026-11-02, `evals/d7-2026-11-02.txt`): 4 of 4 passed in 65 s, on the first run after `make infra-up`.
+- Accepted limits: numbers in `jsonPayload` read back from Cloud Logging are doubles (d7-pins 8). The infrastructure stays up until after submission; `make infra-down` removes it.
 
 **Out of scope:** UI.
 
