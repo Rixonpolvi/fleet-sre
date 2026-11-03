@@ -378,7 +378,7 @@ def create_app(
                     status_code=404,
                     content={"error": f"unknown fault: {fault_id}"},
                 )
-            rt.clear_fault(fault_id)
+            rt.clear_fault(fault_id, by=operator)
             return _demo_view(host)
 
     @app.post("/api/demo/act")

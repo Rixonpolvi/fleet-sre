@@ -401,6 +401,435 @@ def fleet_view(rt: Any) -> dict[str, Any]:
     }
 
 
+def next_step(rt: Any, record: Any) -> dict[str, str]:
+    """Status banner: who acts next and what they do (d8-story)."""
+    state = (
+        record.state.value
+        if hasattr(record.state, "value") else str(record.state)
+    )
+    if state == "AWAITING_APPROVAL":
+        proposals = list(record.proposals or [])
+        seq = str(proposals[-1].seq) if proposals else "?"
+        return {
+            "actor": "you",
+            "text": f"approve or reject proposal #{seq}",
+        }
+    if state in ("OPEN", "INVESTIGATING"):
+        pending = record.pending
+        if pending is not None:
+            return {
+                "actor": "sre",
+                "text": f"resumes on the next tick: {pending.trigger}",
+            }
+        return {"actor": "sre", "text": "investigating"}
+    if state == "NEEDS_INPUT":
+        reason = record.reason or ""
+        paused_at = record.paused_at
+        demo_at = None
+        for event in record.timeline:
+            if event.kind == "demo":
+                if paused_at is None or event.at >= paused_at:
+                    demo_at = event.at
+        transport = getattr(rt, "transport", None)
+        exhausted = bool(
+            getattr(transport, "exhausted", False)
+        ) if transport is not None else False
+        if reason == "model_unavailable" and exhausted:
+            return {
+                "actor": "platform",
+                "text": "script ended: switch act to restart",
+            }
+        if demo_at is not None:
+            snapshot = record.paused_snapshot or {}
+            tripped = sorted(
+                tw for tw, status in snapshot.items()
+                if status == "tripped"
+            )
+            if not tripped:
+                tripped = list(record.tripwires or [])
+            joined = ", ".join(tripped)
+            when = (
+                demo_at.isoformat()
+                if hasattr(demo_at, "isoformat") else str(demo_at)
+            )
+            return {
+                "actor": "tripwire",
+                "text": (
+                    f"credential rotated at {when}; waiting for "
+                    f"{joined} to recover, then the SRE resumes"
+                ),
+            }
+        if reason == "escalated":
+            return {
+                "actor": "you",
+                "text": (
+                    "fix it outside the platform (Mark rotated), "
+                    "reply, or close"
+                ),
+            }
+        if reason in ("budget", "token_budget"):
+            return {
+                "actor": "you",
+                "text": "grant turns, reply or close",
+            }
+        if reason == "model_unavailable":
+            return {
+                "actor": "platform",
+                "text": "script ended: switch act to restart",
+            }
+        return {
+            "actor": "you",
+            "text": "grant turns, reply or close",
+        }
+    if state == "APPLYING":
+        return {
+            "actor": "platform", "text": "applying the approved change",
+        }
+    if state == "VERIFYING":
+        ver = _verification_view(rt, record)
+        if ver is not None:
+            return {
+                "actor": "tripwire",
+                "text": (
+                    f"{ver['tripwire']} must be ok by {ver['deadline']}"
+                ),
+            }
+        target = (list(record.tripwires or [""]) or [""])[0]
+        return {"actor": "tripwire", "text": f"{target} must be ok"}
+    if state in ("RESOLVED", "ESCALATED"):
+        closed = ""
+        postmortem = record.postmortem
+        if (
+            postmortem is not None
+            and getattr(postmortem, "closed_at", None) is not None
+        ):
+            closed = postmortem.closed_at.isoformat()
+        elif record.timeline:
+            at = record.timeline[-1].at
+            closed = (
+                at.isoformat() if hasattr(at, "isoformat") else str(at)
+            )
+        return {"actor": "done", "text": f"{state} at {closed}"}
+    return {"actor": "sre", "text": "investigating"}
+
+
+def _trip_reason(record: Any) -> str:
+    incident = record.incident
+    event = getattr(incident, "trip_event", None)
+    if event is None:
+        return ""
+    if isinstance(event, dict):
+        return str(event.get("reason", "") or "")
+    return str(getattr(event, "reason", "") or "")
+
+
+def _extract_reply_text(message: str) -> str:
+    if not message:
+        return ""
+    if message.startswith("Reply from ") and ": " in message:
+        return message.split(": ", 1)[1]
+    return message
+
+
+def _extract_tripwire_change(message: str) -> str:
+    if not message:
+        return "the tripwire state changed"
+    before = message.split(". Current:")[0]
+    if ": " in before:
+        return before.rsplit(": ", 1)[-1]
+    return before
+
+
+def _story_entry(
+    at: str, actor: str, kind: str, text: str, detail: dict[str, Any]
+) -> dict[str, Any]:
+    payload = dict(detail)
+    return {
+        "at": at,
+        "actor": actor,
+        "kind": kind,
+        "text": text,
+        "detail": payload,
+        "Detail": payload,
+    }
+
+
+def story(rt: Any, record: Any) -> list[dict[str, Any]]:
+    """Linear incident story: one entry per timeline event (d8-story)."""
+    import json as _json
+
+    proposals = list(record.proposals or [])
+    by_hash: dict[str, Any] = {}
+    for proposal in proposals:
+        by_hash[str(getattr(proposal, "hash", ""))] = proposal
+    propose_seen = 0
+    out: list[dict[str, Any]] = []
+    for event in record.timeline:
+        kind = str(event.kind)
+        detail = dict(event.detail or {})
+        at = event.at
+        at_text = (
+            at.isoformat() if hasattr(at, "isoformat") else str(at)
+        )
+        if kind == "opened":
+            tripwire = str(
+                detail.get("tripwire", "")
+                or getattr(record.incident, "tripwire", "")
+            )
+            reason = _trip_reason(record)
+            if reason:
+                text = f"Tripwire {tripwire} tripped: {reason}"
+            else:
+                text = f"Tripwire {tripwire} tripped"
+            out.append(_story_entry(
+                at_text, "tripwire", kind, text, detail
+            ))
+        elif kind == "attached":
+            tripwire = str(detail.get("tripwire", ""))
+            text = (
+                f"Tripwire {tripwire} tripped and was attached "
+                "to this incident"
+            )
+            out.append(_story_entry(
+                at_text, "tripwire", kind, text, detail
+            ))
+        elif kind == "recovery":
+            tripwire = str(detail.get("tripwire", ""))
+            out.append(_story_entry(
+                at_text, "tripwire", kind,
+                f"Tripwire {tripwire} recovered", detail,
+            ))
+        elif kind == "segment":
+            status = str(detail.get("status", ""))
+            reason = str(detail.get("reason", ""))
+            turns = detail.get("turns", "")
+            if status == "submitted" and reason == "propose":
+                proposal = (
+                    proposals[propose_seen]
+                    if propose_seen < len(proposals) else None
+                )
+                propose_seen += 1
+                if proposal is not None:
+                    diagnosis = proposal.diagnosis or {}
+                    category = str(diagnosis.get("category", ""))
+                    summary = str(diagnosis.get("summary", ""))
+                    method = str(proposal.method)
+                    text = (
+                        f"SRE investigated and proposed a fix: "
+                        f"{category}: {summary} Proposed {method}."
+                    )
+                else:
+                    text = (
+                        f"SRE finished a segment: {status} "
+                        f"({reason}) after {turns} turns"
+                    )
+                out.append(_story_entry(
+                    at_text, "sre", kind, text, detail
+                ))
+            elif status == "submitted" and reason == "none":
+                diagnosis = record.diagnosis or {}
+                category = str(diagnosis.get("category", ""))
+                summary = str(diagnosis.get("summary", ""))
+                if category or summary:
+                    text = (
+                        f"SRE investigated: {category}: {summary} "
+                        "No change needed."
+                    )
+                else:
+                    text = (
+                        f"SRE finished a segment: {status} "
+                        f"({reason}) after {turns} turns"
+                    )
+                out.append(_story_entry(
+                    at_text, "sre", kind, text, detail
+                ))
+            else:
+                if status == "needs_input":
+                    text = f"SRE paused the investigation: {reason}"
+                else:
+                    text = (
+                        f"SRE finished a segment: {status} "
+                        f"({reason}) after {turns} turns"
+                    )
+                out.append(_story_entry(
+                    at_text, "sre", kind, text, detail
+                ))
+        elif kind == "proposal":
+            seq = int(detail.get("seq", 0) or 0)
+            proposal = (
+                proposals[seq - 1]
+                if 1 <= seq <= len(proposals) else None
+            )
+            if proposal is not None:
+                diagnosis = proposal.diagnosis or {}
+                category = str(diagnosis.get("category", ""))
+                summary = str(diagnosis.get("summary", ""))
+                method = str(proposal.method)
+                try:
+                    patch_text = _json.dumps(
+                        proposal.patch or {}, sort_keys=True
+                    )
+                except (TypeError, ValueError):
+                    patch_text = str(proposal.patch)
+                text = (
+                    f"SRE proposed #{seq}: {category}: {summary} "
+                    f"Proposed {method} with patch {patch_text}."
+                )
+            else:
+                text = f"SRE proposed #{seq}"
+            out.append(_story_entry(
+                at_text, "sre", kind, text, detail
+            ))
+        elif kind == "needs_input":
+            reason = str(
+                detail.get("reason", "") or record.reason or ""
+            )
+            text = f"SRE asked for input: {reason}"
+            if reason == "escalated":
+                diagnosis = record.diagnosis or {}
+                action = diagnosis.get("action") or {}
+                summary = action.get("escalationSummary") or ""
+                if summary:
+                    text = f"{text}. {summary}"
+            out.append(_story_entry(
+                at_text, "sre", kind, text, detail
+            ))
+        elif kind == "approved":
+            proposal_hash = str(detail.get("proposal_hash", ""))
+            proposal = by_hash.get(proposal_hash)
+            if proposal is not None:
+                text = f"You approved proposal #{proposal.seq}"
+            else:
+                text = "You approved the proposal"
+            out.append(_story_entry(
+                at_text, "you", kind, text, detail
+            ))
+        elif kind == "rejected":
+            notes = str(detail.get("notes", ""))
+            text = f"You rejected the proposal: {notes}"
+            out.append(_story_entry(
+                at_text, "you", kind, text, detail
+            ))
+        elif kind == "closed":
+            note = str(detail.get("note", ""))
+            if note:
+                text = f"You closed the incident: {note}"
+            else:
+                text = "You closed the incident"
+            out.append(_story_entry(
+                at_text, "you", kind, text, detail
+            ))
+        elif kind == "resumed":
+            trigger = str(detail.get("trigger", ""))
+            message = str(detail.get("message", "") or "")
+            if trigger == "reply":
+                actor = "you"
+                text = f"replied: {_extract_reply_text(message)}"
+            elif trigger == "tripwire":
+                actor = "tripwire"
+                change = _extract_tripwire_change(message)
+                text = f"{change} resumed the investigation"
+            elif trigger == "rejection":
+                actor = "sre"
+                text = "revising after your rejection"
+            else:
+                actor = "sre"
+                if message:
+                    text = f"resuming after {trigger}: {message}"
+                else:
+                    text = f"resuming after {trigger}"
+            out.append(_story_entry(
+                at_text, actor, kind, text, detail
+            ))
+        elif kind == "demo":
+            out.append(_story_entry(
+                at_text, "you", kind,
+                "rotated the credential outside the platform",
+                detail,
+            ))
+        elif kind == "applied":
+            out.append(_story_entry(
+                at_text, "platform", kind,
+                "applied the approved change", detail,
+            ))
+        elif kind == "verification_started":
+            tripwire = str(detail.get("tripwire", ""))
+            seconds = detail.get("seconds", 0)
+            out.append(_story_entry(
+                at_text, "platform", kind,
+                f"started verification: {tripwire} must recover "
+                f"within {seconds}s",
+                detail,
+            ))
+        elif kind == "verified":
+            out.append(_story_entry(
+                at_text, "tripwire", kind,
+                "verified: the tripwire is ok", detail,
+            ))
+        elif kind == "verification_failed":
+            out.append(_story_entry(
+                at_text, "tripwire", kind,
+                "verification failed: the tripwire did not recover "
+                "in time",
+                detail,
+            ))
+        elif kind == "escalated":
+            attempts = detail.get("failed_attempts", "")
+            if attempts != "":
+                text = (
+                    f"escalated after {attempts} failed attempts"
+                )
+            else:
+                text = "escalated"
+            out.append(_story_entry(
+                at_text, "platform", kind, text, detail
+            ))
+        elif kind == "conflict":
+            resource = str(detail.get("resource", ""))
+            out.append(_story_entry(
+                at_text, "platform", kind,
+                f"proposal conflicted: {resource} changed since "
+                "the proposal",
+                detail,
+            ))
+        elif kind == "apply_failed":
+            failure = str(detail.get("detail", ""))
+            if failure:
+                text = f"apply failed: {failure}"
+            else:
+                text = "apply failed"
+            out.append(_story_entry(
+                at_text, "platform", kind, text, detail
+            ))
+        else:
+            out.append(_story_entry(
+                at_text, "platform", kind, f"{kind}: {detail}",
+                detail,
+            ))
+    pending = record.pending
+    if pending is not None and getattr(pending, "trigger", "") == "reply":
+        message = getattr(pending, "message", "") or ""
+        reply_text = _extract_reply_text(str(message))
+        now = rt.clock.now()
+        at_text = (
+            now.isoformat() if hasattr(now, "isoformat") else str(now)
+        )
+        out.append(_story_entry(
+            at_text, "you", "reply",
+            f"replied: {reply_text} "
+            "(queued; the SRE resumes on the next tick)",
+            {
+                "message": message,
+                "trigger": "reply",
+                "queued": True,
+                "extra_turns": getattr(
+                    pending, "extra_turns", 0
+                ),
+            },
+        ))
+    return out
+
+
 def incident_view(rt: Any, incident_id: str) -> dict[str, Any]:
     """Incident data: hypotheses, evidence, proposal, turns, handoff (13-15)."""
     record = rt.manager.get(incident_id)
@@ -433,6 +862,8 @@ def incident_view(rt: Any, incident_id: str) -> dict[str, Any]:
         "turns": _turns_view(records, session),
         "header": _header_view(records),
         "handoff": _handoff_view(rt, record, session, records),
+        "next_step": next_step(rt, record),
+        "story": story(rt, record),
     }
 
 

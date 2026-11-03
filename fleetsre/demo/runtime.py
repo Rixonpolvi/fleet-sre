@@ -286,7 +286,7 @@ class DemoRuntime:
                 for fault in self.world.list_faults()
             ]
 
-    def clear_fault(self, fault_id: str) -> None:
+    def clear_fault(self, fault_id: str, by: str = "operator") -> None:
         """Clear the fault and append the demo timeline event (d8-pins 4)."""
         from fleetsre.control.incidents import IncidentState
         from fleetsre.control.postmortem import TimelineEvent
@@ -313,5 +313,6 @@ class DemoRuntime:
                     at=self.clock.now(), kind="demo",
                     detail={
                         "action": "mark_rotated", "fault": fault_id,
+                        "by": by,
                     },
                 ))

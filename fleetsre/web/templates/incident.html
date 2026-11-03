@@ -5,9 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Incident {{ view.id }}</title>
 <style>
-body { font-family: system-ui, -apple-system, Segoe UI, sans-serif; margin: 0 auto; max-width: 72rem; padding: 1rem 1.5rem 4rem; color: #1a1a1a; background: #fff; }
+body { font-family: system-ui, -apple-system, Segoe UI, sans-serif; margin: 0 auto; max-width: 72rem; padding: 1rem 1.5rem 4rem; color: #1a1a1a; background: #fff; font-size: 18px; line-height: 1.6; }
 header { border-bottom: 2px solid #1a1a1a; padding-bottom: 0.75rem; margin-bottom: 1rem; }
 header p { margin: 0.2rem 0; }
+h1 { font-size: 2rem; }
+h2 { font-size: 1.5rem; margin-top: 2rem; }
 .notice { font-weight: 700; }
 table.diff { border-collapse: collapse; margin: 0.5rem 0 1rem; }
 table.diff th, table.diff td { border: 1px solid #999; padding: 0.35rem 0.6rem; text-align: left; }
@@ -20,9 +22,34 @@ table.diff th, table.diff td { border: 1px solid #999; padding: 0.35rem 0.6rem; 
 .segment-divider { font-weight: 700; margin: 1rem 0 0.2rem; padding: 0.3rem 0.5rem; background: #eee; }
 pre { white-space: pre-wrap; word-break: break-word; background: #f6f6f6; padding: 0.5rem; }
 .controls { margin: 1rem 0; padding: 0.6rem 0.8rem; border: 1px dashed #666; }
-.controls button, .controls input { margin: 0.2rem 0.4rem 0.2rem 0; }
+.controls button, .controls input { margin: 0.2rem 0.4rem 0.2rem 0; font-size: 1rem; }
+.controls button { padding: 0.35rem 0.8rem; }
+button { font-size: 1rem; }
+input { font-size: 1rem; padding: 0.25rem 0.5rem; }
 #stale { display: none; font-weight: 700; }
 a { color: #0b57d0; }
+.banner { padding: 1rem 1.2rem; margin: 1rem 0; border: 2px solid #1a1a1a; font-size: 1.25rem; }
+.state-open, .state-investigating { background: #e8f0fe; border-color: #0b57d0; }
+.state-needs_input, .state-awaiting_approval { background: #fef7e0; border-color: #b26a00; }
+.state-applying, .state-verifying { background: #e6f4f5; border-color: #00696b; }
+.state-resolved { background: #e6f4ea; border-color: #1a7f37; }
+.state-escalated { background: #fce8e6; border-color: #b00020; }
+.actor-chip { display: inline-block; padding: 0.1rem 0.6rem; border-radius: 999px; font-weight: 700; color: #fff; font-size: 0.95rem; margin-right: 0.5rem; }
+.actor-you { background: #0b57d0; }
+.actor-sre { background: #1a7f37; }
+.actor-tripwire { background: #b26a00; }
+.actor-platform { background: #444; }
+.actor-done { background: #333; }
+.state-chip { display: inline-block; padding: 0.1rem 0.6rem; border-radius: 4px; font-weight: 700; background: #1a1a1a; color: #fff; margin-right: 0.5rem; font-size: 1rem; }
+.pause-info { display: block; margin-top: 0.5rem; font-size: 1rem; }
+#action-error { display: none; color: #b00020; font-weight: 700; border: 2px solid #b00020; background: #fce8e6; padding: 0.6rem 0.8rem; margin: 0.6rem 0; font-size: 1.05rem; }
+ol.story { list-style: none; padding: 0; }
+li.story-entry { border: 1px solid #999; padding: 0.8rem 1rem; margin: 0.7rem 0; }
+li.story-entry p.story-text { margin: 0.5rem 0; font-size: 1.1rem; }
+.story-meta { font-size: 0.95rem; color: #333; }
+.story-kind { font-weight: 700; margin-right: 0.5rem; }
+details { margin: 0.5rem 0; }
+summary { cursor: pointer; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -42,43 +69,72 @@ a { color: #0b57d0; }
 <h1>Incident {{ view.id }}</h1>
 <p>Deployment: {{ view.deployment }} | State: {{ view.state }}{% if view.reason %} | Reason: {{ view.reason }}{% endif %}</p>
 <p>Tripwires: {{ view.tripwires | join(", ") }}</p>
-{% if view.diagnosis %}<p>Category: <strong>{{ view.diagnosis.category }}</strong></p>{% endif %}
 
-{% if view.handoff %}
-<h2>Handoff</h2>
-<p>Reason: {{ view.handoff.reason }}</p>
-<p>Paused at: {{ view.handoff.paused_at }}, model calls since pause: {{ view.handoff.model_calls_since_pause }}</p>
-{% if view.handoff.escalation_summary %}<p>Escalation: {{ view.handoff.escalation_summary }}</p>{% endif %}
-{% if view.handoff.last_refusal %}<p>Last refusal: turn {{ view.handoff.last_refusal.n }} {{ view.handoff.last_refusal.tool }}</p>{% endif %}
+<section class="banner state-{{ view.state | lower }}" aria-label="Next step">
+<span class="state-chip">{{ view.state }}</span>
+<span class="actor-chip actor-{{ view.next_step.actor }}">{{ view.next_step.actor }}</span>
 {% if admin %}
-<div class="controls">
-<h3>Operator controls</h3>
+<span class="next-text">{{ view.next_step.text }}</span>
+{% else %}
+<span class="next-text">{{ view.next_step.text | replace("(Mark rotated), ", "") | replace("(Mark rotated)", "") }}</span>
+{% endif %}
+{% if view.state == "NEEDS_INPUT" and view.handoff %}
+<span class="pause-info">model calls since pause: {{ view.handoff.model_calls_since_pause }} (paused at {{ view.handoff.paused_at }})</span>
+{% endif %}
+</section>
+
+{% if admin %}
+<section class="controls" aria-label="Actions">
+<h2>Actions</h2>
+<div id="action-error" role="alert"></div>
+{% if view.state == "AWAITING_APPROVAL" and view.proposal %}
+<input type="hidden" id="proposal-hash" value="{{ view.proposal.hash }}">
+<div>
+<button id="btn-approve" data-url="/api/incidents/{{ view.id }}/approve" data-method="POST" data-body-from="proposal-hash" data-field="proposal_hash">Approve {{ view.proposal.hash }}</button>
+</div>
+<div>
+<input id="reject-notes" placeholder="Rejection notes" style="width:24rem">
+<button id="btn-reject" data-url="/api/incidents/{{ view.id }}/reject" data-method="POST" data-body-from="proposal-hash,reject-notes" data-field="proposal_hash,notes">Reject</button>
+</div>
+{% elif view.state == "NEEDS_INPUT" %}
 <div>
 <input id="reply-msg" placeholder="Reply message">
 <input id="reply-turns" type="number" value="0" min="0" style="width:4rem">
-<button id="btn-reply">Reply</button>
+<button id="btn-reply" data-url="/api/incidents/{{ view.id }}/reply" data-method="POST" data-body-from="reply-msg,reply-turns" data-field="message,extra_turns">Reply</button>
 </div>
 <div>
 <input id="grant-turns" type="number" value="4" min="1" max="24" style="width:4rem">
-<button id="btn-grant">Grant turns</button>
+<button id="btn-grant" data-url="/api/incidents/{{ view.id }}/grant" data-method="POST" data-body-from="grant-turns" data-field="turns">Grant turns</button>
 </div>
 <div>
 <input id="close-note" placeholder="Close note">
-<button id="btn-close">Close</button>
+<button id="btn-close" data-url="/api/incidents/{{ view.id }}/close" data-method="POST" data-body-from="close-note" data-field="note">Close</button>
 </div>
 {% if rotatable %}
 <div>
-<button data-clear-url="/api/demo/faults/{{ rotatable[0].id }}/clear">Mark rotated ({{ rotatable[0].id }})</button>
+<button id="btn-rotate" data-clear-url="/api/demo/faults/{{ rotatable[0].id }}/clear" data-url="/api/demo/faults/{{ rotatable[0].id }}/clear" data-method="POST">Mark rotated ({{ rotatable[0].id }})</button>
 </div>
 {% endif %}
-</div>
 {% endif %}
+</section>
 {% endif %}
 
-<h2>Hypotheses</h2>
+<h2>Incident story</h2>
+<ol class="story">
+{% for entry in view.story %}
+<li class="story-entry actor-{{ entry.actor }}">
+<div class="story-meta">
+<span class="actor-chip actor-{{ entry.actor }}">{{ entry.actor }}</span>
+<span class="story-kind">{{ entry.kind }}</span>
+<span class="story-at">{{ entry.at }}</span>
+</div>
+<p class="story-text">{{ entry.text }}</p>
+{% if entry.actor == "sre" %}
+<details>
+<summary>Hypotheses and evidence</summary>
 {% for h in view.hypotheses %}
 <section>
-<h3>{{ h.id }}: {{ h.statement }}</h3>
+<h4>{{ h.id }}: {{ h.statement }}</h4>
 <p>Would confirm: {{ h.wouldConfirm }}{% if h.alternative %} (alternative){% endif %}</p>
 <ul>
 {% for e in view.evidence if e.hypothesis == h.id %}
@@ -87,6 +143,11 @@ a { color: #0b57d0; }
 </ul>
 </section>
 {% endfor %}
+</details>
+{% endif %}
+</li>
+{% endfor %}
+</ol>
 
 <h2>Proposal</h2>
 {% if view.proposal %}
@@ -107,17 +168,6 @@ a { color: #0b57d0; }
 <p>No proposal.</p>
 {% endif %}
 
-{% if admin and view.state == "AWAITING_APPROVAL" and view.proposal %}
-<div class="controls">
-<h3>Approval</h3>
-<button id="btn-approve">Approve {{ view.proposal.hash }}</button>
-<div>
-<input id="reject-notes" placeholder="Rejection notes" style="width:24rem">
-<button id="btn-reject">Reject</button>
-</div>
-</div>
-{% endif %}
-
 <h2>Verification</h2>
 {% if view.verification %}
 <p>{{ view.verification.tripwire }}: {{ view.verification.current }}, {{ view.verification.outcome }} (started {{ view.verification.started_at }}, deadline {{ view.verification.deadline }})</p>
@@ -132,7 +182,8 @@ a { color: #0b57d0; }
 <p>Root cause: {{ view.postmortem.root_cause }}</p>
 {% endif %}
 
-<h2>Turns</h2>
+<details>
+<summary>SRE turn by turn ({{ view.turns | length }} turns)</summary>
 <p>Turns: {{ view.header.turns }}, model calls: {{ view.header.model_calls }}, read calls: {{ view.header.read_calls }}, cost: {% if demo.live %}{{ "$%.4f"|format(view.header.cost_usd) }}{% else %}n/a (scripted){% endif %}</p>
 {% set resumed = view.timeline | selectattr("kind", "equalto", "resumed") | list %}
 {% for card in view.turns %}
@@ -150,36 +201,83 @@ a { color: #0b57d0; }
 </details>
 </div>
 {% endfor %}
+</details>
 
 <script>
 (function () {
   var id = {{ view.id | tojson }};
-  function post(path, body) {
-    return fetch(path, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)}).then(function () { window.location.reload(); });
-  }
-  var approve = document.getElementById("btn-approve");
-  if (approve) { approve.addEventListener("click", function () { post("/api/incidents/" + id + "/approve", {proposal_hash: {{ view.proposal.hash | tojson if view.proposal else '""' }}}); }); }
-  var reject = document.getElementById("btn-reject");
-  if (reject) { reject.addEventListener("click", function () { post("/api/incidents/" + id + "/reject", {proposal_hash: {{ view.proposal.hash | tojson if view.proposal else '""' }}, notes: document.getElementById("reject-notes").value}); }); }
-  var reply = document.getElementById("btn-reply");
-  if (reply) { reply.addEventListener("click", function () { post("/api/incidents/" + id + "/reply", {message: document.getElementById("reply-msg").value, extra_turns: parseInt(document.getElementById("reply-turns").value || "0", 10)}); }); }
-  var grant = document.getElementById("btn-grant");
-  if (grant) { grant.addEventListener("click", function () { post("/api/incidents/" + id + "/grant", {turns: parseInt(document.getElementById("grant-turns").value || "4", 10)}); }); }
-  var close = document.getElementById("btn-close");
-  if (close) { close.addEventListener("click", function () { post("/api/incidents/" + id + "/close", {note: document.getElementById("close-note").value}); }); }
-  document.querySelectorAll("[data-clear-url]").forEach(function (el) {
-    el.addEventListener("click", function () { fetch(el.dataset.clearUrl, {method: "POST"}).then(function () { window.location.reload(); }); });
+  document.addEventListener("click", function (event) {
+    var btn = null;
+    if (event.target && event.target.closest) {
+      btn = event.target.closest("button[data-url]");
+    }
+    if (!btn) {
+      return;
+    }
+    var url = btn.getAttribute("data-url");
+    var method = btn.getAttribute("data-method") || "POST";
+    var body = {};
+    var from = btn.getAttribute("data-body-from");
+    var fields = btn.getAttribute("data-field");
+    if (from && fields) {
+      var ids = from.split(",");
+      var keys = fields.split(",");
+      for (var i = 0; i < ids.length; i++) {
+        var inputId = ids[i].trim();
+        var key = (keys[i] || "").trim();
+        if (!inputId || !key) {
+          continue;
+        }
+        var input = document.getElementById(inputId);
+        if (!input) {
+          continue;
+        }
+        if (input.type === "number") {
+          var n = parseInt(input.value || "0", 10);
+          body[key] = isNaN(n) ? 0 : n;
+        } else {
+          body[key] = input.value;
+        }
+      }
+    }
+    fetch(url, {method: method, headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)}).then(function (resp) {
+      if (resp.ok) {
+        window.location.reload();
+      } else {
+        resp.json().then(function (data) {
+          var err = document.getElementById("action-error");
+          var msg = (data && data.error) ? data.error : ("request failed: " + resp.status);
+          if (err) {
+            err.textContent = msg;
+            err.style.display = "block";
+          }
+        }).catch(function () {
+          var err2 = document.getElementById("action-error");
+          if (err2) {
+            err2.textContent = "request failed: " + resp.status;
+            err2.style.display = "block";
+          }
+        });
+      }
+    }).catch(function (err3) {
+      var box = document.getElementById("action-error");
+      if (box) {
+        box.textContent = String(err3 && err3.message ? err3.message : err3);
+        box.style.display = "block";
+      }
+    });
   });
   document.querySelectorAll("details").forEach(function (box) {
     var loaded = false;
     box.addEventListener("toggle", function () {
       if (!box.open || loaded) return;
-      loaded = true;
       var target = box.querySelector("[data-turn-input]");
+      if (!target) return;
+      loaded = true;
       var n = target.dataset.turnInput;
       fetch("/api/incidents/" + id + "/turns/" + n + "/input").then(function (r) { return r.json(); }).then(function (data) {
         target.innerHTML = "";
-        data.forEach(function (item, i) {
+        data.forEach(function (item) {
           var wrap = document.createElement("div");
           if (item.role === "developer") {
             var inner = document.createElement("details");
