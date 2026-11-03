@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Incident {{ view.id }}</title>
+<style>
+body { font-family: system-ui, -apple-system, Segoe UI, sans-serif; margin: 0 auto; max-width: 72rem; padding: 1rem 1.5rem 4rem; color: #1a1a1a; background: #fff; }
+header { border-bottom: 2px solid #1a1a1a; padding-bottom: 0.75rem; margin-bottom: 1rem; }
+header p { margin: 0.2rem 0; }
+.notice { font-weight: 700; }
+table.diff { border-collapse: collapse; margin: 0.5rem 0 1rem; }
+table.diff th, table.diff td { border: 1px solid #999; padding: 0.35rem 0.6rem; text-align: left; }
+.turn-card { border: 1px solid #999; padding: 0.6rem 0.8rem; margin: 0.6rem 0; }
+.turn-card.accepted { border-left: 6px solid #1a7f37; }
+.turn-card.refused { border-left: 6px solid #b00020; }
+.turn-card.wouldRefuse { border-left: 6px solid #b26a00; }
+.turn-card.no_tool_call { border-left: 6px solid #666; }
+.turn-card.stuck { border-left: 6px solid #666; }
+.segment-divider { font-weight: 700; margin: 1rem 0 0.2rem; padding: 0.3rem 0.5rem; background: #eee; }
+pre { white-space: pre-wrap; word-break: break-word; background: #f6f6f6; padding: 0.5rem; }
+.controls { margin: 1rem 0; padding: 0.6rem 0.8rem; border: 1px dashed #666; }
+.controls button, .controls input { margin: 0.2rem 0.4rem 0.2rem 0; }
+#stale { display: none; font-weight: 700; }
+a { color: #0b57d0; }
+</style>
+</head>
+<body>
+<header>
+<p><a href="/">Fleet grid</a></p>
+<p>Act: {{ demo.act }} &mdash; {{ demo.title }}</p>
+<p>Sim time: {{ demo.now }}</p>
+{% if demo.held %}<p class="notice">clock held: awaiting approval</p>{% endif %}
+<p>Model calls: {{ demo.model_calls }}{% if demo.last_model_call_at %} (last: {{ demo.last_model_call_at }}){% endif %}</p>
+<p>Model: {% if demo.live %}live ({{ demo.model }}){% else %}scripted replay{% endif %}</p>
+<p>cost: {% if demo.live %}{{ "$%.4f"|format(view.header.cost_usd) }}{% else %}n/a (scripted){% endif %}</p>
+{% if demo.exhausted %}<p class="notice">script ended: switch act to restart</p>{% endif %}
+<p id="stale">updated: reload</p>
+</header>
+<h1>Incident {{ view.id }}</h1>
+<p>Deployment: {{ view.deployment }} | State: {{ view.state }}{% if view.reason %} | Reason: {{ view.reason }}{% endif %}</p>
+<p>Tripwires: {{ view.tripwires | join(", ") }}</p>
+{% if view.diagnosis %}<p>Category: <strong>{{ view.diagnosis.category }}</strong></p>{% endif %}
+
+<h2>Hypotheses</h2>
+{% for h in view.hypotheses %}
+<section>
+<h3>{{ h.id }}: {{ h.statement }}</h3>
+<p>Would confirm: {{ h.wouldConfirm }}{% if h.alternative %} (alternative){% endif %}</p>
+<ul>
+{% for e in view.evidence if e.hypothesis == h.id %}
+<li>{{ e.id }} ({{ e.stance }}, turn {{ e.recordedAtTurn }}): {{ e.why }} &mdash; {{ e.source.kind }}{% if e.source.kind == "log" %} {{ e.source.insertId }} {{ e.source.severity }}{% else %} {{ e.source.tool }} {{ e.source.field }}={{ e.source.value }}{% endif %}</li>
+{% endfor %}
+</ul>
+</section>
+{% endfor %}
+
+<h2>Proposal</h2>
+{% if view.proposal %}
+<p>{{ view.proposal.method }} {{ view.proposal.resource }} (seq {{ view.proposal.seq }}, {{ view.proposal.hash }})</p>
+{% if view.proposal.diff %}
+<table class="diff">
+<thead><tr><th>Field</th><th>Before</th><th>After</th></tr></thead>
+<tbody>
+{% for row in view.proposal.diff %}
+<tr><td>{{ row.field }}</td><td>{{ row.before }}</td><td>{{ row.after }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+{% else %}
+<p>{{ view.proposal.steps }}</p>
+{% endif %}
+{% else %}
+<p>No proposal.</p>
+{% endif %}
+
+<h2>Verification</h2>
+{% if view.verification %}
+<p>{{ view.verification.tripwire }}: {{ view.verification.current }}, {{ view.verification.outcome }} (started {{ view.verification.started_at }}, deadline {{ view.verification.deadline }})</p>
+{% else %}
+<p>No verification.</p>
+{% endif %}
+
+{% if view.postmortem %}
+<h2>Postmortem</h2>
+<p>Outcome: {{ view.postmortem.outcome }}</p>
+<p>Category: {{ view.postmortem.category }}</p>
+<p>Root cause: {{ view.postmortem.root_cause }}</p>
+{% endif %}
+
+<h2>Turns</h2>
+<p>Turns: {{ view.header.turns }}, model calls: {{ view.header.model_calls }}, read calls: {{ view.header.read_calls }}, cost: {{ view.header.cost_usd }}</p>
+{% set resumed = view.timeline | selectattr("kind", "equalto", "resumed") | list %}
+{% for card in view.turns %}
+{% if card.segment > 1 and (loop.first or view.turns[loop.index0 - 1].segment != card.segment) %}
+<div class="segment-divider">Segment {{ card.segment }} resumed (trigger: {{ resumed[card.segment - 2].detail.trigger }}) &mdash; {{ resumed[card.segment - 2].detail.message }}</div>
+{% endif %}
+<div class="turn-card {{ card.verdict }}">
+<h4>Turn {{ card.n }} (segment {{ card.segment }}) &mdash; {{ card.verdict }}</h4>
+<p>Think: {{ card.think }}</p>
+{% if card.act %}<p>Act: {{ card.act.tool }}</p><pre>{{ card.act.args | tojson(indent=2) }}</pre>{% endif %}
+{% if card.observe is not none %}<p>Observe:</p><pre>{{ card.observe | tojson(indent=2) }}</pre>{% endif %}
+<details>
+<summary>Exact input</summary>
+<div data-turn-input="{{ card.n }}">Loading exact input&hellip;</div>
+</details>
+</div>
+{% endfor %}
+
+{% if view.handoff %}
+<h2>Handoff</h2>
+<p>Reason: {{ view.handoff.reason }}</p>
+<p>Paused at: {{ view.handoff.paused_at }}, model calls since pause: {{ view.handoff.model_calls_since_pause }}</p>
+{% if view.handoff.escalation_summary %}<p>Escalation: {{ view.handoff.escalation_summary }}</p>{% endif %}
+{% if view.handoff.last_refusal %}<p>Last refusal: turn {{ view.handoff.last_refusal.n }} {{ view.handoff.last_refusal.tool }}</p>{% endif %}
+{% if admin %}
+<div class="controls">
+<h3>Operator controls</h3>
+<div>
+<input id="reply-msg" placeholder="Reply message">
+<input id="reply-turns" type="number" value="0" min="0" style="width:4rem">
+<button id="btn-reply">Reply</button>
+</div>
+<div>
+<input id="grant-turns" type="number" value="4" min="1" max="24" style="width:4rem">
+<button id="btn-grant">Grant turns</button>
+</div>
+<div>
+<input id="close-note" placeholder="Close note">
+<button id="btn-close">Close</button>
+</div>
+{% if rotatable %}
+<div>
+<button data-clear-url="/api/demo/faults/{{ rotatable[0].id }}/clear">Mark rotated ({{ rotatable[0].id }})</button>
+</div>
+{% endif %}
+</div>
+{% endif %}
+{% endif %}
+
+{% if admin and view.state == "AWAITING_APPROVAL" and view.proposal %}
+<div class="controls">
+<h3>Approval</h3>
+<button id="btn-approve">Approve {{ view.proposal.hash }}</button>
+<div>
+<input id="reject-notes" placeholder="Rejection notes" style="width:24rem">
+<button id="btn-reject">Reject</button>
+</div>
+</div>
+{% endif %}
+
+<script>
+(function () {
+  var id = {{ view.id | tojson }};
+  function post(path, body) {
+    return fetch(path, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)}).then(function () { window.location.reload(); });
+  }
+  var approve = document.getElementById("btn-approve");
+  if (approve) { approve.addEventListener("click", function () { post("/api/incidents/" + id + "/approve", {proposal_hash: {{ view.proposal.hash | tojson if view.proposal else '""' }}}); }); }
+  var reject = document.getElementById("btn-reject");
+  if (reject) { reject.addEventListener("click", function () { post("/api/incidents/" + id + "/reject", {proposal_hash: {{ view.proposal.hash | tojson if view.proposal else '""' }}, notes: document.getElementById("reject-notes").value}); }); }
+  var reply = document.getElementById("btn-reply");
+  if (reply) { reply.addEventListener("click", function () { post("/api/incidents/" + id + "/reply", {message: document.getElementById("reply-msg").value, extra_turns: parseInt(document.getElementById("reply-turns").value || "0", 10)}); }); }
+  var grant = document.getElementById("btn-grant");
+  if (grant) { grant.addEventListener("click", function () { post("/api/incidents/" + id + "/grant", {turns: parseInt(document.getElementById("grant-turns").value || "4", 10)}); }); }
+  var close = document.getElementById("btn-close");
+  if (close) { close.addEventListener("click", function () { post("/api/incidents/" + id + "/close", {note: document.getElementById("close-note").value}); }); }
+  document.querySelectorAll("[data-clear-url]").forEach(function (el) {
+    el.addEventListener("click", function () { fetch(el.dataset.clearUrl, {method: "POST"}).then(function () { window.location.reload(); }); });
+  });
+  document.querySelectorAll("details").forEach(function (box) {
+    var loaded = false;
+    box.addEventListener("toggle", function () {
+      if (!box.open || loaded) return;
+      loaded = true;
+      var target = box.querySelector("[data-turn-input]");
+      var n = target.dataset.turnInput;
+      fetch("/api/incidents/" + id + "/turns/" + n + "/input").then(function (r) { return r.json(); }).then(function (data) {
+        target.innerHTML = "";
+        data.forEach(function (item, i) {
+          var wrap = document.createElement("div");
+          if (item.role === "developer") {
+            var inner = document.createElement("details");
+            var sum = document.createElement("summary");
+            sum.textContent = "developer prompt";
+            inner.appendChild(sum);
+            var pre = document.createElement("pre");
+            pre.textContent = JSON.stringify(item, null, 2);
+            inner.appendChild(pre);
+            wrap.appendChild(inner);
+          } else {
+            var blk = document.createElement("pre");
+            blk.textContent = JSON.stringify(item, null, 2);
+            wrap.appendChild(blk);
+          }
+          target.appendChild(wrap);
+        });
+      });
+    });
+  });
+})();
+</script>
+<script>
+(function () {
+  var known = null;
+  function poll() {
+    fetch("/api/version").then(function (r) { return r.json(); }).then(function (data) {
+      if (known === null) { known = data.version; return; }
+      if (data.version !== known) {
+        if (document.querySelector("details[open]")) {
+          document.getElementById("stale").style.display = "block";
+          known = data.version;
+        } else { window.location.reload(); }
+      }
+    }).catch(function () {});
+  }
+  setInterval(poll, 2000);
+})();
+</script>
+</body>
+</html>

@@ -25,3 +25,14 @@ forbidden_modules =
     httpx
     urllib
     google
+
+[importlinter:contract:3]
+name = Demo locality (d8-pins 19)
+type = forbidden
+source_modules =
+    fleetsre.web
+    fleetsre.demo
+forbidden_modules =
+    google
+    fleetsre.adapters.cloud_logging
+    fleetsre.adapters.gcp_auth
