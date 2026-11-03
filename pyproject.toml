@@ -12,6 +12,8 @@ dependencies = [
   "google-cloud-pubsub",
   "google-cloud-iam",
   "google-auth",
+  "jinja2",
+  "uvicorn",
 ]
 
 [project.optional-dependencies]

@@ -1,0 +1,43 @@
+# Demo acts (D8 Session A, from the P1 pre-flight; d8-pins 1). Protected once merged.
+# Each act replays its D6 end-to-end world: seed, t0 and fault schedule from the
+# D6 scripted fixtures, responses concatenated in order, one incident, and the
+# actions --check performs (the human's video beats).
+F1:
+  title: "Connector stall on alpha"
+  seed: 102
+  t0: "2026-10-29T14:00:00Z"
+  tick_seconds: 15
+  faults:
+    - { at: 1830, type: connector_stall, environment: alpha }
+  responses:
+    - fixtures/scripted/d6/F1.json
+  incident: "inc-alert-ingestion-alpha-dead-connector-20261029T143315Z"
+  actions:
+    - { on: AWAITING_APPROVAL, do: approve }
+F2:
+  title: "Credential expiry on bravo"
+  seed: 103
+  t0: "2026-10-29T14:00:00Z"
+  tick_seconds: 15
+  faults:
+    - { at: 1830, type: credential_expiry, environment: bravo }
+  responses:
+    - fixtures/scripted/d6/F2.json
+    - fixtures/scripted/d6/F2-resume.json
+  incident: "inc-alert-ingestion-bravo-connector-errors-20261029T143800Z"
+  actions:
+    - { on: NEEDS_INPUT, do: mark_rotated }
+F3:
+  title: "Severity drift on alpha"
+  seed: 104
+  t0: "2026-10-29T14:00:00Z"
+  tick_seconds: 15
+  faults:
+    - { at: 1830, type: severity_drift, environment: alpha, params: { rate: 0.5 } }
+  responses:
+    - fixtures/scripted/d6/F3-reject.json
+    - fixtures/scripted/d6/F3-revise.json
+  incident: "inc-alert-ingestion-alpha-priority-shape-20261029T143200Z"
+  actions:
+    - { on: AWAITING_APPROVAL, do: reject, notes: "unknown severities should map to 100" }
+    - { on: AWAITING_APPROVAL, do: approve }
