@@ -1,87 +1,42 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fleet SRE demo — {{ fleet.act }}</title>
-<style>
-body { font-family: system-ui, -apple-system, Segoe UI, sans-serif; margin: 0 auto; max-width: 72rem; padding: 1rem 1.5rem 4rem; color: #1a1a1a; background: #fff; }
-header { border-bottom: 2px solid #1a1a1a; padding-bottom: 0.75rem; margin-bottom: 1rem; }
-header p { margin: 0.2rem 0; }
-.notice { font-weight: 700; }
-table.grid { border-collapse: collapse; width: 100%; margin: 0.5rem 0 1.5rem; }
-table.grid th, table.grid td { border: 1px solid #999; padding: 0.4rem 0.6rem; text-align: left; vertical-align: top; }
-.health-ok { background: #e6f4ea; }
-.health-tripped { background: #fce8e6; }
-.tw { font-size: 0.85em; color: #333; }
-#stale { display: none; font-weight: 700; }
-.actbar button { margin-right: 0.5rem; }
-a { color: #0b57d0; }
-</style>
-</head>
-<body>
-<header>
-<p>Admin: {{ "on" if admin else "off" }}</p>
-{% if admin_error %}<p class="notice">admin token not accepted</p>{% endif %}
-<p>Act: {{ fleet.act }} &mdash; {{ demo.title }}</p>
-<p>Sim time: {{ fleet.now }}</p>
-<p>Held: {{ "yes" if fleet.held else "no" }}</p>
-{% if fleet.held %}<p class="notice">clock held: awaiting approval</p>{% endif %}
-<p>Model calls: {{ demo.model_calls }}{% if demo.last_model_call_at %} (last: {{ demo.last_model_call_at }}){% endif %}</p>
-<p>Model: {% if demo.live %}live ({{ demo.model }}){% else %}scripted replay{% endif %}</p>
-<p>Active faults:{% if demo.active_faults %} {% for f in demo.active_faults %}{{ f.id }} {{ f.type }} {{ f.environment }}{% if not loop.last %}; {% endif %}{% endfor %}{% else %} none{% endif %}</p>
-{% if demo.exhausted %}<p class="notice">script ended: switch act to restart</p>{% endif %}
-<p id="stale">updated: reload</p>
-</header>
+{% extends "base.html" %}
+{% block title %}Fleet SRE &mdash; {{ demo.act }}{% endblock %}
+{% block content %}
 <h1>Fleet grid</h1>
+<p class="inc-meta">Act {{ fleet.act }} &mdash; {{ demo.title }}</p>
 {% for service in fleet.services %}
+<section>
 <h2>{{ service.service }}</h2>
-<table class="grid">
-<thead><tr><th>Deployment</th>{% for comp in service.deployments[0].components %}<th>{{ comp.id }}</th>{% endfor %}<th>Incident</th></tr></thead>
-<tbody>
+<div class="dep-grid">
 {% for dep in service.deployments %}
-<tr>
-<td>{{ dep.id }}</td>
+<article class="card dep-card">
+<h3>{{ dep.id }}</h3>
+{% set rate = dep.expected_alerts_per_hour %}
+{% if rate is not none and rate <= 2 %}
+{% if rate == 0 %}
+<p class="quiet">quiet tenant &mdash; no organic alerts</p>
+{% else %}
+<p class="quiet">quiet tenant &mdash; expects {{ rate }} alerts/hour</p>
+{% endif %}
+{% endif %}
 {% for comp in dep.components %}
-<td class="health-{{ comp.health }}">{{ comp.health }}{% for tw in comp.tripwires %}<div class="tw">{{ tw.id }}: {{ tw.status }}</div>{% endfor %}</td>
-{% endfor %}
-<td>{% if dep.incident %}<a href="/incidents/{{ dep.incident.id }}">{{ dep.incident.id }} ({{ dep.incident.state }})</a>{% else %}&mdash;{% endif %}</td>
-</tr>
-{% endfor %}
-</tbody>
-</table>
-{% endfor %}
-{% if admin %}
-<div class="actbar">
-<h2>Switch act</h2>
-{% for name in demo.acts %}
-<button data-act="{{ name }}">{{ name }}</button>
+<div class="comp">
+<span class="comp-id">{{ comp.id }}</span>
+<span class="pill state-{{ comp.health }}">{{ comp.health }}</span>
+</div>
+<div class="tw-list">
+{% for tw in comp.tripwires %}
+<span class="tw">{{ tw.id }} &middot; {{ tw.status }}</span>
 {% endfor %}
 </div>
-<script>
-document.querySelectorAll("[data-act]").forEach(function (el) {
-  el.addEventListener("click", function () {
-    fetch("/api/demo/act", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({act: el.dataset.act})}).then(function () { window.location.reload(); });
-  });
-});
-</script>
+{% endfor %}
+{% if dep.incident %}
+<p><a class="badge-link badge-{{ dep.incident.state | lower }}" href="/incidents/{{ dep.incident.id }}" title="{{ dep.incident.id }}">{{ demo.title }} &middot; {{ dep.incident.state | lower | replace("_", " ") }}</a></p>
+{% else %}
+<p class="inc-meta">&mdash;</p>
 {% endif %}
-<script>
-(function () {
-  var known = null;
-  function poll() {
-    fetch("/api/version").then(function (r) { return r.json(); }).then(function (data) {
-      if (known === null) { known = data.version; return; }
-      if (data.version !== known) {
-        if (document.querySelector("details[open]")) {
-          document.getElementById("stale").style.display = "block";
-          known = data.version;
-        } else { window.location.reload(); }
-      }
-    }).catch(function () {});
-  }
-  setInterval(poll, 2000);
-})();
-</script>
-</body>
-</html>
+</article>
+{% endfor %}
+</div>
+</section>
+{% endfor %}
+{% endblock %}

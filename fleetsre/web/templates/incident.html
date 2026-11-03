@@ -1,157 +1,87 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Incident {{ view.id }}</title>
-<style>
-body { font-family: system-ui, -apple-system, Segoe UI, sans-serif; margin: 0 auto; max-width: 72rem; padding: 1rem 1.5rem 4rem; color: #1a1a1a; background: #fff; font-size: 18px; line-height: 1.6; }
-header { border-bottom: 2px solid #1a1a1a; padding-bottom: 0.75rem; margin-bottom: 1rem; }
-header p { margin: 0.2rem 0; }
-h1 { font-size: 2rem; }
-h2 { font-size: 1.5rem; margin-top: 2rem; }
-.notice { font-weight: 700; }
-table.diff { border-collapse: collapse; margin: 0.5rem 0 1rem; }
-table.diff th, table.diff td { border: 1px solid #999; padding: 0.35rem 0.6rem; text-align: left; }
-.turn-card { border: 1px solid #999; padding: 0.6rem 0.8rem; margin: 0.6rem 0; }
-.turn-card.accepted { border-left: 6px solid #1a7f37; }
-.turn-card.refused { border-left: 6px solid #b00020; }
-.turn-card.wouldRefuse { border-left: 6px solid #b26a00; }
-.turn-card.no_tool_call { border-left: 6px solid #666; }
-.turn-card.stuck { border-left: 6px solid #666; }
-.segment-divider { font-weight: 700; margin: 1rem 0 0.2rem; padding: 0.3rem 0.5rem; background: #eee; }
-pre { white-space: pre-wrap; word-break: break-word; background: #f6f6f6; padding: 0.5rem; }
-.controls { margin: 1rem 0; padding: 0.6rem 0.8rem; border: 1px dashed #666; }
-.controls button, .controls input { margin: 0.2rem 0.4rem 0.2rem 0; font-size: 1rem; }
-.controls button { padding: 0.35rem 0.8rem; }
-button { font-size: 1rem; }
-input { font-size: 1rem; padding: 0.25rem 0.5rem; }
-#stale { display: none; font-weight: 700; }
-a { color: #0b57d0; }
-.banner { padding: 1rem 1.2rem; margin: 1rem 0; border: 2px solid #1a1a1a; font-size: 1.25rem; }
-.state-open, .state-investigating { background: #e8f0fe; border-color: #0b57d0; }
-.state-needs_input, .state-awaiting_approval { background: #fef7e0; border-color: #b26a00; }
-.state-applying, .state-verifying { background: #e6f4f5; border-color: #00696b; }
-.state-resolved { background: #e6f4ea; border-color: #1a7f37; }
-.state-escalated { background: #fce8e6; border-color: #b00020; }
-.actor-chip { display: inline-block; padding: 0.1rem 0.6rem; border-radius: 999px; font-weight: 700; color: #fff; font-size: 0.95rem; margin-right: 0.5rem; }
-.actor-you { background: #0b57d0; }
-.actor-sre { background: #1a7f37; }
-.actor-tripwire { background: #b26a00; }
-.actor-platform { background: #444; }
-.actor-done { background: #333; }
-.state-chip { display: inline-block; padding: 0.1rem 0.6rem; border-radius: 4px; font-weight: 700; background: #1a1a1a; color: #fff; margin-right: 0.5rem; font-size: 1rem; }
-.pause-info { display: block; margin-top: 0.5rem; font-size: 1rem; }
-#action-error { display: none; color: #b00020; font-weight: 700; border: 2px solid #b00020; background: #fce8e6; padding: 0.6rem 0.8rem; margin: 0.6rem 0; font-size: 1.05rem; }
-ol.story { list-style: none; padding: 0; }
-li.story-entry { border: 1px solid #999; padding: 0.8rem 1rem; margin: 0.7rem 0; }
-li.story-entry p.story-text { margin: 0.5rem 0; font-size: 1.1rem; }
-.story-meta { font-size: 0.95rem; color: #333; }
-.story-kind { font-weight: 700; margin-right: 0.5rem; }
-details { margin: 0.5rem 0; }
-summary { cursor: pointer; font-weight: 600; }
-</style>
-</head>
-<body>
-<header>
-<p><a href="/">Fleet grid (switch act)</a></p>
-<p>Admin: {{ "on" if admin else "off" }}</p>
-{% if admin_error %}<p class="notice">admin token not accepted</p>{% endif %}
-<p>Act: {{ demo.act }} &mdash; {{ demo.title }}</p>
-<p>Sim time: {{ demo.now }}</p>
-{% if demo.held %}<p class="notice">clock held: awaiting approval</p>{% endif %}
-<p>Model calls: {{ demo.model_calls }}{% if demo.last_model_call_at %} (last: {{ demo.last_model_call_at }}){% endif %}</p>
-<p>Model: {% if demo.live %}live ({{ demo.model }}){% else %}scripted replay{% endif %}</p>
-<p>cost: {% if demo.live %}{{ "$%.4f"|format(view.header.cost_usd) }}{% else %}n/a (scripted){% endif %}</p>
-{% if demo.exhausted %}<p class="notice">script ended: switch act to restart</p>{% endif %}
-<p id="stale">updated: reload</p>
-</header>
-<h1>Incident {{ view.id }}</h1>
-<p>Deployment: {{ view.deployment }} | State: {{ view.state }}{% if view.reason %} | Reason: {{ view.reason }}{% endif %}</p>
-<p>Tripwires: {{ view.tripwires | join(", ") }}</p>
+{% extends "base.html" %}
+{% block title %}{{ demo.title }} &mdash; Fleet SRE{% endblock %}
+{% block content %}
+{% if demo.title %}
+<h1>{{ demo.title }}</h1>
+{% else %}
+<h1>{{ view.tripwires[0] }} on {{ view.deployment.split('/')[-1] }}</h1>
+{% endif %}
+<p class="inc-id"><code>{{ view.id }}</code></p>
+<p class="inc-meta">Deployment: {{ view.deployment }}</p>
+<p class="inc-meta">Tripwires: {{ view.tripwires | join(", ") }}</p>
 
 <section class="banner state-{{ view.state | lower }}" aria-label="Next step">
+<div class="banner-top">
 <span class="state-chip">{{ view.state }}</span>
 <span class="actor-chip actor-{{ view.next_step.actor }}">{{ view.next_step.actor }}</span>
+</div>
 {% if admin %}
-<span class="next-text">{{ view.next_step.text }}</span>
+<p class="next-text">{{ view.next_step.text }}</p>
 {% else %}
-<span class="next-text">{{ view.next_step.text | replace("(Mark rotated), ", "") | replace("(Mark rotated)", "") }}</span>
+<p class="next-text">{{ view.next_step.text | replace("(Mark rotated), ", "") | replace("(Mark rotated)", "") }}</p>
 {% endif %}
 {% if view.state == "NEEDS_INPUT" and view.handoff %}
 <span class="pause-info">model calls since pause: {{ view.handoff.model_calls_since_pause }} (paused at {{ view.handoff.paused_at }})</span>
 {% endif %}
+{% if admin and view.next_step.actor == "you" %}
+{% include "_controls.html" %}
+{% endif %}
 </section>
 
-{% if admin %}
-<section class="controls" aria-label="Actions">
-<h2>Actions</h2>
-<div id="action-error" role="alert"></div>
-{% if view.state == "AWAITING_APPROVAL" and view.proposal %}
-<input type="hidden" id="proposal-hash" value="{{ view.proposal.hash }}">
-<div>
-<button id="btn-approve" data-url="/api/incidents/{{ view.id }}/approve" data-method="POST" data-body-from="proposal-hash" data-field="proposal_hash">Approve {{ view.proposal.hash }}</button>
-</div>
-<div>
-<input id="reject-notes" placeholder="Rejection notes" style="width:24rem">
-<button id="btn-reject" data-url="/api/incidents/{{ view.id }}/reject" data-method="POST" data-body-from="proposal-hash,reject-notes" data-field="proposal_hash,notes">Reject</button>
-</div>
-{% elif view.state == "NEEDS_INPUT" %}
-<div>
-<input id="reply-msg" placeholder="Reply message">
-<input id="reply-turns" type="number" value="0" min="0" style="width:4rem">
-<button id="btn-reply" data-url="/api/incidents/{{ view.id }}/reply" data-method="POST" data-body-from="reply-msg,reply-turns" data-field="message,extra_turns">Reply</button>
-</div>
-<div>
-<input id="grant-turns" type="number" value="4" min="1" max="24" style="width:4rem">
-<button id="btn-grant" data-url="/api/incidents/{{ view.id }}/grant" data-method="POST" data-body-from="grant-turns" data-field="turns">Grant turns</button>
-</div>
-<div>
-<input id="close-note" placeholder="Close note">
-<button id="btn-close" data-url="/api/incidents/{{ view.id }}/close" data-method="POST" data-body-from="close-note" data-field="note">Close</button>
-</div>
-{% if rotatable %}
-<div>
-<button id="btn-rotate" data-clear-url="/api/demo/faults/{{ rotatable[0].id }}/clear" data-url="/api/demo/faults/{{ rotatable[0].id }}/clear" data-method="POST">Mark rotated ({{ rotatable[0].id }})</button>
-</div>
-{% endif %}
-{% endif %}
-</section>
+{% if admin and view.next_step.actor != "you" %}
+{% include "_controls.html" %}
 {% endif %}
 
 <h2>Incident story</h2>
-<ol class="story">
+<ol class="timeline">
 {% for entry in view.story %}
-<li class="story-entry actor-{{ entry.actor }}">
-<div class="story-meta">
+{% set next = view.story[loop.index0 + 1] if not loop.last else none %}
+{% if entry.kind == "segment" and next is not none and next.at == entry.at and next.kind in ["proposal", "needs_input"] %}
+{% else %}
+<li class="tl-entry actor-{{ entry.actor }}">
+<span class="tl-dot" aria-hidden="true"></span>
+<div class="tl-meta">
 <span class="actor-chip actor-{{ entry.actor }}">{{ entry.actor }}</span>
-<span class="story-kind">{{ entry.kind }}</span>
-<span class="story-at">{{ entry.at }}</span>
+<time>{{ entry.at[11:19] }}</time>
+<span class="t-rel">{{ entry.elapsed }}</span>
 </div>
-<p class="story-text">{{ entry.text }}</p>
+{% if entry.kind == "proposal" and entry.change is defined %}
+<p class="tl-text">Proposed #{{ entry.change.seq }}{% if entry.change.category %}: {{ entry.change.category }}: {{ entry.change.summary }}{% endif %}</p>
+<ul class="change">
+{% for line in entry.change.lines %}
+<li><code>{{ line }}</code></li>
+{% endfor %}
+</ul>
+{% else %}
+<p class="tl-text">{% if entry.kind == "needs_input" and "escalated" in entry.text and view.diagnosis %}<strong>{{ view.diagnosis.category }}: {{ view.diagnosis.summary }}</strong> &mdash; {% endif %}{{ entry.text }}</p>
+{% endif %}
 {% if entry.actor == "sre" %}
 <details>
 <summary>Hypotheses and evidence</summary>
+<ul class="hyp-list">
 {% for h in view.hypotheses %}
-<section>
-<h4>{{ h.id }}: {{ h.statement }}</h4>
-<p>Would confirm: {{ h.wouldConfirm }}{% if h.alternative %} (alternative){% endif %}</p>
-<ul>
+<li><strong>{{ h.id }}</strong>: {{ h.statement }}
+<span class="confirm">Would confirm: {{ h.wouldConfirm }}{% if h.alternative %} (alternative){% endif %}</span>
+<ul class="ev-list">
 {% for e in view.evidence if e.hypothesis == h.id %}
-<li>{{ e.id }} ({{ e.stance }}, turn {{ e.recordedAtTurn }}): {{ e.why }} &mdash; {{ e.source.kind }}{% if e.source.kind == "log" %} {{ e.source.insertId }} {{ e.source.severity }}{% else %} {{ e.source.tool }} {{ e.source.field }}={{ e.source.value }}{% endif %}</li>
+<li><span class="stance stance-{{ e.stance }}">{{ e.stance }}</span> {{ e.id }} (turn {{ e.recordedAtTurn }}): {{ e.why }} &mdash; {{ e.source.kind }}{% if e.source.kind == "log" %} {{ e.source.insertId }} {{ e.source.severity }}{% else %} {{ e.source.tool }} {{ e.source.field }}={{ e.source.value }}{% endif %}</li>
 {% endfor %}
 </ul>
-</section>
+</li>
 {% endfor %}
+</ul>
 </details>
 {% endif %}
 </li>
+{% endif %}
 {% endfor %}
 </ol>
 
 <h2>Proposal</h2>
 {% if view.proposal %}
-<p>{{ view.proposal.method }} {{ view.proposal.resource }} (seq {{ view.proposal.seq }}, {{ view.proposal.hash }})</p>
+<div class="card">
+<p><code>{{ view.proposal.method }}</code> <span class="res-short" title="{{ view.proposal.resource }}">{{ view.proposal.resource.split('/')[-1] }}</span></p>
+<p class="proposal-meta">seq {{ view.proposal.seq }} &middot; <code>{{ view.proposal.hash }}</code></p>
 {% if view.proposal.diff %}
 <table class="diff">
 <thead><tr><th>Field</th><th>Before</th><th>After</th></tr></thead>
@@ -164,22 +94,28 @@ summary { cursor: pointer; font-weight: 600; }
 {% else %}
 <p>{{ view.proposal.steps }}</p>
 {% endif %}
+</div>
 {% else %}
 <p>No proposal.</p>
 {% endif %}
 
 <h2>Verification</h2>
 {% if view.verification %}
-<p>{{ view.verification.tripwire }}: {{ view.verification.current }}, {{ view.verification.outcome }} (started {{ view.verification.started_at }}, deadline {{ view.verification.deadline }})</p>
+<div class="card compact">
+<p><strong>{{ view.verification.tripwire }}</strong> <span class="pill state-{{ view.verification.current }}">{{ view.verification.current }}</span> {{ view.verification.outcome }}</p>
+<p class="inc-meta">started {{ view.verification.started_at }} &middot; deadline {{ view.verification.deadline }}</p>
+</div>
 {% else %}
 <p>No verification.</p>
 {% endif %}
 
 {% if view.postmortem %}
 <h2>Postmortem</h2>
+<div class="card compact">
 <p>Outcome: {{ view.postmortem.outcome }}</p>
 <p>Category: {{ view.postmortem.category }}</p>
 <p>Root cause: {{ view.postmortem.root_cause }}</p>
+</div>
 {% endif %}
 
 <details>
@@ -191,10 +127,17 @@ summary { cursor: pointer; font-weight: 600; }
 <div class="segment-divider">Segment {{ card.segment }} resumed (trigger: {{ resumed[card.segment - 2].detail.trigger }}) &mdash; {{ resumed[card.segment - 2].detail.message }}</div>
 {% endif %}
 <div class="turn-card {{ card.verdict }}">
-<h4>Turn {{ card.n }} (segment {{ card.segment }}) &mdash; {{ card.verdict }}</h4>
-<p>Think: {{ card.think }}</p>
-{% if card.act %}<p>Act: {{ card.act.tool }}</p><pre>{{ card.act.args | tojson(indent=2) }}</pre>{% endif %}
-{% if card.observe is not none %}<p>Observe:</p><pre>{{ card.observe | tojson(indent=2) }}</pre>{% endif %}
+<div class="turn-row">
+<span class="turn-n">Turn {{ card.n }}</span>
+<span class="turn-tool">{{ card.act.tool if card.act else "no tool call" }}</span>
+<span class="turn-think">{{ card.think }}</span>
+<span class="verdict verdict-{{ card.verdict }}">{{ card.verdict }}</span>
+</div>
+<details>
+<summary>JSON</summary>
+{% if card.act %}<pre>{{ card.act.args | tojson(indent=2) }}</pre>{% endif %}
+{% if card.observe is not none %}<pre>{{ card.observe | tojson(indent=2) }}</pre>{% endif %}
+</details>
 <details>
 <summary>Exact input</summary>
 <div data-turn-input="{{ card.n }}">Loading exact input&hellip;</div>
@@ -202,71 +145,11 @@ summary { cursor: pointer; font-weight: 600; }
 </div>
 {% endfor %}
 </details>
-
+{% endblock %}
+{% block scripts %}
 <script>
 (function () {
   var id = {{ view.id | tojson }};
-  document.addEventListener("click", function (event) {
-    var btn = null;
-    if (event.target && event.target.closest) {
-      btn = event.target.closest("button[data-url]");
-    }
-    if (!btn) {
-      return;
-    }
-    var url = btn.getAttribute("data-url");
-    var method = btn.getAttribute("data-method") || "POST";
-    var body = {};
-    var from = btn.getAttribute("data-body-from");
-    var fields = btn.getAttribute("data-field");
-    if (from && fields) {
-      var ids = from.split(",");
-      var keys = fields.split(",");
-      for (var i = 0; i < ids.length; i++) {
-        var inputId = ids[i].trim();
-        var key = (keys[i] || "").trim();
-        if (!inputId || !key) {
-          continue;
-        }
-        var input = document.getElementById(inputId);
-        if (!input) {
-          continue;
-        }
-        if (input.type === "number") {
-          var n = parseInt(input.value || "0", 10);
-          body[key] = isNaN(n) ? 0 : n;
-        } else {
-          body[key] = input.value;
-        }
-      }
-    }
-    fetch(url, {method: method, headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)}).then(function (resp) {
-      if (resp.ok) {
-        window.location.reload();
-      } else {
-        resp.json().then(function (data) {
-          var err = document.getElementById("action-error");
-          var msg = (data && data.error) ? data.error : ("request failed: " + resp.status);
-          if (err) {
-            err.textContent = msg;
-            err.style.display = "block";
-          }
-        }).catch(function () {
-          var err2 = document.getElementById("action-error");
-          if (err2) {
-            err2.textContent = "request failed: " + resp.status;
-            err2.style.display = "block";
-          }
-        });
-      }
-    }).catch(function (err3) {
-      var box = document.getElementById("action-error");
-      if (box) {
-        box.textContent = String(err3 && err3.message ? err3.message : err3);
-        box.style.display = "block";
-      }
-    });
-  });
   document.querySelectorAll("details").forEach(function (box) {
     var loaded = false;
     box.addEventListener("toggle", function () {
@@ -300,22 +183,4 @@ summary { cursor: pointer; font-weight: 600; }
   });
 })();
 </script>
-<script>
-(function () {
-  var known = null;
-  function poll() {
-    fetch("/api/version").then(function (r) { return r.json(); }).then(function (data) {
-      if (known === null) { known = data.version; return; }
-      if (data.version !== known) {
-        if (document.querySelector("details[open]")) {
-          document.getElementById("stale").style.display = "block";
-          known = data.version;
-        } else { window.location.reload(); }
-      }
-    }).catch(function () {});
-  }
-  setInterval(poll, 2000);
-})();
-</script>
-</body>
-</html>
+{% endblock %}

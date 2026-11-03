@@ -1,0 +1,33 @@
+<section class="controls" aria-label="Actions">
+<h2>Actions</h2>
+<div id="action-error" role="alert"></div>
+{% if view.state == "AWAITING_APPROVAL" and view.proposal %}
+<input type="hidden" id="proposal-hash" value="{{ view.proposal.hash }}">
+<div>
+<button id="btn-approve" data-url="/api/incidents/{{ view.id }}/approve" data-method="POST" data-body-from="proposal-hash" data-field="proposal_hash">Approve proposal #{{ view.proposal.seq }}</button>
+</div>
+<div>
+<input id="reject-notes" placeholder="Rejection notes" style="width:24rem">
+<button id="btn-reject" data-url="/api/incidents/{{ view.id }}/reject" data-method="POST" data-body-from="proposal-hash,reject-notes" data-field="proposal_hash,notes">Reject</button>
+</div>
+{% elif view.state == "NEEDS_INPUT" %}
+<div>
+<input id="reply-msg" placeholder="Reply message">
+<input id="reply-turns" type="number" value="0" min="0" style="width:4rem">
+<button id="btn-reply" data-url="/api/incidents/{{ view.id }}/reply" data-method="POST" data-body-from="reply-msg,reply-turns" data-field="message,extra_turns">Reply</button>
+</div>
+<div>
+<input id="grant-turns" type="number" value="4" min="1" max="24" style="width:4rem">
+<button id="btn-grant" data-url="/api/incidents/{{ view.id }}/grant" data-method="POST" data-body-from="grant-turns" data-field="turns">Grant turns</button>
+</div>
+<div>
+<input id="close-note" placeholder="Close note">
+<button id="btn-close" data-url="/api/incidents/{{ view.id }}/close" data-method="POST" data-body-from="close-note" data-field="note">Close</button>
+</div>
+{% if rotatable %}
+<div>
+<button id="btn-rotate" data-clear-url="/api/demo/faults/{{ rotatable[0].id }}/clear" data-url="/api/demo/faults/{{ rotatable[0].id }}/clear" data-method="POST">Mark rotated ({{ rotatable[0].id }})</button>
+</div>
+{% endif %}
+{% endif %}
+</section>

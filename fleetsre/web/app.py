@@ -48,10 +48,14 @@ def _demo_view(host: Any) -> dict[str, Any]:
     rt = host.current
     last = rt.last_model_call_at
     transport = rt.transport
+    names = sorted(host.acts.keys())
     return {
         "act": getattr(rt, "act_name", ""),
         "title": rt.act.title,
-        "acts": sorted(host.acts.keys()),
+        "acts": names,
+        "act_titles": {
+            name: host.acts[name].title for name in names
+        },
         "now": rt.clock.now().isoformat(),
         "started_at": rt.started_at.isoformat(),
         "speed": rt.speed,

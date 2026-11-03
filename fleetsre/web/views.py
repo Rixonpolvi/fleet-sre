@@ -378,12 +378,16 @@ def fleet_view(rt: Any) -> dict[str, Any]:
             }
         else:
             incident = None
+        params = getattr(deployment, "parameters", {}) or {}
         view = {
             "id": deployment.id,
             "environment": deployment.environment,
             "health": dep_health,
             "incident": incident,
             "components": components,
+            "expected_alerts_per_hour": params.get(
+                "expectedAlertsPerHour"
+            ),
         }
         if deployment.service not in by_service:
             by_service[deployment.service] = []
@@ -399,6 +403,19 @@ def fleet_view(rt: Any) -> dict[str, Any]:
         "held": bool(rt.held),
         "services": services,
     }
+
+
+def _hhmmss(value: Any) -> str:
+    """A sim timestamp as HH:MM:SS for banner sentences."""
+    if hasattr(value, "strftime"):
+        try:
+            return str(value.strftime("%H:%M:%S"))
+        except (TypeError, ValueError):
+            pass
+    text = str(value)
+    if len(text) >= 19 and text[10:11] == "T":
+        return text[11:19]
+    return text
 
 
 def next_step(rt: Any, record: Any) -> dict[str, str]:
@@ -448,10 +465,7 @@ def next_step(rt: Any, record: Any) -> dict[str, str]:
             if not tripped:
                 tripped = list(record.tripwires or [])
             joined = ", ".join(tripped)
-            when = (
-                demo_at.isoformat()
-                if hasattr(demo_at, "isoformat") else str(demo_at)
-            )
+            when = _hhmmss(demo_at)
             return {
                 "actor": "tripwire",
                 "text": (
@@ -491,25 +505,33 @@ def next_step(rt: Any, record: Any) -> dict[str, str]:
             return {
                 "actor": "tripwire",
                 "text": (
-                    f"{ver['tripwire']} must be ok by {ver['deadline']}"
+                    f"{ver['tripwire']} must be ok by "
+                    f"{_hhmmss(ver['deadline'])}"
                 ),
             }
         target = (list(record.tripwires or [""]) or [""])[0]
         return {"actor": "tripwire", "text": f"{target} must be ok"}
     if state in ("RESOLVED", "ESCALATED"):
         closed = ""
+        short = ""
         postmortem = record.postmortem
         if (
             postmortem is not None
             and getattr(postmortem, "closed_at", None) is not None
         ):
             closed = postmortem.closed_at.isoformat()
+            short = _hhmmss(postmortem.closed_at)
         elif record.timeline:
             at = record.timeline[-1].at
             closed = (
                 at.isoformat() if hasattr(at, "isoformat") else str(at)
             )
-        return {"actor": "done", "text": f"{state} at {closed}"}
+            short = _hhmmss(at)
+        if short:
+            text = f"{state} at {short} ({closed})"
+        else:
+            text = f"{state} at {closed}"
+        return {"actor": "done", "text": text}
     return {"actor": "sre", "text": "investigating"}
 
 
@@ -541,7 +563,12 @@ def _extract_tripwire_change(message: str) -> str:
 
 
 def _story_entry(
-    at: str, actor: str, kind: str, text: str, detail: dict[str, Any]
+    at: str,
+    actor: str,
+    kind: str,
+    text: str,
+    detail: dict[str, Any],
+    elapsed: str = "T+0:00",
 ) -> dict[str, Any]:
     payload = dict(detail)
     return {
@@ -551,6 +578,53 @@ def _story_entry(
         "text": text,
         "detail": payload,
         "Detail": payload,
+        "elapsed": elapsed,
+    }
+
+
+def _elapsed_label(at: Any, trip_at: Any) -> str:
+    """Sim time since the trip as T+m:ss for the timeline rail."""
+    try:
+        seconds = int((at - trip_at).total_seconds())
+    except (TypeError, ValueError, AttributeError):
+        return "T+0:00"
+    if seconds < 0:
+        seconds = 0
+    return f"T+{seconds // 60}:{seconds % 60:02d}"
+
+
+def _quote_empty(value: Any) -> str:
+    text = str(value)
+    return '""' if text == "" else text
+
+
+def _change_view(proposal: Any) -> dict[str, Any]:
+    """A proposal as changed fields only, never raw patch JSON."""
+    diagnosis = proposal.diagnosis or {}
+    method = str(proposal.method)
+    short = method.rsplit(".", 1)[-1]
+    rendered = _proposal_view(proposal)
+    lines: list[str] = []
+    for row in rendered["diff"]:
+        field = str(row.get("field", ""))
+        if field.startswith("parameters[") and field.endswith("]"):
+            label = field[len("parameters["):-1]
+        else:
+            label = field
+        lines.append(
+            f"{label}: {_quote_empty(row.get('before', ''))} \u2192 "
+            f"{_quote_empty(row.get('after', ''))}"
+        )
+    if not lines and rendered["steps"]:
+        steps = str(rendered["steps"]).replace(": ", " ", 1)
+        lines.append(f"{short} ({steps})")
+    return {
+        "seq": proposal.seq,
+        "category": str(diagnosis.get("category", "")),
+        "summary": str(diagnosis.get("summary", "")),
+        "method": method,
+        "short": short,
+        "lines": lines,
     }
 
 
@@ -677,9 +751,12 @@ def story(rt: Any, record: Any) -> list[dict[str, Any]]:
                 )
             else:
                 text = f"SRE proposed #{seq}"
-            out.append(_story_entry(
+            entry = _story_entry(
                 at_text, "sre", kind, text, detail
-            ))
+            )
+            if proposal is not None:
+                entry["change"] = _change_view(proposal)
+            out.append(entry)
         elif kind == "needs_input":
             reason = str(
                 detail.get("reason", "") or record.reason or ""
@@ -806,6 +883,9 @@ def story(rt: Any, record: Any) -> list[dict[str, Any]]:
                 at_text, "platform", kind, f"{kind}: {detail}",
                 detail,
             ))
+    trip_at = record.timeline[0].at if record.timeline else None
+    for entry, event in zip(out, record.timeline):
+        entry["elapsed"] = _elapsed_label(event.at, trip_at)
     pending = record.pending
     if pending is not None and getattr(pending, "trigger", "") == "reply":
         message = getattr(pending, "message", "") or ""
@@ -826,6 +906,7 @@ def story(rt: Any, record: Any) -> list[dict[str, Any]]:
                     pending, "extra_turns", 0
                 ),
             },
+            _elapsed_label(now, trip_at),
         ))
     return out
 
