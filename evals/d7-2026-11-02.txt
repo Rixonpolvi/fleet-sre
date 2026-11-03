@@ -1,0 +1,10 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.2.0, pluggy-1.7.0
+rootdir: /home/rixon/fleet-sre
+configfile: pyproject.toml
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 4 items
+
+tests/acceptance/d7/test_d7_gcp.py ....                                  [100%]
+
+========================= 4 passed in 65.17s (0:01:05) =========================
