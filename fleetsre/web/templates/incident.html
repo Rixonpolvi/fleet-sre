@@ -27,7 +27,9 @@ a { color: #0b57d0; }
 </head>
 <body>
 <header>
-<p><a href="/">Fleet grid</a></p>
+<p><a href="/">Fleet grid (switch act)</a></p>
+<p>Admin: {{ "on" if admin else "off" }}</p>
+{% if admin_error %}<p class="notice">admin token not accepted</p>{% endif %}
 <p>Act: {{ demo.act }} &mdash; {{ demo.title }}</p>
 <p>Sim time: {{ demo.now }}</p>
 {% if demo.held %}<p class="notice">clock held: awaiting approval</p>{% endif %}
@@ -41,6 +43,37 @@ a { color: #0b57d0; }
 <p>Deployment: {{ view.deployment }} | State: {{ view.state }}{% if view.reason %} | Reason: {{ view.reason }}{% endif %}</p>
 <p>Tripwires: {{ view.tripwires | join(", ") }}</p>
 {% if view.diagnosis %}<p>Category: <strong>{{ view.diagnosis.category }}</strong></p>{% endif %}
+
+{% if view.handoff %}
+<h2>Handoff</h2>
+<p>Reason: {{ view.handoff.reason }}</p>
+<p>Paused at: {{ view.handoff.paused_at }}, model calls since pause: {{ view.handoff.model_calls_since_pause }}</p>
+{% if view.handoff.escalation_summary %}<p>Escalation: {{ view.handoff.escalation_summary }}</p>{% endif %}
+{% if view.handoff.last_refusal %}<p>Last refusal: turn {{ view.handoff.last_refusal.n }} {{ view.handoff.last_refusal.tool }}</p>{% endif %}
+{% if admin %}
+<div class="controls">
+<h3>Operator controls</h3>
+<div>
+<input id="reply-msg" placeholder="Reply message">
+<input id="reply-turns" type="number" value="0" min="0" style="width:4rem">
+<button id="btn-reply">Reply</button>
+</div>
+<div>
+<input id="grant-turns" type="number" value="4" min="1" max="24" style="width:4rem">
+<button id="btn-grant">Grant turns</button>
+</div>
+<div>
+<input id="close-note" placeholder="Close note">
+<button id="btn-close">Close</button>
+</div>
+{% if rotatable %}
+<div>
+<button data-clear-url="/api/demo/faults/{{ rotatable[0].id }}/clear">Mark rotated ({{ rotatable[0].id }})</button>
+</div>
+{% endif %}
+</div>
+{% endif %}
+{% endif %}
 
 <h2>Hypotheses</h2>
 {% for h in view.hypotheses %}
@@ -74,6 +107,17 @@ a { color: #0b57d0; }
 <p>No proposal.</p>
 {% endif %}
 
+{% if admin and view.state == "AWAITING_APPROVAL" and view.proposal %}
+<div class="controls">
+<h3>Approval</h3>
+<button id="btn-approve">Approve {{ view.proposal.hash }}</button>
+<div>
+<input id="reject-notes" placeholder="Rejection notes" style="width:24rem">
+<button id="btn-reject">Reject</button>
+</div>
+</div>
+{% endif %}
+
 <h2>Verification</h2>
 {% if view.verification %}
 <p>{{ view.verification.tripwire }}: {{ view.verification.current }}, {{ view.verification.outcome }} (started {{ view.verification.started_at }}, deadline {{ view.verification.deadline }})</p>
@@ -89,7 +133,7 @@ a { color: #0b57d0; }
 {% endif %}
 
 <h2>Turns</h2>
-<p>Turns: {{ view.header.turns }}, model calls: {{ view.header.model_calls }}, read calls: {{ view.header.read_calls }}, cost: {{ view.header.cost_usd }}</p>
+<p>Turns: {{ view.header.turns }}, model calls: {{ view.header.model_calls }}, read calls: {{ view.header.read_calls }}, cost: {% if demo.live %}{{ "$%.4f"|format(view.header.cost_usd) }}{% else %}n/a (scripted){% endif %}</p>
 {% set resumed = view.timeline | selectattr("kind", "equalto", "resumed") | list %}
 {% for card in view.turns %}
 {% if card.segment > 1 and (loop.first or view.turns[loop.index0 - 1].segment != card.segment) %}
@@ -106,48 +150,6 @@ a { color: #0b57d0; }
 </details>
 </div>
 {% endfor %}
-
-{% if view.handoff %}
-<h2>Handoff</h2>
-<p>Reason: {{ view.handoff.reason }}</p>
-<p>Paused at: {{ view.handoff.paused_at }}, model calls since pause: {{ view.handoff.model_calls_since_pause }}</p>
-{% if view.handoff.escalation_summary %}<p>Escalation: {{ view.handoff.escalation_summary }}</p>{% endif %}
-{% if view.handoff.last_refusal %}<p>Last refusal: turn {{ view.handoff.last_refusal.n }} {{ view.handoff.last_refusal.tool }}</p>{% endif %}
-{% if admin %}
-<div class="controls">
-<h3>Operator controls</h3>
-<div>
-<input id="reply-msg" placeholder="Reply message">
-<input id="reply-turns" type="number" value="0" min="0" style="width:4rem">
-<button id="btn-reply">Reply</button>
-</div>
-<div>
-<input id="grant-turns" type="number" value="4" min="1" max="24" style="width:4rem">
-<button id="btn-grant">Grant turns</button>
-</div>
-<div>
-<input id="close-note" placeholder="Close note">
-<button id="btn-close">Close</button>
-</div>
-{% if rotatable %}
-<div>
-<button data-clear-url="/api/demo/faults/{{ rotatable[0].id }}/clear">Mark rotated ({{ rotatable[0].id }})</button>
-</div>
-{% endif %}
-</div>
-{% endif %}
-{% endif %}
-
-{% if admin and view.state == "AWAITING_APPROVAL" and view.proposal %}
-<div class="controls">
-<h3>Approval</h3>
-<button id="btn-approve">Approve {{ view.proposal.hash }}</button>
-<div>
-<input id="reject-notes" placeholder="Rejection notes" style="width:24rem">
-<button id="btn-reject">Reject</button>
-</div>
-</div>
-{% endif %}
 
 <script>
 (function () {

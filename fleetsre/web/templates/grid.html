@@ -21,6 +21,8 @@ a { color: #0b57d0; }
 </head>
 <body>
 <header>
+<p>Admin: {{ "on" if admin else "off" }}</p>
+{% if admin_error %}<p class="notice">admin token not accepted</p>{% endif %}
 <p>Act: {{ fleet.act }} &mdash; {{ demo.title }}</p>
 <p>Sim time: {{ fleet.now }}</p>
 <p>Held: {{ "yes" if fleet.held else "no" }}</p>
