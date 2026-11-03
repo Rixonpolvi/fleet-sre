@@ -107,6 +107,7 @@ def create_app(
 
     def _grid_page(request: Request) -> Response:
         query_token = request.query_params.get("admin")
+        admin_error = False
         if query_token is not None:
             try:
                 ok = secrets.compare_digest(query_token, admin_token)
@@ -119,6 +120,7 @@ def create_app(
                     samesite="strict", path="/",
                 )
                 return response
+            admin_error = True
         admin = _is_admin(request, admin_token)
         rt = host.current
         with rt.lock:
@@ -126,6 +128,7 @@ def create_app(
             demo = _demo_view(host)
         html = templates.get_template("grid.html").render(
             fleet=fleet, demo=demo, admin=admin,
+            admin_error=admin_error,
         )
         return HTMLResponse(html)
 
@@ -133,6 +136,7 @@ def create_app(
         request: Request, incident_id: str
     ) -> Response:
         query_token = request.query_params.get("admin")
+        admin_error = False
         if query_token is not None:
             try:
                 ok = secrets.compare_digest(query_token, admin_token)
@@ -147,6 +151,7 @@ def create_app(
                     samesite="strict", path="/",
                 )
                 return response
+            admin_error = True
         admin = _is_admin(request, admin_token)
         rt = host.current
         with rt.lock:
@@ -165,6 +170,7 @@ def create_app(
             ]
         html = templates.get_template("incident.html").render(
             view=view, demo=demo, admin=admin, rotatable=rotatable,
+            admin_error=admin_error,
         )
         return HTMLResponse(html)
 
