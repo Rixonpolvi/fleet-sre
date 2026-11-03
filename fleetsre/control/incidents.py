@@ -331,7 +331,8 @@ class IncidentManager:
         resource = action["resource"]
         update_mask = list(action.get("updateMask") or [])
         patch = dict(action.get("patch") or {})
-        version = resource_version(self._reader.get(resource))
+        resource_before = self._reader.get(resource)
+        version = resource_version(resource_before)
         seq = len(record.proposals) + 1
         digest = proposal_hash(
             record.id, seq, method, resource, update_mask, patch,
@@ -348,6 +349,7 @@ class IncidentManager:
             resource_version=version,
             diagnosis=diagnosis,
             created_at=now,
+            resource_before=dict(resource_before),
         ))
         record.state = IncidentState.AWAITING_APPROVAL
         record.timeline.append(TimelineEvent(

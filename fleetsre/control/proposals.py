@@ -5,7 +5,7 @@ import json
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class Proposal(BaseModel):
@@ -19,6 +19,9 @@ class Proposal(BaseModel):
     resource_version: str
     diagnosis: dict[str, Any]
     created_at: datetime
+    # d8-pins 18: the resource exactly as reader.get returned it when the
+    # proposal was created. Not part of proposal_hash, so D6 is unaffected.
+    resource_before: dict[str, Any] = Field(default_factory=dict)
 
 
 def resource_version(resource: dict[str, Any]) -> str:

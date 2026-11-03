@@ -1,17 +1,46 @@
-"""Scripted demo transport (D8 stub; Session B implements per d8-pins 3)."""
+"""Scripted demo transport (d8-pins 3). Wraps ScriptedTransport."""
 
+import copy
 from typing import Any
+
+from fleetsre.sre.gateway import ScriptedTransport, TransportError
 
 
 class DemoTransport:
     """Wraps ScriptedTransport; sets exhausted and raises TransportError(400)
     once the script is used up. `calls` counts every create."""
 
-    def __init__(
-        self, responses: list[dict[str, Any]], *, timeout: float = 120.0
-    ) -> None:
-        raise NotImplementedError("D8 Session B implements DemoTransport")
+    def __init__(self, responses: list[dict[str, Any]]) -> None:
+        self._inner = ScriptedTransport(list(responses))
+        self._script_length = len(responses)
+        self.exhausted = False
+        self.calls = 0
 
-    def create(self, request: dict[str, Any]) -> dict[str, Any]:
+    @property
+    def requests(self) -> list[dict[str, Any]]:
+        return self._inner.requests
+
+    @property
+    def timeouts(self) -> list[float]:
+        return self._inner.timeouts
+
+    @property
+    def script_length(self) -> int:
+        return self._script_length
+
+    def create(
+        self, request: dict[str, Any], *, timeout: float = 120.0
+    ) -> dict[str, Any]:
         """One model call; records the request like ScriptedTransport."""
-        raise NotImplementedError("D8 Session B implements DemoTransport")
+        self.calls += 1
+        try:
+            return self._inner.create(request, timeout=timeout)
+        except IndexError:
+            self.exhausted = True
+            raise TransportError(400, "demo script exhausted") from None
+
+    def snapshot(self) -> dict[str, Any]:
+        return copy.deepcopy({
+            "calls": self.calls,
+            "exhausted": self.exhausted,
+        })
