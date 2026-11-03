@@ -22,6 +22,8 @@ Revised 2026-11-02 after D6b: D6b recorded as built, with the live authoring res
 
 Revised 2026-11-03 after D7: D7 interfaces and semantics are in `docs/d7-pins.md`; D7 recorded as built, with the live result (§D7 "Settled in D7").
 
+Revised 2026-11-03 after D8: D8 interfaces and semantics are in `docs/d8-pins.md`; the D8 rows match the re-plan (admin only, demo acts, no live instance); D8 recorded as built (§D8 "Settled in D8").
+
 Nine deliverables, D0–D8. Each one is **two merges**: a tests PR, then an implementation PR. The acceptance tests below are the definition of done. The coding agent translates them into code; it does not decide them.
 
 ---
@@ -651,25 +653,32 @@ Concurrency: when a proposal is created, the platform records the target resourc
 
 ---
 
-## D8 — UI, live chaos loop and deploy
+## D8 — UI, demo and README
 
 **Target:** Tue Nov 3 · **Owner:** Muse; keep the UI minimal · **Depends on:** D6, D7
 
-**Goal.** A judge can open a URL and watch faults trip, get investigated turn by turn and recover without touching anything; you can approve, reject and answer handoffs in admin mode; `make demo` reproduces it locally.
+**Goal.** `make demo` plays the video's F1, F2 and F3 beats locally, one act at a time: faults trip, the SRE investigates turn by turn, and the operator approves, rejects, answers handoffs and marks a credential rotated in an admin-only UI.
 
-**Re-plan (2026-11-01).** In scope: rows T1, T2, T3, T6, T8, T9 and T10; the rest are in §Cut. There is no live instance: `create_app` has admin mode only, T10's public-mode clause is dropped, and the README (T8) links the repo and the video only.
+**Re-plan (2026-11-01).** In scope: rows T1, T2, T3, T6, T8, T9 and T10; the rest are in §Cut. There is no live instance: `create_app` has admin mode only, T10's public-mode clause is dropped, and the README (T8) links the repo and the video only. [`docs/d8-pins.md`](d8-pins.md) holds the D8 interfaces and semantics and wins over the rows below.
 
-**Interfaces.** `fleetsre/web/app.py` `create_app(mode: Literal["admin", "public"], ...)`; `fleetsre/live/chaos_loop.py` `ChaosLoop(world, schedule, clock).tick()`.
+**Interfaces.** `fleetsre/demo/` (acts, transport, runtime, host, `python -m fleetsre.demo`) and `fleetsre/web/` (`create_app(host, *, admin_token)`, views, templates); detail in d8-pins §Interfaces. There is no chaos loop.
 
 | ID | Test | Pass condition |
 | --- | --- | --- |
 | D8-T1 | Fleet grid | `GET /api/fleet` returns services × deployments × components with health from `Evaluator.status()`; the HTML grid renders every deployment |
 | D8-T2 | Incident view | `GET /incidents/{id}` shows hypotheses, recorded evidence (resolved from `insertId`s and call IDs), category, the patch diff, verification state and the postmortem |
-| D8-T3 | Approve and reject (admin) | In admin mode, approving creates an approval for the current proposal hash and moves the incident to APPLYING; rejecting with notes calls `ApprovalStore.reject`; requests without the admin credential get 403 |
-| D8-T6 | Local demo | `make demo` from a clean clone starts mock, evaluator, SRE (scripted model unless a key is set) and UI; the grid shows a trip within 5 minutes |
-| D8-T8 | README | Contains: what it is, how to run locally, architecture, where each gate sits and what it refuses, "Built during the hackathon" (list of components with deliverable IDs), faithful-vs-invented table from `mocks.md` §9, and links to the live instance and video |
+| D8-T3 | Approve and reject (admin) | In admin mode, approving creates an approval for the current proposal hash and moves the incident to APPLYING; rejecting with notes goes through `IncidentManager.reject`; requests without the admin credential (d8-pins 11) get 403 |
+| D8-T6 | Local demo | `make demo` from a clean clone serves one act (mock, evaluator, SRE on scripted segments unless `--live`, and UI); the grid shows a trip within 5 minutes at demo speed; `make demo-check` plays every act to RESOLVED |
+| D8-T8 | README | Contains: what it is, how to run locally, architecture, where each gate sits and what it refuses, "Built during the hackathon" (list of components with deliverable IDs), faithful-vs-invented table from `mocks.md` §9, limits, roles, and links to the repo and the video |
 | D8-T9 | Turn timeline | The incident page has one card per turn with Think (the call's `rationale`), Act (tool and arguments) and Observe (the result, or the gate's refusal and problems, coloured by outcome); expanding a card shows the exact input the model saw that turn; a header shows turns, read calls, tokens (reasoning and cached) and refusals by gate |
-| D8-T10 | Handoff card | A NEEDS_INPUT incident shows its reason, hypotheses, recorded evidence and last refusal. Admin mode offers reply, grant turns and close, wired to `IncidentManager.reply` and `close`; public mode shows the card without actions |
+| D8-T10 | Handoff card | A NEEDS_INPUT incident shows its reason, hypotheses, recorded evidence and last refusal. With the admin credential it offers reply, grant turns, close and, for an active credential fault, mark rotated, wired to `IncidentManager.reply` and `close` and the demo's fault clear; without it the card shows no actions |
+
+**Settled in D8.** [`docs/d8-pins.md`](d8-pins.md) records the interfaces and semantics as built (#39, #40). In short:
+- `make demo` plays one act at a time (F1, F2, F3), each a replica of the D6 end-to-end world its scripted segments were recorded in (seeds 102, 103, 104), arming alert-ingestion on alpha, bravo, charlie and canary. The demo clock holds while an incident awaits approval.
+- `make demo-check` plays every act with the human actions at 0, 600 and 1800 s: 9 of 9 RESOLVED, each consuming its script exactly, no refusals.
+- Scripted mode shows "Model: scripted replay" and no cost. "Mark rotated" clears the active credential fault through the world's own fault list.
+- A turn's exact input is read from the runtime's request log, not rebuilt from the session, so it is offered for the act's incident only (D8-T9 then compares the log with itself; accepted for one-incident acts).
+- Accepted limits: the patch diff omits unchanged rows; POST handlers block on the runtime lock, so a live segment blocks the server until it ends.
 
 **Out of scope:** anything new. After D8, only fixes.
 
