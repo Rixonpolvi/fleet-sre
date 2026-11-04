@@ -162,4 +162,4 @@ Everything in this repository was built between 2026-10-28 and 2026-11-04; the f
 ## Links
 
 - Repo: https://github.com/Rixonpolvi/fleet-sre
-- Video: (added at submission)
+- Video: https://youtu.be/b9Wyi15MX2M
