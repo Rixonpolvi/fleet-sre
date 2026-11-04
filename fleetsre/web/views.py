@@ -34,6 +34,21 @@ _SEGMENT_WORDS = {
 }
 
 
+_RESUME_WORDS = {
+    "rejection": "your rejection",
+    "tripwire": "the tripwire recovered",
+    "reply": "your note",
+}
+
+
+def _resume_words(trigger: Any) -> str:
+    """A resume trigger in story-header words (d8-story2)."""
+    text = str(trigger or "")
+    if text in _RESUME_WORDS:
+        return _RESUME_WORDS[text]
+    return trigger_words(text)
+
+
 def trigger_words(trigger: Any) -> str:
     """A pending/resumed trigger code in plain words."""
     text = str(trigger or "")
@@ -543,12 +558,21 @@ def handoff_actions(record: Any, rt: Any) -> dict[str, Any] | None:
         others = ["note", "close"]
     if reason in ("budget", "token_budget") and primary != "grant":
         others.append("grant")
+    transport = getattr(rt, "transport", None)
+    exhausted = bool(
+        getattr(transport, "exhausted", False)
+    ) if transport is not None else False
+    if reason == "model_unavailable" and not exhausted:
+        note_prefill = "Retry."
+    else:
+        note_prefill = ""
     return {
         "primary": primary,
         "others": others,
         "rotatable": rotatable,
         "tripped": _tripped_names(record),
         "rotated": rotated,
+        "note_prefill": note_prefill,
     }
 
 
@@ -656,8 +680,8 @@ def next_step(rt: Any, record: Any) -> dict[str, str]:
             }
         if reason == "model_unavailable":
             return {
-                "actor": "platform",
-                "text": "script ended: switch act to restart",
+                "actor": "you",
+                "text": "The model did not answer in time",
             }
         return {
             "actor": "you",
@@ -796,23 +820,177 @@ def _change_view(proposal: Any) -> dict[str, Any]:
     }
 
 
+def _story_segments(
+    rt: Any, record: Any
+) -> tuple[
+    list[int], dict[int, int], list[str], list[int],
+    list[dict[str, Any] | None], list[list[dict[str, Any]]],
+    list[dict[str, Any]],
+]:
+    """Segment headers, turn counts, diagnoses and evidence (d8-story2).
+
+    Returns (segment_timeline_idxs, seg_by_timeline, headers, counts,
+    diags, filtered_evidence, hypotheses). Headers use display_model for
+    the first segment and resume triggers after that; diags come from
+    each segment's accepted submit_diagnosis in the transcript; evidence
+    is filtered by recordedAtTurn within the segment's turn range.
+    """
+    timeline = list(record.timeline or [])
+    seg_idxs = [
+        idx for idx, event in enumerate(timeline)
+        if str(event.kind) == "segment"
+    ]
+    seg_by_timeline = {idx: order for order, idx in enumerate(seg_idxs)}
+    try:
+        session = rt.store.load(record.id)
+    except (KeyError, ValueError, AttributeError, TypeError):
+        session = None
+    try:
+        records = _transcript_records(rt, record)
+    except (KeyError, ValueError, AttributeError, TypeError):
+        records = []
+    if session is not None:
+        try:
+            resumes = sorted(session.resumed_at_turns or [])
+        except (AttributeError, TypeError):
+            resumes = []
+    else:
+        resumes = []
+    try:
+        hyps = _hypotheses_view(session)
+    except (AttributeError, TypeError):
+        hyps = []
+    try:
+        evs = _evidence_view(rt, session)
+    except (AttributeError, TypeError, ValueError, KeyError):
+        evs = []
+
+    def _turn_in_range(turn: int, order: int) -> bool:
+        if order < 0:
+            return False
+        if order == 0:
+            high = resumes[0] if resumes else None
+            if high is None:
+                return turn >= 0
+            return turn <= high
+        low: int | None
+        if order - 1 < len(resumes):
+            low = resumes[order - 1]
+        elif resumes:
+            low = resumes[-1]
+        else:
+            low = 0
+        high = resumes[order] if order < len(resumes) else None
+        if high is None:
+            return turn > low
+        return turn > low and turn <= high
+
+    headers: list[str] = []
+    counts: list[int] = []
+    diags: list[dict[str, Any] | None] = []
+    filtered: list[list[dict[str, Any]]] = []
+    cum: list[int | None] = []
+    for idx in seg_idxs:
+        detail = dict(timeline[idx].detail or {})
+        raw_turns = detail.get("turns", "")
+        try:
+            cum.append(int(raw_turns))
+        except (TypeError, ValueError):
+            cum.append(None)
+    for order, idx in enumerate(seg_idxs):
+        if cum[order] is not None:
+            if order == 0:
+                count = int(cum[0] or 0)
+            elif cum[order - 1] is not None:
+                count = int(cum[order] or 0) - int(cum[order - 1] or 0)
+            else:
+                count = int(cum[order] or 0)
+        else:
+            count = sum(
+                1 for item in records
+                if isinstance(item.get("turn"), int)
+                and _turn_in_range(int(item["turn"]), order)
+            )
+        if count < 0:
+            count = 0
+        counts.append(count)
+        trigger = ""
+        for back in range(idx - 1, -1, -1):
+            if str(timeline[back].kind) == "resumed":
+                detail = dict(timeline[back].detail or {})
+                trigger = str(detail.get("trigger", ""))
+                break
+            if str(timeline[back].kind) == "segment":
+                break
+        if order == 0:
+            model = display_model(rt)
+            headers.append(f"SRE ({model}) investigated \u00b7 {count} turns")
+        else:
+            headers.append(
+                f"SRE resumed after {_resume_words(trigger)} "
+                f"\u00b7 {count} turns"
+            )
+        diag: dict[str, Any] | None = None
+        for item in records:
+            if item.get("tool") != "submit_diagnosis":
+                continue
+            if item.get("verdict") != "accepted":
+                continue
+            turn = item.get("turn")
+            if not isinstance(turn, int):
+                continue
+            if not _turn_in_range(turn, order):
+                continue
+            args = item.get("args") or {}
+            candidate = args.get("diagnosis") if isinstance(args, dict) else None
+            if isinstance(candidate, dict):
+                diag = dict(candidate)
+        diags.append(diag)
+        segment_evs = [
+            item for item in evs
+            if isinstance(item.get("recordedAtTurn"), int)
+            and _turn_in_range(int(item["recordedAtTurn"]), order)
+        ]
+        filtered.append(segment_evs)
+    return seg_idxs, seg_by_timeline, headers, counts, diags, filtered, hyps
+
+
 def story(rt: Any, record: Any) -> list[dict[str, Any]]:
-    """Linear incident story: one entry per timeline event (d8-story)."""
+    """Linear incident story: one entry per SRE segment (d8-story2)."""
     import json as _json
 
     proposals = list(record.proposals or [])
     by_hash: dict[str, Any] = {}
     for proposal in proposals:
         by_hash[str(getattr(proposal, "hash", ""))] = proposal
-    propose_seen = 0
+    timeline = list(record.timeline or [])
+    trip_at = timeline[0].at if timeline else None
+    (
+        _seg_idxs, seg_by_timeline, headers, _counts, diags,
+        filtered_evs, hyps,
+    ) = _story_segments(rt, record)
+    skipped_segments: set[int] = set()
+    header_for_timeline: dict[int, int] = {}
+    for order, seg_idx in enumerate(_seg_idxs):
+        nxt = seg_idx + 1
+        if nxt >= len(timeline):
+            continue
+        try:
+            same_at = timeline[nxt].at == timeline[seg_idx].at
+        except (AttributeError, TypeError):
+            same_at = False
+        if same_at and str(timeline[nxt].kind) in ("proposal", "needs_input"):
+            skipped_segments.add(seg_idx)
+            header_for_timeline[nxt] = order
     out: list[dict[str, Any]] = []
-    for event in record.timeline:
+    for idx, event in enumerate(timeline):
         kind = str(event.kind)
         detail = dict(event.detail or {})
         at = event.at
         at_text = (
             at.isoformat() if hasattr(at, "isoformat") else str(at)
         )
+        elapsed = _elapsed_label(at, trip_at)
         if kind == "opened":
             tripwire = str(
                 detail.get("tripwire", "")
@@ -824,7 +1002,7 @@ def story(rt: Any, record: Any) -> list[dict[str, Any]]:
             else:
                 text = f"Tripwire {tripwire} tripped"
             out.append(_story_entry(
-                at_text, "tripwire", kind, text, detail
+                at_text, "tripwire", kind, text, detail, elapsed
             ))
         elif kind == "attached":
             tripwire = str(detail.get("tripwire", ""))
@@ -833,74 +1011,104 @@ def story(rt: Any, record: Any) -> list[dict[str, Any]]:
                 "to this incident"
             )
             out.append(_story_entry(
-                at_text, "tripwire", kind, text, detail
+                at_text, "tripwire", kind, text, detail, elapsed
             ))
         elif kind == "recovery":
             tripwire = str(detail.get("tripwire", ""))
             out.append(_story_entry(
                 at_text, "tripwire", kind,
-                f"Tripwire {tripwire} recovered", detail,
+                f"Tripwire {tripwire} recovered", detail, elapsed,
             ))
         elif kind == "segment":
+            if idx in skipped_segments:
+                continue
+            order = seg_by_timeline.get(idx, 0)
+            header = headers[order] if order < len(headers) else "SRE"
+            seg_diag = diags[order] if order < len(diags) else None
             status = str(detail.get("status", ""))
-            reason = str(detail.get("reason", ""))
-            turns = detail.get("turns", "")
-            if status == "submitted" and reason == "propose":
-                proposal = (
-                    proposals[propose_seen]
-                    if propose_seen < len(proposals) else None
-                )
-                propose_seen += 1
-                if proposal is not None:
-                    diagnosis = proposal.diagnosis or {}
-                    category = str(diagnosis.get("category", ""))
-                    summary = str(diagnosis.get("summary", ""))
-                    method = str(proposal.method)
-                    text = (
-                        f"SRE investigated and proposed a fix: "
-                        f"{category}: {summary} Proposed {method}."
-                    )
-                else:
-                    text = (
-                        f"SRE finished a segment: {status} "
-                        f"({reason}) after {turns} turns"
-                    )
-                out.append(_story_entry(
-                    at_text, "sre", kind, text, detail
-                ))
-            elif status == "submitted" and reason == "none":
-                diagnosis = record.diagnosis or {}
-                category = str(diagnosis.get("category", ""))
-                summary = str(diagnosis.get("summary", ""))
-                if category or summary:
-                    text = (
-                        f"SRE investigated: {category}: {summary} "
-                        "No change needed."
-                    )
-                else:
-                    text = (
-                        f"SRE finished a segment: {status} "
-                        f"({reason}) after {turns} turns"
-                    )
-                out.append(_story_entry(
-                    at_text, "sre", kind, text, detail
-                ))
-            else:
+            seg_reason = str(detail.get("reason", ""))
+            if seg_diag is None:
                 if status == "needs_input":
-                    text = f"SRE paused the investigation: {reason}"
+                    text = f"{header}: paused \u2013 {seg_reason}"
                 else:
-                    text = (
-                        f"SRE finished a segment: {status} "
-                        f"({reason}) after {turns} turns"
-                    )
-                out.append(_story_entry(
-                    at_text, "sre", kind, text, detail
-                ))
+                    text = f"{header}: {status} ({seg_reason})"
+            else:
+                action = seg_diag.get("action") or {}
+                action_type = str(action.get("type", ""))
+                category = str(seg_diag.get("category", ""))
+                summary = str(seg_diag.get("summary", ""))
+                if action_type == "none":
+                    if order == 0:
+                        if category or summary:
+                            text = (
+                                f"{header}: {category}: {summary} "
+                                "No change needed."
+                            )
+                        else:
+                            text = f"{header}: No change needed."
+                    else:
+                        clean = summary.strip()
+                        if clean.endswith("."):
+                            text = (
+                                f"{header}: Re-checked: {clean} "
+                                "No change needed."
+                            )
+                        elif clean:
+                            text = (
+                                f"{header}: Re-checked: {clean}. "
+                                "No change needed."
+                            )
+                        else:
+                            text = f"{header}: Re-checked. No change needed."
+                elif action_type == "escalate":
+                    esc = str(action.get("escalationSummary", "") or "")
+                    if summary and esc:
+                        text = f"{header}: escalated \u2013 {summary} {esc}"
+                    elif esc:
+                        text = f"{header}: escalated \u2013 {esc}"
+                    elif summary:
+                        text = f"{header}: escalated \u2013 {summary}"
+                    else:
+                        text = f"{header}: escalated"
+                elif action_type == "propose":
+                    method = str(action.get("method", "") or "")
+                    if method:
+                        text = (
+                            f"{header}: Proposed a fix: {category}: "
+                            f"{summary} Proposed {method}."
+                        )
+                    elif category or summary:
+                        text = (
+                            f"{header}: Proposed a fix: {category}: "
+                            f"{summary}"
+                        )
+                    else:
+                        text = f"{header}: Proposed a fix."
+                elif category or summary:
+                    text = f"{header}: {category}: {summary}"
+                else:
+                    text = f"{header}: {status} ({seg_reason})"
+            entry = _story_entry(
+                at_text, "sre", kind, text, detail, elapsed
+            )
+            entry["segment"] = order + 1
+            entry["header"] = header
+            entry["hypotheses"] = hyps
+            entry["evidence"] = (
+                filtered_evs[order] if order < len(filtered_evs) else []
+            )
+            out.append(entry)
         elif kind == "proposal":
             seq = int(detail.get("seq", 0) or 0)
             proposal = (
                 proposals[seq - 1]
                 if 1 <= seq <= len(proposals) else None
+            )
+            prop_order: int | None = header_for_timeline.get(idx)
+            header = (
+                headers[prop_order]
+                if prop_order is not None and prop_order < len(headers)
+                else ""
             )
             if proposal is not None:
                 diagnosis = proposal.diagnosis or {}
@@ -913,32 +1121,89 @@ def story(rt: Any, record: Any) -> list[dict[str, Any]]:
                     )
                 except (TypeError, ValueError):
                     patch_text = str(proposal.patch)
-                text = (
-                    f"SRE proposed #{seq}: {category}: {summary} "
+                body = (
+                    f"Proposed #{seq}: {category}: {summary} "
                     f"Proposed {method} with patch {patch_text}."
                 )
+                text = f"{header}: {body}" if header else f"SRE {body[0].lower()}{body[1:]}"
             else:
-                text = f"SRE proposed #{seq}"
+                body = f"Proposed #{seq}"
+                text = f"{header}: {body}" if header else f"SRE proposed #{seq}"
             entry = _story_entry(
-                at_text, "sre", kind, text, detail
+                at_text, "sre", kind, text, detail, elapsed
             )
             if proposal is not None:
                 entry["change"] = _change_view(proposal)
+            if prop_order is not None:
+                entry["segment"] = prop_order + 1
+                entry["header"] = header
+                entry["hypotheses"] = hyps
+                entry["evidence"] = (
+                    filtered_evs[prop_order]
+                    if prop_order < len(filtered_evs) else []
+                )
             out.append(entry)
         elif kind == "needs_input":
             reason = str(
                 detail.get("reason", "") or record.reason or ""
             )
-            text = f"SRE asked for input: {reason}"
-            if reason == "escalated":
-                diagnosis = record.diagnosis or {}
-                action = diagnosis.get("action") or {}
-                summary = action.get("escalationSummary") or ""
-                if summary:
-                    text = f"{text}. {summary}"
-            out.append(_story_entry(
-                at_text, "sre", kind, text, detail
-            ))
+            need_order: int | None = header_for_timeline.get(idx)
+            header = (
+                headers[need_order]
+                if need_order is not None and need_order < len(headers)
+                else ""
+            )
+            seg_diag = (
+                diags[need_order]
+                if need_order is not None and need_order < len(diags)
+                else None
+            )
+            if header:
+                if reason == "escalated":
+                    esc = ""
+                    summary = ""
+                    if seg_diag is not None:
+                        action = seg_diag.get("action") or {}
+                        esc = str(action.get("escalationSummary", "") or "")
+                        summary = str(seg_diag.get("summary", "") or "")
+                    if esc and summary:
+                        text = (
+                            f"{header}: asked for input \u2013 escalated. "
+                            f"{summary} {esc}"
+                        )
+                    elif esc:
+                        text = (
+                            f"{header}: asked for input \u2013 escalated. "
+                            f"{esc}"
+                        )
+                    elif summary:
+                        text = (
+                            f"{header}: asked for input \u2013 escalated. "
+                            f"{summary}"
+                        )
+                    else:
+                        text = f"{header}: asked for input \u2013 escalated"
+                else:
+                    text = f"{header}: asked for input \u2013 {reason}"
+            else:
+                text = f"SRE asked for input: {reason}"
+                if reason == "escalated" and seg_diag is not None:
+                    action = seg_diag.get("action") or {}
+                    esc = str(action.get("escalationSummary", "") or "")
+                    if esc:
+                        text = f"{text}. {esc}"
+            entry = _story_entry(
+                at_text, "sre", kind, text, detail, elapsed
+            )
+            if need_order is not None:
+                entry["segment"] = need_order + 1
+                entry["header"] = header
+                entry["hypotheses"] = hyps
+                entry["evidence"] = (
+                    filtered_evs[need_order]
+                    if need_order < len(filtered_evs) else []
+                )
+            out.append(entry)
         elif kind == "approved":
             proposal_hash = str(detail.get("proposal_hash", ""))
             proposal = by_hash.get(proposal_hash)
@@ -947,13 +1212,13 @@ def story(rt: Any, record: Any) -> list[dict[str, Any]]:
             else:
                 text = "You approved the proposal"
             out.append(_story_entry(
-                at_text, "you", kind, text, detail
+                at_text, "you", kind, text, detail, elapsed
             ))
         elif kind == "rejected":
             notes = str(detail.get("notes", ""))
             text = f"You rejected the proposal: {notes}"
             out.append(_story_entry(
-                at_text, "you", kind, text, detail
+                at_text, "you", kind, text, detail, elapsed
             ))
         elif kind == "closed":
             note = str(detail.get("note", ""))
@@ -962,24 +1227,20 @@ def story(rt: Any, record: Any) -> list[dict[str, Any]]:
             else:
                 text = "You closed the incident"
             out.append(_story_entry(
-                at_text, "you", kind, text, detail
+                at_text, "you", kind, text, detail, elapsed
             ))
         elif kind == "resumed":
-            trigger = str(detail.get("trigger", ""))
-            out.append(_story_entry(
-                at_text, "sre", kind,
-                f"SRE resumed: {trigger_words(trigger)}", detail,
-            ))
+            continue
         elif kind == "demo":
             out.append(_story_entry(
                 at_text, "you", kind,
                 "rotated the credential outside the platform",
-                detail,
+                detail, elapsed,
             ))
         elif kind == "applied":
             out.append(_story_entry(
                 at_text, "platform", kind,
-                "applied the approved change", detail,
+                "applied the approved change", detail, elapsed,
             ))
         elif kind == "verification_started":
             tripwire = str(detail.get("tripwire", ""))
@@ -988,19 +1249,19 @@ def story(rt: Any, record: Any) -> list[dict[str, Any]]:
                 at_text, "platform", kind,
                 f"started verification: {tripwire} must recover "
                 f"within {seconds}s",
-                detail,
+                detail, elapsed,
             ))
         elif kind == "verified":
             out.append(_story_entry(
                 at_text, "tripwire", kind,
-                "verified: the tripwire is ok", detail,
+                "verified: the tripwire is ok", detail, elapsed,
             ))
         elif kind == "verification_failed":
             out.append(_story_entry(
                 at_text, "tripwire", kind,
                 "verification failed: the tripwire did not recover "
                 "in time",
-                detail,
+                detail, elapsed,
             ))
         elif kind == "escalated":
             attempts = detail.get("failed_attempts", "")
@@ -1011,7 +1272,7 @@ def story(rt: Any, record: Any) -> list[dict[str, Any]]:
             else:
                 text = "escalated"
             out.append(_story_entry(
-                at_text, "platform", kind, text, detail
+                at_text, "platform", kind, text, detail, elapsed
             ))
         elif kind == "conflict":
             resource = str(detail.get("resource", ""))
@@ -1019,7 +1280,7 @@ def story(rt: Any, record: Any) -> list[dict[str, Any]]:
                 at_text, "platform", kind,
                 f"proposal conflicted: {resource} changed since "
                 "the proposal",
-                detail,
+                detail, elapsed,
             ))
         elif kind == "apply_failed":
             failure = str(detail.get("detail", ""))
@@ -1028,31 +1289,13 @@ def story(rt: Any, record: Any) -> list[dict[str, Any]]:
             else:
                 text = "apply failed"
             out.append(_story_entry(
-                at_text, "platform", kind, text, detail
+                at_text, "platform", kind, text, detail, elapsed
             ))
         else:
             out.append(_story_entry(
                 at_text, "platform", kind, f"{kind}: {detail}",
-                detail,
+                detail, elapsed,
             ))
-    trip_at = record.timeline[0].at if record.timeline else None
-    for entry, event in zip(out, record.timeline):
-        entry["elapsed"] = _elapsed_label(event.at, trip_at)
-    opened_index = next(
-        (index for index, entry in enumerate(out)
-         if entry.get("kind") == "opened"),
-        None,
-    )
-    if opened_index is not None:
-        opened = out[opened_index]
-        model = display_model(rt)
-        out.insert(opened_index + 1, _story_entry(
-            str(opened.get("at", "")),
-            "sre", "dispatched",
-            f"SRE dispatched ({model})",
-            {"model": model},
-            str(opened.get("elapsed", "T+0:00")),
-        ))
     pending = record.pending
     if pending is not None and getattr(pending, "trigger", "") == "reply":
         message = getattr(pending, "message", "") or ""

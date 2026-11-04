@@ -43,24 +43,26 @@
 <span class="t-rel">{{ entry.elapsed }}</span>
 </div>
 {% if entry.kind == "proposal" and entry.change is defined %}
-<p class="tl-text">Proposed #{{ entry.change.seq }}{% if entry.change.category %}: {{ entry.change.category }}: {{ entry.change.summary }}{% endif %}</p>
+<p class="tl-text">{% if entry.header is defined %}{{ entry.header }}: {% endif %}Proposed #{{ entry.change.seq }}{% if entry.change.category %}: {{ entry.change.category }}: {{ entry.change.summary }}{% endif %}</p>
 <ul class="change">
 {% for line in entry.change.lines %}
 <li><code>{{ line }}</code></li>
 {% endfor %}
 </ul>
 {% else %}
-<p class="tl-text">{% if entry.kind == "needs_input" and "escalated" in entry.text and view.diagnosis %}<strong>{{ view.diagnosis.category }}: {{ view.diagnosis.summary }}</strong> &mdash; {% endif %}{{ entry.text }}</p>
+<p class="tl-text">{{ entry.text }}</p>
 {% endif %}
 {% if entry.actor == "sre" %}
 <details>
 <summary>Hypotheses and evidence</summary>
+{% set hyps = entry.hypotheses if entry.hypotheses is defined else view.hypotheses %}
+{% set evs = entry.evidence if entry.evidence is defined else view.evidence %}
 <ul class="hyp-list">
-{% for h in view.hypotheses %}
+{% for h in hyps %}
 <li><strong>{{ h.id }}</strong>: {{ h.statement }}
 <span class="confirm">Would confirm: {{ h.wouldConfirm }}{% if h.alternative %} (alternative){% endif %}</span>
 <ul class="ev-list">
-{% for e in view.evidence if e.hypothesis == h.id %}
+{% for e in evs if e.hypothesis == h.id %}
 <li><span class="stance stance-{{ e.stance }}">{{ e.stance }}</span> {{ e.id }} (turn {{ e.recordedAtTurn }}): {{ e.why }} &mdash; {{ e.source.kind }}{% if e.source.kind == "log" %} {{ e.source.insertId }} {{ e.source.severity }}{% else %} {{ e.source.tool }} {{ e.source.field }}={{ e.source.value }}{% endif %}</li>
 {% endfor %}
 </ul>

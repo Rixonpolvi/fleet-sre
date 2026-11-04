@@ -24,7 +24,7 @@
 </div>
 {% elif actions and actions.primary == "note" %}
 <div class="primary-action">
-<input id="reply-msg" placeholder="Note for the SRE" style="width:24rem">
+<input id="reply-msg" placeholder="Note for the SRE" style="width:24rem"{% if actions.note_prefill %} value="{{ actions.note_prefill }}"{% endif %}>
 <button id="btn-reply" data-url="/api/incidents/{{ view.id }}/reply" data-method="POST" data-body-from="reply-msg" data-field="message">Send the SRE a note</button>
 </div>
 {% endif %}
@@ -33,7 +33,7 @@
 <summary>Other options</summary>
 {% if "note" in actions.others %}
 <div>
-<input id="reply-msg" placeholder="Note for the SRE" style="width:24rem">
+<input id="reply-msg" placeholder="Note for the SRE" style="width:24rem"{% if actions.note_prefill %} value="{{ actions.note_prefill }}"{% endif %}>
 <button id="btn-reply" data-url="/api/incidents/{{ view.id }}/reply" data-method="POST" data-body-from="reply-msg" data-field="message">Send the SRE a note</button>
 </div>
 {% endif %}
