@@ -162,9 +162,13 @@ def create_app(
             try:
                 view = incident_view(rt, incident_id)
             except (ValueError, KeyError):
-                return HTMLResponse(
-                    f"unknown incident: {incident_id}", status_code=404
+                demo = _demo_view(host)
+                html = templates.get_template("not_found.html").render(
+                    demo=demo, admin=admin,
+                    admin_error=admin_error,
+                    incident_id=incident_id,
                 )
+                return HTMLResponse(html, status_code=404)
             demo = _demo_view(host)
             environment = view["deployment"].split("/", 1)[-1]
             rotatable = [

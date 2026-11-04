@@ -15,13 +15,9 @@
 <span class="state-chip">{{ view.state }}</span>
 <span class="actor-chip actor-{{ view.next_step.actor }}">{{ view.next_step.actor }}</span>
 </div>
-{% if admin %}
 <p class="next-text">{{ view.next_step.text }}</p>
-{% else %}
-<p class="next-text">{{ view.next_step.text | replace("(Mark rotated), ", "") | replace("(Mark rotated)", "") }}</p>
-{% endif %}
 {% if view.state == "NEEDS_INPUT" and view.handoff %}
-<span class="pause-info">model calls since pause: {{ view.handoff.model_calls_since_pause }} (paused at {{ view.handoff.paused_at }})</span>
+<span class="pause-info">model calls since pause: {{ view.handoff.model_calls_since_pause }}{% if view.handoff.paused_at %} (paused at {{ view.handoff.paused_at[11:19] }}){% endif %}</span>
 {% endif %}
 {% if admin and view.next_step.actor == "you" %}
 {% include "_controls.html" %}
@@ -103,7 +99,7 @@
 {% if view.verification %}
 <div class="card compact">
 <p><strong>{{ view.verification.tripwire }}</strong> <span class="pill state-{{ view.verification.current }}">{{ view.verification.current }}</span> {{ view.verification.outcome }}</p>
-<p class="inc-meta">started {{ view.verification.started_at }} &middot; deadline {{ view.verification.deadline }}</p>
+<p class="inc-meta">started {{ view.verification.started_at[11:19] }} &middot; deadline {{ view.verification.deadline[11:19] }}</p>
 </div>
 {% else %}
 <p>No verification.</p>

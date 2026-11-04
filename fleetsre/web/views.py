@@ -418,6 +418,76 @@ def _hhmmss(value: Any) -> str:
     return text
 
 
+def _rotatable_faults(rt: Any, record: Any) -> list[dict[str, Any]]:
+    """Active credential_expiry faults on the incident's environment."""
+    deployment = str(record.incident.deployment)
+    environment = deployment.split("/", 1)[-1]
+    return [
+        fault for fault in rt.active_faults()
+        if fault["type"] == "credential_expiry"
+        and fault["environment"] == environment
+    ]
+
+
+def _demo_since_pause(record: Any) -> bool:
+    """Whether the credential was rotated since the pause began."""
+    paused_at = record.paused_at
+    for event in record.timeline:
+        if event.kind == "demo" and (
+            paused_at is None or event.at >= paused_at
+        ):
+            return True
+    return False
+
+
+def _tripped_names(record: Any) -> list[str]:
+    """Tripwires tripped at pause time, falling back to the incident's."""
+    snapshot = record.paused_snapshot or {}
+    tripped = sorted(
+        name for name, status in snapshot.items() if status == "tripped"
+    )
+    return tripped or list(record.tripwires or [])
+
+
+def handoff_actions(record: Any, rt: Any) -> dict[str, Any] | None:
+    """Which NEEDS_INPUT controls to show: one primary plus other options.
+
+    Returns None outside NEEDS_INPUT. ``primary`` is one of "rotate",
+    "grant", "note" or None (after rotation there is no primary button);
+    ``others`` lists the controls under the collapsed "Other options".
+    """
+    state = (
+        record.state.value
+        if hasattr(record.state, "value") else str(record.state)
+    )
+    if state != "NEEDS_INPUT":
+        return None
+    reason = record.reason or ""
+    rotatable = _rotatable_faults(rt, record)
+    rotated = _demo_since_pause(record)
+    if rotated:
+        primary = None
+    elif reason == "escalated" and rotatable:
+        primary = "rotate"
+    elif reason in ("budget", "token_budget"):
+        primary = "grant"
+    else:
+        primary = "note"
+    if primary == "note":
+        others = ["close"]
+    else:
+        others = ["note", "close"]
+    if reason in ("budget", "token_budget") and primary != "grant":
+        others.append("grant")
+    return {
+        "primary": primary,
+        "others": others,
+        "rotatable": rotatable,
+        "tripped": _tripped_names(record),
+        "rotated": rotated,
+    }
+
+
 def next_step(rt: Any, record: Any) -> dict[str, str]:
     """Status banner: who acts next and what they do (d8-story)."""
     state = (
@@ -474,13 +544,34 @@ def next_step(rt: Any, record: Any) -> dict[str, str]:
                 ),
             }
         if reason == "escalated":
-            return {
-                "actor": "you",
-                "text": (
-                    "fix it outside the platform (Mark rotated), "
-                    "reply, or close"
-                ),
-            }
+            diagnosis = record.diagnosis or {}
+            summary = str(diagnosis.get("summary", ""))
+            escalation = str(
+                (diagnosis.get("action") or {}).get(
+                    "escalationSummary", ""
+                )
+            )
+            if _rotatable_faults(rt, record):
+                category = str(
+                    diagnosis.get("category", "")
+                ).replace("_", " ")
+                environment = str(
+                    record.incident.deployment
+                ).split("/", 1)[-1]
+                return {
+                    "actor": "you",
+                    "text": (
+                        f"The SRE found {category} on {environment} "
+                        f"({summary}). The fix is outside what the "
+                        f"SRE may do. {escalation}"
+                    ),
+                }
+            parts = [part for part in (summary, escalation) if part]
+            if parts:
+                text = " ".join(parts)
+            else:
+                text = "The SRE escalated; reply or close"
+            return {"actor": "you", "text": text}
         if reason in ("budget", "token_budget"):
             return {
                 "actor": "you",
@@ -528,7 +619,7 @@ def next_step(rt: Any, record: Any) -> dict[str, str]:
             )
             short = _hhmmss(at)
         if short:
-            text = f"{state} at {short} ({closed})"
+            text = f"{state} at {short}"
         else:
             text = f"{state} at {closed}"
         return {"actor": "done", "text": text}
@@ -943,6 +1034,7 @@ def incident_view(rt: Any, incident_id: str) -> dict[str, Any]:
         "turns": _turns_view(records, session),
         "header": _header_view(records),
         "handoff": _handoff_view(rt, record, session, records),
+        "actions": handoff_actions(record, rt),
         "next_step": next_step(rt, record),
         "story": story(rt, record),
     }

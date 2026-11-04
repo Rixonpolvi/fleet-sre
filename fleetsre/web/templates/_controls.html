@@ -11,23 +11,45 @@
 <button id="btn-reject" data-url="/api/incidents/{{ view.id }}/reject" data-method="POST" data-body-from="proposal-hash,reject-notes" data-field="proposal_hash,notes">Reject</button>
 </div>
 {% elif view.state == "NEEDS_INPUT" %}
-<div>
-<input id="reply-msg" placeholder="Reply message">
-<input id="reply-turns" type="number" value="0" min="0" style="width:4rem">
-<button id="btn-reply" data-url="/api/incidents/{{ view.id }}/reply" data-method="POST" data-body-from="reply-msg,reply-turns" data-field="message,extra_turns">Reply</button>
+{% set actions = view.actions %}
+{% if actions and actions.primary == "rotate" and rotatable %}
+<div class="primary-action">
+<button id="btn-rotate" data-clear-url="/api/demo/faults/{{ rotatable[0].id }}/clear" data-url="/api/demo/faults/{{ rotatable[0].id }}/clear" data-method="POST" title="Mark rotated">I've rotated the credential</button>
+<p class="caption">The platform waits for {{ actions.tripped | join(", ") }} to recover before the SRE checks again. Demo: this clears the simulated fault.</p>
 </div>
-<div>
-<input id="grant-turns" type="number" value="4" min="1" max="24" style="width:4rem">
-<button id="btn-grant" data-url="/api/incidents/{{ view.id }}/grant" data-method="POST" data-body-from="grant-turns" data-field="turns">Grant turns</button>
+{% elif actions and actions.primary == "grant" %}
+<div class="primary-action">
+<input type="hidden" id="grant-turns" value="8">
+<button id="btn-grant" data-url="/api/incidents/{{ view.id }}/grant" data-method="POST" data-body-from="grant-turns" data-field="turns">Give the SRE 8 more turns</button>
 </div>
-<div>
-<input id="close-note" placeholder="Close note">
-<button id="btn-close" data-url="/api/incidents/{{ view.id }}/close" data-method="POST" data-body-from="close-note" data-field="note">Close</button>
+{% elif actions and actions.primary == "note" %}
+<div class="primary-action">
+<input id="reply-msg" placeholder="Note for the SRE" style="width:24rem">
+<button id="btn-reply" data-url="/api/incidents/{{ view.id }}/reply" data-method="POST" data-body-from="reply-msg" data-field="message">Send the SRE a note</button>
 </div>
-{% if rotatable %}
+{% endif %}
+{% if actions and actions.others %}
+<details>
+<summary>Other options</summary>
+{% if "note" in actions.others %}
 <div>
-<button id="btn-rotate" data-clear-url="/api/demo/faults/{{ rotatable[0].id }}/clear" data-url="/api/demo/faults/{{ rotatable[0].id }}/clear" data-method="POST">Mark rotated ({{ rotatable[0].id }})</button>
+<input id="reply-msg" placeholder="Note for the SRE" style="width:24rem">
+<button id="btn-reply" data-url="/api/incidents/{{ view.id }}/reply" data-method="POST" data-body-from="reply-msg" data-field="message">Send the SRE a note</button>
 </div>
+{% endif %}
+{% if "grant" in actions.others %}
+<div>
+<input type="hidden" id="grant-turns" value="8">
+<button id="btn-grant" data-url="/api/incidents/{{ view.id }}/grant" data-method="POST" data-body-from="grant-turns" data-field="turns">Give the SRE 8 more turns</button>
+</div>
+{% endif %}
+{% if "close" in actions.others %}
+<div>
+<input id="close-note" placeholder="Note (optional)">
+<button id="btn-close" data-url="/api/incidents/{{ view.id }}/close" data-method="POST" data-body-from="close-note" data-field="note">Close as handled outside the platform</button>
+</div>
+{% endif %}
+</details>
 {% endif %}
 {% endif %}
 </section>

@@ -32,7 +32,13 @@ h2 { font-size: 1.3rem; margin-top: 2rem; }
 .topbar-main { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; padding-top: 0.6rem; padding-bottom: 0.6rem; }
 .topbar-meta { display: flex; gap: 0.4rem 1.2rem; flex-wrap: wrap; font-size: 0.85rem; color: var(--muted); border-top: 1px solid #eee; padding-top: 0.4rem; padding-bottom: 0.4rem; }
 .brand { font-weight: 700; font-size: 1.1rem; color: var(--ink); text-decoration: none; }
+.grid-link { font-size: 0.95rem; }
 .act-label { margin: 0; font-weight: 600; }
+.demo-strip { background: var(--card); border-bottom: 1px dashed #999; }
+.demo-strip-inner { max-width: 1100px; margin: 0 auto; padding: 0.5rem 1.5rem; display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
+.demo-label { font-weight: 700; font-size: 0.9rem; }
+.demo-fault-label { font-size: 0.95rem; }
+.seg-restart { border: 1px solid var(--border); background: var(--card); padding: 0.3rem 0.9rem; font-size: 0.95rem; cursor: pointer; color: var(--ink); border-radius: 8px; }
 .segments { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
 .seg { border: 0; background: var(--card); padding: 0.3rem 0.9rem; font-size: 0.95rem; cursor: pointer; color: var(--ink); }
 .seg + .seg { border-left: 1px solid var(--border); }
@@ -80,6 +86,9 @@ h2 { font-size: 1.3rem; margin-top: 2rem; }
 .controls button { padding: 0.4rem 0.9rem; border: 1px solid #999; border-radius: 6px; background: var(--card); cursor: pointer; }
 .controls button:disabled { opacity: 0.6; cursor: default; }
 .controls input { padding: 0.3rem 0.5rem; border: 1px solid var(--border); border-radius: 6px; }
+.primary-action { margin: 0.6rem 0; }
+.primary-action button { font-weight: 700; border: 2px solid var(--ink); }
+.caption { font-size: 0.9rem; color: var(--muted); margin: 0.4rem 0 0; }
 #action-error { display: none; color: var(--bad-fg); font-weight: 700; border: 1px solid var(--bad-fg); background: var(--bad-bg); border-radius: 6px; padding: 0.6rem 0.8rem; margin: 0.6rem 0; font-size: 1rem; }
 ol.timeline { list-style: none; padding: 0; margin: 1rem 0; }
 .tl-entry { position: relative; padding: 0 0 1.2rem 2rem; border-left: 2px solid var(--border); margin-left: 0.5rem; }
@@ -123,15 +132,7 @@ summary { cursor: pointer; font-weight: 600; }
 <header class="topbar">
 <div class="topbar-main">
 <a class="brand" href="/">Fleet SRE</a>
-{% if admin %}
-<div class="segments" role="group" aria-label="Act">
-{% for name in demo.acts %}
-<button type="button" class="seg{% if name == demo.act %} seg-current{% endif %}" title="{{ demo.act_titles[name] }}" data-url="/api/demo/act" data-method="POST" data-act="{{ name }}"{% if name == demo.act %} aria-current="true"{% endif %}>{{ name }}</button>
-{% endfor %}
-</div>
-{% else %}
-<p class="act-label">Act {{ demo.act }} &mdash; {{ demo.title }}</p>
-{% endif %}
+<a class="grid-link" href="/">Fleet grid</a>
 <div class="topbar-right">
 <span class="clock" title="Sim time">{{ demo.now[11:19] }}</span>
 {% if demo.live %}<span class="pill">Live: {{ demo.model }}</span>{% else %}<span class="pill">Scripted replay</span>{% endif %}
@@ -147,6 +148,22 @@ summary { cursor: pointer; font-weight: 600; }
 <span id="stale">updated: reload</span>
 </div>
 </header>
+<div class="demo-strip">
+<div class="demo-strip-inner">
+<span class="demo-label">Demo</span>
+{% if admin %}
+<span class="demo-fault-label">Demo fault:</span>
+<div class="segments" role="group" aria-label="Demo fault">
+{% for name in demo.acts %}
+<button type="button" class="seg{% if name == demo.act %} seg-current{% endif %}" title="{{ name }}" data-url="/api/demo/act" data-method="POST" data-act="{{ name }}"{% if name == demo.act %} aria-current="true"{% endif %}>{{ demo.act_titles[name] }}</button>
+{% endfor %}
+</div>
+<button type="button" class="seg-restart" title="Restart {{ demo.act }}" data-url="/api/demo/act" data-method="POST" data-act="{{ demo.act }}">Restart this act</button>
+{% else %}
+<span class="act-label">Act {{ demo.act }} &mdash; {{ demo.title }}</span>
+{% endif %}
+</div>
+</div>
 <main>
 {% block content %}{% endblock %}
 </main>
@@ -206,7 +223,11 @@ summary { cursor: pointer; font-weight: 600; }
     }
     fetch(url, {method: method, headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)}).then(function (resp) {
       if (resp.ok) {
-        window.location.reload();
+        if (url === "/api/demo/act") {
+          window.location.href = "/";
+        } else {
+          window.location.reload();
+        }
       } else {
         resp.json().then(function (data) {
           var msg = (data && data.error) ? data.error : ("request failed: " + resp.status);
