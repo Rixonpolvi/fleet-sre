@@ -78,10 +78,18 @@ def _live_config() -> Any:
 class _CountingTransport:
     """Counts model calls and stamps each with the sim time (d8-pins 4)."""
 
-    def __init__(self, inner: Any, clock: Any, lock: threading.RLock) -> None:
+    def __init__(
+        self,
+        inner: Any,
+        clock: Any,
+        lock: threading.RLock,
+        *,
+        activity: Any = None,
+    ) -> None:
         self._inner = inner
         self._clock = clock
         self._lock = lock
+        self._activity = activity
         self.call_times: list[datetime] = []
         self.requests: list[dict[str, Any]] = []
 
@@ -93,7 +101,13 @@ class _CountingTransport:
             self.requests.append(json.loads(json.dumps(
                 request, default=str
             )))
-        return self._inner.create(request, timeout=timeout)
+        if self._activity is not None:
+            self._activity.set_call_in_flight(True)
+        try:
+            return self._inner.create(request, timeout=timeout)
+        finally:
+            if self._activity is not None:
+                self._activity.set_call_in_flight(False)
 
 
 class DemoRuntime:
@@ -101,7 +115,7 @@ class DemoRuntime:
 
     Members: act, clock, world, sink, evaluator, registry, manager,
     store, loop, transport (DemoTransport, or None when live), lock,
-    started_at, held, model_calls, last_model_call_at.
+    started_at, held, model_calls, last_model_call_at, activity.
     """
 
     def __init__(
@@ -111,6 +125,7 @@ class DemoRuntime:
         live: bool = False,
         speed: float = 10.0,
         lead_s: int = 60,
+        turn_delay_s: float = 0.0,
     ) -> None:
         from fastapi.testclient import TestClient
 
@@ -123,6 +138,11 @@ class DemoRuntime:
         from fleetsre.control.journal import Journal
         from fleetsre.control.loop import ControlLoop
         from fleetsre.control.verify import Verifier
+        from fleetsre.demo.activity import (
+            Activity,
+            ActivityInvestigator,
+            ActivitySessionStore,
+        )
         from fleetsre.demo.transport import DemoTransport
         from fleetsre.evaluator.canary import CanaryScheduler
         from fleetsre.evaluator.engine import Evaluator
@@ -144,8 +164,10 @@ class DemoRuntime:
         self.live = live
         self.speed = speed
         self.lead_s = lead_s
+        self.turn_delay_s = float(turn_delay_s)
         self.act_name = ""
         self.lock: threading.RLock = threading.RLock()
+        self.activity = Activity()
         t0: datetime = act.t0
 
         service = _service_for_incident(act.incident)
@@ -169,11 +191,15 @@ class DemoRuntime:
             script_length = 0
         else:
             responses = _load_responses(list(act.responses))
-            transport = DemoTransport(responses)
+            transport = DemoTransport(
+                responses, turn_delay_s=self.turn_delay_s
+            )
             inner = transport
             config = _scripted_config()
             script_length = len(responses)
-        counting = _CountingTransport(inner, clock, self.lock)
+        counting = _CountingTransport(
+            inner, clock, self.lock, activity=self.activity
+        )
         gateway = ModelGateway(config, counting)
 
         log_query = MemoryLogQuery(sink)
@@ -187,8 +213,14 @@ class DemoRuntime:
             log_query, obs, state, registry, clock=clock,
             verification=True,
         )
-        store = MemorySessionStore()
-        investigator = Investigator(tools, gateway, store)
+        store = ActivitySessionStore(
+            MemorySessionStore(), self.activity
+        )
+        inner_investigator = Investigator(tools, gateway, store)
+        investigator = ActivityInvestigator(
+            inner_investigator, self.activity,
+            str(config.roles["investigate"].model),
+        )
         approvals = ApprovalStore(clock)
         journal = Journal()
         executor = Executor(deployer, approvals, journal, clock=clock)
@@ -197,6 +229,7 @@ class DemoRuntime:
             evaluator, investigator, approvals, executor, verifier,
             state, clock, registry=registry, reader=reader,
         )
+        investigator.set_manager(manager)
         loop = ControlLoop(
             world, evaluator, scheduler, manager, sink, t0=t0,
             tick_seconds=act.tick_seconds,

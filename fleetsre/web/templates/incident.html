@@ -10,6 +10,7 @@
 <p class="inc-meta">Deployment: {{ view.deployment }}</p>
 <p class="inc-meta">Tripwires: {{ view.tripwires | join(", ") }}</p>
 
+<p id="sre-page-waiting" class="sre-page-waiting" hidden>The SRE is working; this page updates when it finishes</p>
 <section class="banner state-{{ view.state | lower }}" aria-label="Next step">
 <div class="banner-top">
 <span class="state-chip">{{ view.state }}</span>

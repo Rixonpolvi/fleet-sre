@@ -43,15 +43,17 @@ def test_f1_awaiting_next_and_story():
     entries = story(rt, record)
     assert _seq(entries) == [
         ("tripwire", "opened"),
+        ("sre", "dispatched"),
         ("sre", "segment"),
         ("sre", "proposal"),
     ]
     assert "no connector.run.completed" in entries[0]["text"]
+    assert entries[1]["text"] == "SRE dispatched (scripted replay)"
     proposal = record.proposals[0]
     diagnosis = proposal.diagnosis
-    assert diagnosis["category"] in entries[2]["text"]
-    assert diagnosis["summary"] in entries[2]["text"]
-    assert proposal.method in entries[2]["text"]
+    assert diagnosis["category"] in entries[3]["text"]
+    assert diagnosis["summary"] in entries[3]["text"]
+    assert proposal.method in entries[3]["text"]
     for entry in entries:
         assert "mark rotated" not in entry["text"].lower()
 
@@ -72,11 +74,13 @@ def test_f2_needs_before_and_after_clear():
     entries = story(rt, record)
     assert _seq(entries) == [
         ("tripwire", "opened"),
+        ("sre", "dispatched"),
         ("sre", "segment"),
         ("sre", "needs_input"),
     ]
-    assert "escalated" in entries[2]["text"]
-    assert record.diagnosis["action"]["escalationSummary"] in entries[2]["text"]
+    assert entries[1]["text"] == "SRE dispatched (scripted replay)"
+    assert "escalated" in entries[3]["text"]
+    assert record.diagnosis["action"]["escalationSummary"] in entries[3]["text"]
 
     fault_id = rt.active_faults()[0]["id"]
     rt.clear_fault(fault_id)
@@ -93,11 +97,12 @@ def test_f2_needs_before_and_after_clear():
     entries = story(rt, cleared)
     assert _seq(entries) == [
         ("tripwire", "opened"),
+        ("sre", "dispatched"),
         ("sre", "segment"),
         ("sre", "needs_input"),
         ("you", "demo"),
     ]
-    assert entries[3]["text"] == "rotated the credential outside the platform"
+    assert entries[4]["text"] == "rotated the credential outside the platform"
     for entry in entries:
         assert "mark rotated" not in entry["text"].lower()
 
@@ -114,17 +119,18 @@ def test_f2_resolved_next_and_story():
     entries = story(rt, record)
     assert _seq(entries) == [
         ("tripwire", "opened"),
+        ("sre", "dispatched"),
         ("sre", "segment"),
         ("sre", "needs_input"),
         ("you", "demo"),
         ("tripwire", "recovery"),
-        ("tripwire", "resumed"),
+        ("sre", "resumed"),
         ("sre", "segment"),
         ("platform", "verification_started"),
         ("tripwire", "verified"),
     ]
-    resumed = entries[5]
-    assert "resumed the investigation" in resumed["text"]
+    resumed = entries[6]
+    assert resumed["text"] == "SRE resumed: tripwire state changed"
     assert record.postmortem.closed_at.strftime("%H:%M:%S") in step["text"]
     assert record.postmortem.closed_at.isoformat() not in step["text"]
     for entry in entries:
@@ -150,6 +156,7 @@ def test_f1_resolved_next_and_story():
     entries = story(rt, record)
     assert _seq(entries) == [
         ("tripwire", "opened"),
+        ("sre", "dispatched"),
         ("sre", "segment"),
         ("sre", "proposal"),
         ("you", "approved"),
@@ -179,6 +186,7 @@ def test_f3_rejection_notes_verbatim_and_revise():
     entries = story(rt, record)
     assert _seq(entries) == [
         ("tripwire", "opened"),
+        ("sre", "dispatched"),
         ("sre", "segment"),
         ("sre", "proposal"),
         ("you", "rejected"),
@@ -186,14 +194,14 @@ def test_f3_rejection_notes_verbatim_and_revise():
         ("sre", "segment"),
         ("sre", "proposal"),
     ]
-    assert notes in entries[3]["text"]
-    assert entries[4]["text"] == "revising after your rejection"
+    assert notes in entries[4]["text"]
+    assert entries[5]["text"] == "SRE resumed: you rejected the proposal"
     first = record.proposals[0].diagnosis["summary"]
     second = record.proposals[1].diagnosis["summary"]
     assert first != second
-    assert first in entries[2]["text"]
-    assert second in entries[6]["text"]
-    assert notes in entries[3]["text"]
+    assert first in entries[3]["text"]
+    assert second in entries[7]["text"]
+    assert notes in entries[4]["text"]
     for entry in entries:
         assert "mark rotated" not in entry["text"].lower()
 
@@ -217,7 +225,8 @@ def test_queued_reply_shows():
         "actor": "sre", "text": "resumes on the next tick: reply",
     }
     entries = story(rt, record)
-    assert len(entries) == len(record.timeline) + 1
+    assert len(entries) == len(record.timeline) + 2
+    assert entries[1]["kind"] == "dispatched"
     queued = entries[-1]
     assert queued["actor"] == "you"
     assert message in queued["text"]

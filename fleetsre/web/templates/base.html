@@ -126,6 +126,27 @@ table.diff th, table.diff td { border: 1px solid var(--border); padding: 0.35rem
 pre { white-space: pre-wrap; word-break: break-word; background: #f6f7f9; padding: 0.6rem; border-radius: 6px; font-size: 0.85rem; }
 details { margin: 0.5rem 0; }
 summary { cursor: pointer; font-weight: 600; }
+#sre-activity { background: var(--sre-bg); border-bottom: 1px solid var(--border); }
+.sre-activity-inner { max-width: 1100px; margin: 0 auto; padding: 0.6rem 1.5rem; }
+.sre-head { display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; }
+.sre-title { font-weight: 700; }
+.sre-meta { color: var(--sre-fg); font-size: 0.95rem; }
+.sre-elapsed { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--sre-fg); font-size: 0.9rem; }
+.pulse { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--sre-fg); animation: sre-pulse 1.2s ease-in-out infinite; }
+@keyframes sre-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+@media (prefers-reduced-motion: reduce) { .pulse { animation: none; } }
+.sre-turns { margin: 0.4rem 0 0; display: flex; flex-direction: column; gap: 0.25rem; }
+.sre-turn { display: flex; gap: 0.6rem; align-items: baseline; flex-wrap: wrap; font-size: 0.9rem; }
+.sre-turn-n { font-weight: 700; white-space: nowrap; }
+.sre-turn-tool { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 0.85rem; }
+.sre-turn-think { color: var(--muted); flex: 1 1 16rem; }
+.sre-waiting { margin-top: 0.4rem; font-style: italic; color: var(--sre-fg); }
+.sre-sub { color: var(--sre-fg); font-size: 0.9rem; }
+button.sre-working { cursor: wait; }
+body.sre-running .banner, body.sre-running .controls { opacity: 0.55; }
+.sre-page-waiting { font-weight: 700; color: var(--wait-fg); background: var(--wait-bg); border: 1px solid var(--border); border-radius: 8px; padding: 0.6rem 0.9rem; }
+.dep-card.sre-active { border-color: var(--bad-fg); background: var(--bad-bg); }
+.sre-badge { margin-top: 0.5rem; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -162,6 +183,19 @@ summary { cursor: pointer; font-weight: 600; }
 {% else %}
 <span class="act-label">Act {{ demo.act }} &mdash; {{ demo.title }}</span>
 {% endif %}
+</div>
+</div>
+<div id="sre-activity" data-live="{% if demo.live %}1{% else %}0{% endif %}" hidden>
+<div class="sre-activity-inner">
+<div class="sre-head">
+<span class="pulse" aria-hidden="true"></span>
+<span class="sre-title">SRE investigating</span>
+<span class="sre-elapsed" id="sre-elapsed"></span>
+</div>
+<div class="sre-meta" id="sre-meta"></div>
+<div class="sre-sub" id="sre-sub"></div>
+<div class="sre-turns" id="sre-turns"></div>
+<div class="sre-waiting" id="sre-waiting" hidden>waiting for the model…</div>
 </div>
 </div>
 <main>
@@ -249,6 +283,7 @@ summary { cursor: pointer; font-weight: 600; }
 (function () {
   var known = null;
   function poll() {
+    if (window.__sreRunning) { return; }
     fetch("/api/version").then(function (r) { return r.json(); }).then(function (data) {
       if (known === null) { known = data.version; return; }
       if (data.version !== known) {
@@ -260,6 +295,170 @@ summary { cursor: pointer; font-weight: 600; }
     }).catch(function () {});
   }
   setInterval(poll, 2000);
+})();
+</script>
+<script>
+(function () {
+  var TRIGGER_WORDS = {
+    opened: "tripwire tripped",
+    reply: "you replied",
+    tripwire: "tripwire state changed",
+    rejection: "you rejected the proposal",
+    conflict: "resource changed since the proposal",
+    invalid_patch: "proposal was invalid",
+    apply_failed: "apply failed",
+    verification_failed: "verification failed"
+  };
+  var SEGMENT_WORDS = {
+    start: "first investigation",
+    resume: "resumed investigation",
+    reopen: "reopened investigation"
+  };
+  function triggerWords(trigger) {
+    if (TRIGGER_WORDS[trigger]) { return TRIGGER_WORDS[trigger]; }
+    return String(trigger || "").replace(/_/g, " ");
+  }
+  function segmentWords(segment) {
+    if (SEGMENT_WORDS[segment]) { return SEGMENT_WORDS[segment]; }
+    return String(segment || "").replace(/_/g, " ");
+  }
+  var prev = null;
+  function setButtonsDisabled(running) {
+    var buttons = document.querySelectorAll("button[data-url]");
+    for (var i = 0; i < buttons.length; i++) {
+      var btn = buttons[i];
+      if (running) {
+        if (btn.dataset.sreTitle === undefined) {
+          btn.dataset.sreTitle = btn.getAttribute("title") || "";
+          btn.dataset.sreHadTitle = btn.hasAttribute("title") ? "1" : "0";
+        }
+        btn.disabled = true;
+        btn.classList.add("sre-working");
+        btn.setAttribute("title", "SRE is working");
+      } else if (btn.dataset.sreTitle !== undefined) {
+        btn.disabled = false;
+        btn.classList.remove("sre-working");
+        if (btn.dataset.sreHadTitle === "1") {
+          btn.setAttribute("title", btn.dataset.sreTitle);
+        } else {
+          btn.removeAttribute("title");
+        }
+        delete btn.dataset.sreTitle;
+        delete btn.dataset.sreHadTitle;
+      }
+    }
+  }
+  function markGridCard(data, running) {
+    var marked = document.querySelectorAll(".dep-card.sre-active");
+    for (var i = 0; i < marked.length; i++) {
+      marked[i].classList.remove("sre-active");
+      var old = marked[i].querySelector(".sre-badge");
+      if (old) { old.parentNode.removeChild(old); }
+    }
+    if (!running || !data.deployment) { return; }
+    var cards = document.querySelectorAll(".dep-card[data-deployment]");
+    for (var j = 0; j < cards.length; j++) {
+      if (cards[j].getAttribute("data-deployment") !== data.deployment) {
+        continue;
+      }
+      cards[j].classList.add("sre-active");
+      var badge = document.createElement("span");
+      badge.className = "pill state-tripped sre-badge";
+      badge.textContent = "SRE investigating";
+      cards[j].appendChild(badge);
+    }
+  }
+  function markPageWaiting(running, data) {
+    if (document.body.classList) {
+      if (running) { document.body.classList.add("sre-running"); }
+      else { document.body.classList.remove("sre-running"); }
+    }
+    var wait = document.getElementById("sre-page-waiting");
+    if (wait) { wait.hidden = !running; }
+    markGridCard(data, running);
+  }
+  function render(data) {
+    var panel = document.getElementById("sre-activity");
+    var meta = document.getElementById("sre-meta");
+    var sub = document.getElementById("sre-sub");
+    var elapsed = document.getElementById("sre-elapsed");
+    var turnsBox = document.getElementById("sre-turns");
+    var waiting = document.getElementById("sre-waiting");
+    if (!panel) { return; }
+    var live = panel.getAttribute("data-live") === "1";
+    var modelName = live ? (data.model || "") : "scripted replay";
+    var seg = segmentWords(data.segment);
+    var trig = triggerWords(data.trigger);
+    var first = seg + " \u2014 " + trig;
+    var tripwires = data.tripwires || [];
+    var depText = String(data.deployment || "");
+    var env = depText.split("/").length > 1 ? depText.split("/")[1] : depText;
+    if (tripwires.length && env) {
+      first = tripwires[0] + " tripped on " + env + " \u00b7 " + first;
+    }
+    meta.textContent = first;
+    var subParts = [];
+    if (modelName) { subParts.push(modelName); }
+    if (depText) { subParts.push(depText); }
+    sub.textContent = subParts.join(" \u00b7 ");
+    var secs = Math.round(data.elapsed_s || 0);
+    elapsed.textContent = secs + "s";
+    while (turnsBox.firstChild) {
+      turnsBox.removeChild(turnsBox.firstChild);
+    }
+    var turns = data.turns || [];
+    for (var i = 0; i < turns.length; i++) {
+      var turn = turns[i];
+      var row = document.createElement("div");
+      row.className = "sre-turn";
+      var n = document.createElement("span");
+      n.className = "sre-turn-n";
+      n.textContent = "Turn " + turn.n;
+      row.appendChild(n);
+      var tool = document.createElement("span");
+      tool.className = "sre-turn-tool";
+      tool.textContent = turn.tool || "no tool call";
+      row.appendChild(tool);
+      if (turn.rationale) {
+        var think = document.createElement("span");
+        think.className = "sre-turn-think";
+        think.textContent = turn.rationale;
+        row.appendChild(think);
+      }
+      var chip = document.createElement("span");
+      chip.className = "verdict verdict-" + (turn.verdict || "");
+      chip.textContent = turn.verdict || "";
+      row.appendChild(chip);
+      turnsBox.appendChild(row);
+    }
+    waiting.hidden = !data.call_in_flight;
+    panel.hidden = false;
+  }
+  function poll() {
+    fetch("/api/demo/activity").then(function (r) {
+      return r.json();
+    }).then(function (data) {
+      var running = data && data.state === "running";
+      window.__sreRunning = running;
+      if (running) {
+        render(data);
+        setButtonsDisabled(true);
+        markPageWaiting(true, data);
+      } else {
+        var panel = document.getElementById("sre-activity");
+        if (panel) { panel.hidden = true; }
+        setButtonsDisabled(false);
+        markPageWaiting(false, data || {});
+      }
+      if (prev === "running" && data.state === "idle") {
+        window.location.reload();
+        return;
+      }
+      prev = data.state;
+    }).catch(function () {});
+  }
+  setInterval(poll, 1000);
+  poll();
 })();
 </script>
 {% block scripts %}{% endblock %}

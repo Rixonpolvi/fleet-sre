@@ -8,7 +8,7 @@
 <h2>{{ service.service }}</h2>
 <div class="dep-grid">
 {% for dep in service.deployments %}
-<article class="card dep-card">
+<article class="card dep-card" data-deployment="{{ dep.id }}">
 <h3>{{ dep.id }}</h3>
 {% set rate = dep.expected_alerts_per_hour %}
 {% if rate is not none and rate <= 2 %}
