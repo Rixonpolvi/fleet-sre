@@ -67,7 +67,8 @@ def _live_config() -> Any:
                 prices = {model: dict(data)}
     return GatewayConfig(
         roles={"investigate": RoleConfig(
-            model=model, reasoning_effort="medium"
+            model=model, reasoning_effort="medium",
+            timeout_s=60, retry_timeouts=False,
         )},
         base_url="https://api.meta.ai/v1",
         max_retries=5,
