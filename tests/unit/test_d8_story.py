@@ -62,8 +62,12 @@ def test_f2_needs_before_and_after_clear():
     record = drive(rt, IncidentState.NEEDS_INPUT)
     step = next_step(rt, record)
     assert step["actor"] == "you"
+    diagnosis = record.diagnosis
     assert step["text"] == (
-        "fix it outside the platform (Mark rotated), reply, or close"
+        "The SRE found credential failure on bravo "
+        f"({diagnosis['summary']}). "
+        "The fix is outside what the SRE may do. "
+        f"{diagnosis['action']['escalationSummary']}"
     )
     entries = story(rt, record)
     assert _seq(entries) == [
@@ -121,7 +125,8 @@ def test_f2_resolved_next_and_story():
     ]
     resumed = entries[5]
     assert "resumed the investigation" in resumed["text"]
-    assert record.postmortem.closed_at.isoformat() in step["text"]
+    assert record.postmortem.closed_at.strftime("%H:%M:%S") in step["text"]
+    assert record.postmortem.closed_at.isoformat() not in step["text"]
     for entry in entries:
         assert "mark rotated" not in entry["text"].lower()
 
