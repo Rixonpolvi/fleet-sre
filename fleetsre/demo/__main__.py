@@ -154,7 +154,7 @@ def _run_check(delays: list[int]) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     """Options: [--act F1] [--host 127.0.0.1] [--port 8000] [--speed 10]
-    [--live] or --check [--delay S ...]."""
+    [--live] [--turn-delay S] or --check [--delay S ...]."""
     parser = argparse.ArgumentParser(
         description="Fleet SRE local demo (d8-pins 7)"
     )
@@ -165,6 +165,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--live", action="store_true")
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--delay", nargs="*", type=int, default=None)
+    parser.add_argument("--turn-delay", type=float, default=None)
     args = parser.parse_args(argv)
 
     if args.check and args.live:
@@ -188,8 +189,13 @@ def main(argv: list[str] | None = None) -> int:
     if args.act not in acts:
         print(f"unknown act: {args.act}", file=sys.stderr)
         return 2
+    if args.turn_delay is None:
+        turn_delay = 0.0 if args.live else 1.5
+    else:
+        turn_delay = float(args.turn_delay)
     host = DemoHost(
-        acts, live=args.live, speed=args.speed, realtime=True
+        acts, live=args.live, speed=args.speed, realtime=True,
+        turn_delay_s=turn_delay,
     )
     host.switch(args.act)
     token = os.environ.get("FLEETSRE_ADMIN_TOKEN") or (

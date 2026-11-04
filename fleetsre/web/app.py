@@ -251,6 +251,15 @@ def create_app(
         with rt.lock:
             return _version_view(host)
 
+    @app.get("/api/demo/activity")
+    def _get_activity() -> dict[str, Any]:
+        rt = host.current
+        if rt is None:
+            from fleetsre.demo.activity import Activity
+
+            return Activity().snapshot()
+        return rt.activity.snapshot()
+
     def _forbidden() -> JSONResponse:
         return JSONResponse(
             status_code=403,

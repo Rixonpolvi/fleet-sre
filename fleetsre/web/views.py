@@ -15,6 +15,70 @@ READ_TOOLS = frozenset({
 })
 
 
+_TRIGGER_WORDS = {
+    "opened": "tripwire tripped",
+    "reply": "you replied",
+    "tripwire": "tripwire state changed",
+    "rejection": "you rejected the proposal",
+    "conflict": "resource changed since the proposal",
+    "invalid_patch": "proposal was invalid",
+    "apply_failed": "apply failed",
+    "verification_failed": "verification failed",
+}
+
+
+_SEGMENT_WORDS = {
+    "start": "first investigation",
+    "resume": "resumed investigation",
+    "reopen": "reopened investigation",
+}
+
+
+def trigger_words(trigger: Any) -> str:
+    """A pending/resumed trigger code in plain words."""
+    text = str(trigger or "")
+    if text in _TRIGGER_WORDS:
+        return _TRIGGER_WORDS[text]
+    return text.replace("_", " ") or text
+
+
+def segment_words(segment: Any) -> str:
+    """A segment kind in plain words."""
+    text = str(segment or "")
+    return _SEGMENT_WORDS.get(text, text.replace("_", " ") or text)
+
+
+def _activity_snapshot(rt: Any) -> dict[str, Any] | None:
+    activity = getattr(rt, "activity", None)
+    if activity is None:
+        return None
+    try:
+        snapshot = activity.snapshot()
+    except (TypeError, ValueError, AttributeError):
+        return None
+    return snapshot if isinstance(snapshot, dict) else None
+
+
+def _demo_model(rt: Any) -> str:
+    try:
+        return str(
+            rt.gateway.config.roles["investigate"].model
+        )
+    except (AttributeError, KeyError, TypeError):
+        return ""
+
+
+def display_model(rt: Any) -> str:
+    """Model name for humans: scripted replay unless live."""
+    try:
+        live = bool(getattr(rt, "live", False))
+    except (AttributeError, TypeError):
+        live = False
+    if not live:
+        return "scripted replay"
+    return _demo_model(rt)
+
+
 def _transcript_records(rt: Any, record: Any) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     for transcript_id in record.transcript_ids:
@@ -490,6 +554,19 @@ def handoff_actions(record: Any, rt: Any) -> dict[str, Any] | None:
 
 def next_step(rt: Any, record: Any) -> dict[str, str]:
     """Status banner: who acts next and what they do (d8-story)."""
+    snapshot = _activity_snapshot(rt)
+    if snapshot is not None and snapshot.get("state") == "running":
+        incident = snapshot.get("incident")
+        if incident is None or incident == getattr(record, "id", None):
+            turns = snapshot.get("turns") or []
+            try:
+                count = len(turns)
+            except TypeError:
+                count = 0
+            return {
+                "actor": "sre",
+                "text": f"investigating live \u2014 turn {count + 1}",
+            }
     state = (
         record.state.value
         if hasattr(record.state, "value") else str(record.state)
@@ -889,25 +966,9 @@ def story(rt: Any, record: Any) -> list[dict[str, Any]]:
             ))
         elif kind == "resumed":
             trigger = str(detail.get("trigger", ""))
-            message = str(detail.get("message", "") or "")
-            if trigger == "reply":
-                actor = "you"
-                text = f"replied: {_extract_reply_text(message)}"
-            elif trigger == "tripwire":
-                actor = "tripwire"
-                change = _extract_tripwire_change(message)
-                text = f"{change} resumed the investigation"
-            elif trigger == "rejection":
-                actor = "sre"
-                text = "revising after your rejection"
-            else:
-                actor = "sre"
-                if message:
-                    text = f"resuming after {trigger}: {message}"
-                else:
-                    text = f"resuming after {trigger}"
             out.append(_story_entry(
-                at_text, actor, kind, text, detail
+                at_text, "sre", kind,
+                f"SRE resumed: {trigger_words(trigger)}", detail,
             ))
         elif kind == "demo":
             out.append(_story_entry(
@@ -977,6 +1038,21 @@ def story(rt: Any, record: Any) -> list[dict[str, Any]]:
     trip_at = record.timeline[0].at if record.timeline else None
     for entry, event in zip(out, record.timeline):
         entry["elapsed"] = _elapsed_label(event.at, trip_at)
+    opened_index = next(
+        (index for index, entry in enumerate(out)
+         if entry.get("kind") == "opened"),
+        None,
+    )
+    if opened_index is not None:
+        opened = out[opened_index]
+        model = display_model(rt)
+        out.insert(opened_index + 1, _story_entry(
+            str(opened.get("at", "")),
+            "sre", "dispatched",
+            f"SRE dispatched ({model})",
+            {"model": model},
+            str(opened.get("elapsed", "T+0:00")),
+        ))
     pending = record.pending
     if pending is not None and getattr(pending, "trigger", "") == "reply":
         message = getattr(pending, "message", "") or ""
